@@ -4512,9 +4512,16 @@ async function boot() {
       if (window.currentBusiness?.id) {
         showApp();
       } else {
-        // Authenticated but no business found — run setup to create one
-        showBusiness();
-        setTimeout(() => doBusinessSetup(), 400);
+        // Authenticated but no business found — redirect to registration wizard
+        // so the user can enter their business details properly
+        showRegister();
+        setTimeout(() => {
+          const s3 = document.getElementById('reg-step-3');
+          if (s3) {
+            document.querySelectorAll('.reg-step').forEach(s => s.classList.remove('active'));
+            s3.classList.add('active');
+          }
+        }, 200);
       }
     } else if (!hasRegistered) {
       // No session, no prior registration — fresh install, show registration
@@ -10821,7 +10828,7 @@ async function regStep3Submit() {
   const bizNameEl = document.getElementById('biz-name');
   const bizContactsEl = document.getElementById('biz-contacts');
   if (bizNameEl) bizNameEl.value = bizName || '';
-  if (bizContactsEl) bizContactsEl.value = bizAddress || '';
+  if (bizContactsEl) bizContactsEl.value = address || '';
 
   localStorage.setItem('lms-has-registered', '1');
   showBusiness();
@@ -10852,7 +10859,7 @@ async function regStep4Submit() {
     const bizNameEl = document.getElementById('biz-name');
     const bizContactsEl = document.getElementById('biz-contacts');
     if (bizNameEl) bizNameEl.value = bizName || '';
-    if (bizContactsEl) bizContactsEl.value = bizAddress || '';
+    if (bizContactsEl) bizContactsEl.value = registrationData.bizAddress || '';
 
     // Mark as registered so future loads go to login page, not register page
     localStorage.setItem('lms-has-registered', '1');
