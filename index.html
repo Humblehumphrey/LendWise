@@ -4588,16 +4588,35 @@ async function boot() {
         }, 200);
       }
     } else {
-      // No active session. Check if users exist in DB to decide: login vs register.
-      // localStorage is a fast-path hint but Supabase is the real source of truth.
-      let hasAnyUsers = hasRegistered; // start with localStorage hint
-      if (!hasAnyUsers) {
+      // No active session. Decide: show login or register.
+      // If localStorage says registered, go straight to login.
+      // If not, check businesses table (works even anon if RLS returns error = users exist).
+      // Rule: only show register if we can CONFIRM the DB is completely empty.
+      // Any error/block from Supabase means users exist -> show login.
+      let showRegistration = false;
+      if (!hasRegistered) {
         try {
-          const { data: anyUser } = await sb.from('users').select('id').limit(1).maybeSingle();
-          if (anyUser?.id) { hasAnyUsers = true; localStorage.setItem('lms-has-registered', '1'); }
-        } catch(_) {}
+          const { data: biz, error: bizErr } = await sb.from('businesses').select('id').limit(1).maybeSingle();
+          if (bizErr) {
+            // RLS blocked the query = users/businesses exist = show login
+            localStorage.setItem('lms-has-registered', '1');
+            showRegistration = false;
+          } else if (biz) {
+            // Business found = show login
+            localStorage.setItem('lms-has-registered', '1');
+            showRegistration = false;
+          } else {
+            // No error, no data = truly empty DB = fresh install
+            showRegistration = true;
+          }
+        } catch(_) {
+          // Any exception = play it safe, show login
+          showRegistration = false;
+        }
       }
-      if (hasAnyUsers) {
+      if (showRegistration) {
+        showRegister();
+      } else {
         showLogin();
         try {
           const remembered = localStorage.getItem('lms-remembered-email');
@@ -4606,8 +4625,6 @@ async function boot() {
             if (emailEl) { emailEl.value = remembered; document.getElementById('login-remember').checked = true; }
           }
         } catch(_) {}
-      } else {
-        showRegister();
       }
     }
   } catch(e) {
