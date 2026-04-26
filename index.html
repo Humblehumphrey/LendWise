@@ -4517,8 +4517,7 @@ async function boot() {
     const { data: { session } } = await sb.auth.getSession();
     loadBar.style.width = '70%';
 
-    // Use localStorage flag to know if registration has ever been completed.
-    // Avoids an unauthenticated query to `businesses` which RLS would reject (401).
+    // hasRegistered is used as a fast-path fallback only; Supabase Auth is the source of truth.
     const hasRegistered = !!localStorage.getItem('lms-has-registered');
 
     loadBar.style.width = '90%';
@@ -4588,19 +4587,28 @@ async function boot() {
           }
         }, 200);
       }
-    } else if (!hasRegistered) {
-      // No session, no prior registration — fresh install, show registration
-      showRegister();
     } else {
-      // No session but registered before — show login
-      showLogin();
-      try {
-        const remembered = localStorage.getItem('lms-remembered-email');
-        if (remembered) {
-          const emailEl = document.getElementById('login-email');
-          if (emailEl) { emailEl.value = remembered; document.getElementById('login-remember').checked = true; }
-        }
-      } catch(_) {}
+      // No active session. Check if users exist in DB to decide: login vs register.
+      // localStorage is a fast-path hint but Supabase is the real source of truth.
+      let hasAnyUsers = hasRegistered; // start with localStorage hint
+      if (!hasAnyUsers) {
+        try {
+          const { data: anyUser } = await sb.from('users').select('id').limit(1).maybeSingle();
+          if (anyUser?.id) { hasAnyUsers = true; localStorage.setItem('lms-has-registered', '1'); }
+        } catch(_) {}
+      }
+      if (hasAnyUsers) {
+        showLogin();
+        try {
+          const remembered = localStorage.getItem('lms-remembered-email');
+          if (remembered) {
+            const emailEl = document.getElementById('login-email');
+            if (emailEl) { emailEl.value = remembered; document.getElementById('login-remember').checked = true; }
+          }
+        } catch(_) {}
+      } else {
+        showRegister();
+      }
     }
   } catch(e) {
     log('Boot error', e);
