@@ -1870,6 +1870,8 @@ tbody tr:hover td { background: var(--surface-2); }
 /* === DRAWER === */
 .drawer-backdrop { display: none; position: fixed; inset: 0; z-index: 150; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); }
 .drawer-backdrop.open { display: block; }
+/* When both drawers open, clip loan backdrop to only cover the loan drawer area */
+body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); background: rgba(0,0,0,0.25); }
 .drawer { position: fixed; right: 0; top: 0; bottom: 0; z-index: 151; width: 520px; background: var(--surface); border-left: 1px solid var(--border-2); overflow-y: auto; box-shadow: var(--shadow-lg); transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
 #loan-drawer { width: 780px; }
 .drawer.open { transform: none; }
@@ -4226,6 +4228,30 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
   </div>
 </div>
 
+<!-- BORROWER DETAIL DRAWER -->
+<div class="drawer-backdrop" id="borrower-drawer-bg" onclick="closeDrawer('borrower')"></div>
+<div class="drawer" id="borrower-drawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="borrower-drawer-title">Borrower Details</div>
+    <button class="drawer-close" onclick="closeDrawer('borrower')"><i data-lucide="x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <div class="tabs" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+      <div style="display:flex;gap:4px">
+        <button class="tab-btn active" onclick="switchTab(this,'borrower-tabs','bt-overview')">Overview</button>
+        <button class="tab-btn" onclick="switchTab(this,'borrower-tabs','bt-loans')">Loans</button>
+      </div>
+      <button class="btn btn-primary btn-sm" id="borrower-add-loan-btn" onclick="openLoanModalForClient()" style="display:none;gap:5px;padding:0 10px;height:30px;font-size:0.75rem">
+        <i data-lucide="plus-circle" style="width:13px;height:13px"></i> Add Loan
+      </button>
+    </div>
+    <div id="borrower-tabs">
+      <div class="tab-panel active" id="bt-overview"></div>
+      <div class="tab-panel" id="bt-loans"></div>
+    </div>
+  </div>
+</div>
+
 <!-- LOAN DETAIL DRAWER -->
 <div class="drawer-backdrop" id="loan-drawer-bg" onclick="closeDrawer('loan')"></div>
 <div class="drawer" id="loan-drawer">
@@ -4247,30 +4273,6 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
       <div class="tab-panel" id="lt-payments"></div>
       <div class="tab-panel" id="lt-activity"></div>
       <div class="tab-panel" id="lt-agreement"></div>
-    </div>
-  </div>
-</div>
-
-<!-- BORROWER DETAIL DRAWER -->
-<div class="drawer-backdrop" id="borrower-drawer-bg" onclick="closeDrawer('borrower')"></div>
-<div class="drawer" id="borrower-drawer">
-  <div class="drawer-header">
-    <div class="drawer-title" id="borrower-drawer-title">Borrower Details</div>
-    <button class="drawer-close" onclick="closeDrawer('borrower')"><i data-lucide="x"></i></button>
-  </div>
-  <div class="drawer-body">
-    <div class="tabs" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
-      <div style="display:flex;gap:4px">
-        <button class="tab-btn active" onclick="switchTab(this,'borrower-tabs','bt-overview')">Overview</button>
-        <button class="tab-btn" onclick="switchTab(this,'borrower-tabs','bt-loans')">Loans</button>
-      </div>
-      <button class="btn btn-primary btn-sm" id="borrower-add-loan-btn" onclick="openLoanModalForClient()" style="display:none;gap:5px;padding:0 10px;height:30px;font-size:0.75rem">
-        <i data-lucide="plus-circle" style="width:13px;height:13px"></i> Add Loan
-      </button>
-    </div>
-    <div id="borrower-tabs">
-      <div class="tab-panel active" id="bt-overview"></div>
-      <div class="tab-panel" id="bt-loans"></div>
     </div>
   </div>
 </div>
@@ -4734,16 +4736,12 @@ function showApp() {
     }
   } catch(_) {}
 
-  nav('dashboard');
-  loadDashboard();
-  // Restore last visited page from URL hash (e.g. after a refresh)
+  // Restore last visited page from URL hash on refresh — read BEFORE nav() overwrites it
   const hashView = (window.location.hash || '').replace('#', '').trim();
   const validViews = ['dashboard','loans','borrowers','payments','portfolio','par','audit','staff','products','branches','settings'];
-  if (hashView && validViews.includes(hashView) && hashView !== 'dashboard') {
-    nav(hashView);
-  } else {
-    loadDashboard();
-  }
+  const startView = (hashView && validViews.includes(hashView)) ? hashView : 'dashboard';
+  nav(startView);
+  if (startView === 'dashboard') loadDashboard();
   startInactivityTimer();
   setTimeout(refreshLiveNotifications, 2000);
   // Silent one-time migration: add lender_sig_data column if not yet present
@@ -5642,14 +5640,18 @@ function closeModal(id) {
 }
 
 function openDrawer(which) {
+  // Each drawer gets its own backdrop. Body class tracks which drawers are open
+  // so the loan backdrop can be clipped when the borrower drawer is also open.
   document.getElementById(which + '-drawer-bg').classList.add('open');
   document.getElementById(which + '-drawer').classList.add('open');
+  document.body.classList.add(which + '-drawer-open');
   if (window.lucide) lucide.createIcons();
 }
 
 function closeDrawer(which) {
   document.getElementById(which + '-drawer-bg').classList.remove('open');
   document.getElementById(which + '-drawer').classList.remove('open');
+  document.body.classList.remove(which + '-drawer-open');
 }
 
 function switchTab(btn, containerId, panelId) {
@@ -6427,6 +6429,29 @@ async function _fetchLoans(cacheKey, tbody) {
         const clientMap = Object.fromEntries((clients || []).map(c => [c.id, c.full_name]));
         rows.forEach(l => { l.borrower_name = clientMap[l.client_id] || '—'; });
       }
+
+      // FIX: Recalculate amount_paid and outstanding balances from actual repayment rows
+      // so the Remaining column is always accurate without needing a manual refresh.
+      const loanIds = rows.map(l => l.id);
+      const { data: allRepayments } = await sb.from('repayments')
+        .select('loan_id, amount_paid')
+        .eq('business_id', bizId)
+        .in('loan_id', loanIds);
+      const repaymentTotals = {};
+      (allRepayments || []).forEach(r => {
+        repaymentTotals[r.loan_id] = (repaymentTotals[r.loan_id] || 0) + Number(r.amount_paid || 0);
+      });
+      rows.forEach(l => {
+        const truePaid      = repaymentTotals[l.id] || 0;
+        const interestTotal = Number(l.total_interest   || (Number(l.total_repayable || 0) - Number(l.principal_amount || 0)));
+        const principal     = Number(l.principal_amount || 0);
+        const newInterest   = Math.max(0, interestTotal - truePaid);
+        const remainder     = Math.max(0, truePaid - interestTotal);
+        const newPrincipal  = Math.max(0, principal - remainder);
+        l.amount_paid           = truePaid;
+        l.outstanding_interest  = newInterest;
+        l.outstanding_principal = newPrincipal;
+      });
     }
 
     cacheSet(cacheKey, { rows, count: count || 0 });
@@ -7150,10 +7175,7 @@ async function submitNewLoan() {
     closeModal('new-loan-modal');
     loadLoans();
     loadDashboard();
-    // If the loan was created from a client's drawer, re-open that drawer so it refreshes automatically
-    if (_reopenClientId) {
-      setTimeout(() => openBorrowerDrawer(_reopenClientId), 200);
-    }
+    // Stay on current page after loan creation — no drawer reopening
   } catch(e) {
     showModalError('loan-modal-error','loan-modal-error-text', parseSupabaseError(e));
   } finally {
@@ -7188,12 +7210,39 @@ async function openLoanDrawer(loanId) {
       ? await tbl('loan_products').select('product_name').eq('id', loan.product_id).single()
       : { data: null };
 
+    // FIX: Always calculate amountPaid by summing actual repayment rows — never trust the
+    // stored loan.amount_paid field which can drift if payments are double-counted.
+    const { data: repaymentRows } = await tbl('repayments').select('amount_paid').eq('loan_id', loanId);
+    const amountPaidFromRepayments = (repaymentRows || []).reduce((s, r) => s + Number(r.amount_paid || 0), 0);
+
+    // Auto-heal: if the stored value has drifted, silently correct it so the DB stays accurate
+    const storedAmountPaid = Number(loan.amount_paid || 0);
+    if (Math.abs(storedAmountPaid - amountPaidFromRepayments) > 0.5) {
+      const interestTotal  = Number(loan.total_interest   || 0);
+      const principalTotal = Number(loan.principal_amount || 0);
+      const paidSoFar      = amountPaidFromRepayments;
+      const newInterest    = Math.max(0, interestTotal - paidSoFar);
+      const remainder      = Math.max(0, paidSoFar - interestTotal);
+      const newPrincipal   = Math.max(0, principalTotal - remainder);
+      const syncUpdates    = {
+        amount_paid:           amountPaidFromRepayments,
+        outstanding_interest:  newInterest,
+        outstanding_principal: newPrincipal,
+        updated_at:            new Date().toISOString(),
+      };
+      if (newPrincipal < 1 && newInterest < 1) syncUpdates.status = 'completed';
+      try { await tbl('loans').update(syncUpdates).eq('id', loanId); } catch(_) {}
+      loan.amount_paid           = amountPaidFromRepayments;
+      loan.outstanding_interest  = newInterest;
+      loan.outstanding_principal = newPrincipal;
+    }
+
     document.getElementById('loan-drawer-title').textContent = loan.loan_reference || 'Loan Details';
 
     const isOverdue = loan.maturity_date && new Date(loan.maturity_date) < new Date() && loan.status === 'active';
     const displayStatus = isOverdue ? 'OVERDUE' : loan.status.toUpperCase();
     const totalRepayable = Number(loan.total_repayable || loan.principal_amount || 0);
-    const amountPaid = Number(loan.amount_paid || 0);
+    const amountPaid = amountPaidFromRepayments; // always from repayments, never from stored field
     const outstanding = Number(loan.outstanding_principal || 0) + Number(loan.outstanding_interest || 0);
     const pct = totalRepayable > 0 ? Math.min(100, Math.round((amountPaid / totalRepayable) * 100)) : 0;
     const statusColor = isOverdue ? 'var(--danger)' : loan.status === 'active' ? 'var(--accent)' : loan.status === 'completed' || loan.status === 'closed' ? 'var(--text-muted)' : 'var(--warning)';
@@ -8518,6 +8567,15 @@ async function submitNewBorrower() {
   if (window.lucide) lucide.createIcons();
 
   try {
+    // FIX: guard against null business_id — if missing, the client would be saved
+    // with business_id=null and never appear in the app (scoped queries filter it out).
+    const borrowerBizId = window.currentBusiness?.id || null;
+    if (!borrowerBizId) {
+      showModalError('borrower-modal-error','borrower-modal-error-text','No active business session. Please refresh the page and try again.');
+      btn.disabled = false; btn.innerHTML = '<i data-lucide="user-plus"></i> Register';
+      if (window.lucide) lucide.createIcons();
+      return;
+    }
     const statusMap = { VERIFIED:'active', PENDING:'inactive', REJECTED:'blacklisted' };
     const { error, data: newClient } = await tbl('clients').insert({
       full_name:        name,
@@ -8528,7 +8586,7 @@ async function submitNewBorrower() {
       address:          address || null,
       status:           statusMap[kyc] || 'inactive',
       created_by:       currentUser?.id,
-      business_id:      window.currentBusiness?.id || null,
+      business_id:      borrowerBizId,
     }).select('id').single();
     if (error) throw error;
     // Audit log
@@ -8668,7 +8726,7 @@ async function openBorrowerDrawer(clientId) {
           const statusBorder = isClosed ? 'var(--accent-border)' : isOverdue ? 'var(--danger-border)' : (l.status||'').toLowerCase() === 'active' ? 'var(--info-border)' : 'var(--border)';
           const barColor = isClosed ? 'var(--accent)' : isOverdue ? 'var(--danger)' : 'var(--info)';
           return `
-          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px${idx === 0 ? ';border-color:var(--border-2)' : ''}">
+          <div onclick="openLoanDrawer('${l.id}')" style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px;cursor:pointer${idx === 0 ? ';border-color:var(--border-2)' : ''}" title="Click to view loan details">
             <!-- Loan card header -->
             <div style="padding:9px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:${idx === 0 ? 'rgba(88,166,255,0.04)' : 'transparent'}">
               <div style="display:flex;align-items:center;gap:8px">
@@ -12087,10 +12145,18 @@ async function cwSubmitForm() {
     cwSaveStepSet(2, 'spin');
     cwSaveStatus('Saving client profile…');
 
+    // FIX: guard against null business_id — if missing, the client would be saved
+    // with business_id=null and never appear in the app (scoped queries filter it out).
+    const cwBizId = window.currentBusiness?.id || null;
+    if (!cwBizId) {
+      cwSaveStepSet(2, 'error');
+      throw new Error('No active business session. Please refresh the page and try again.');
+    }
+
     // Check for duplicate NID — scoped to this business only
     const _cwDupQ = tbl('clients').select('id').eq('national_id', nationalId).limit(1);
     const { data: dup, error: cwDupErr } = await _cwDupQ;
-    if (cwDupErr) throw new Error('Could not verify National ID uniqueness: ' + cwDupErr.message); // FIX: propagate query error so it is not silently swallowed
+    if (cwDupErr) throw new Error('Could not verify National ID uniqueness: ' + cwDupErr.message);
     if (dup && dup.length > 0) {
       cwSaveStepSet(2, 'error');
       throw new Error(`A client with National ID "${nationalId}" already exists.`);
@@ -12111,7 +12177,7 @@ async function cwSubmitForm() {
       notes:             notes,
       status:            'active',
       created_by:        currentUser?.id || null,
-      business_id:       window.currentBusiness?.id || null,
+      business_id:       cwBizId,
     }).select('id').single();
 
     if (clientErr) throw new Error('Failed to save client: ' + clientErr.message);
