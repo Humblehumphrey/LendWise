@@ -10,7 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js" onerror="(window.console&&console.log('QRCode lib unavailable, using API fallback'))"></script>
 <style>
 /* === CSS VARIABLES === */
 :root {
@@ -275,30 +275,6 @@ svg { display: block; }
 .chart-card:hover {
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
   border-color: var(--border-2);
-}
-
-/* ── Portfolio by product card ── */
-.prod-portfolio-card { padding: 1.25rem; }
-.prod-portfolio-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.1rem; }
-.prod-portfolio-body { display: grid; grid-template-columns: 260px 1fr; gap: 1.5rem; align-items: start; }
-.prod-portfolio-chart-wrap { flex-shrink: 0; }
-.prod-portfolio-stats { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
-.prod-portfolio-stats-loading { padding: 1.5rem; color: var(--text-muted); font-size: 0.8rem; text-align: center; }
-.prod-stat-row { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 0.75rem; padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border); transition: background 0.12s; }
-.prod-stat-row:last-child { border-bottom: none; }
-.prod-stat-row:hover { background: var(--surface-2); }
-.prod-stat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.prod-stat-name { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.prod-stat-bar-wrap { flex: 1; height: 5px; background: var(--surface-3); border-radius: 99px; overflow: hidden; min-width: 60px; }
-.prod-stat-bar { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
-.prod-stat-count { font-size: 0.78rem; font-weight: 700; color: var(--text); white-space: nowrap; min-width: 24px; text-align: right; }
-.prod-stat-amt { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; min-width: 90px; text-align: right; }
-.prod-portfolio-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
-.prod-portfolio-footer-label { font-size: 0.75rem; color: var(--text-muted); }
-.prod-portfolio-footer-val { font-size: 0.82rem; font-weight: 700; color: var(--text); }
-@media (max-width: 900px) {
-  .prod-portfolio-body { grid-template-columns: 1fr; }
-  .prod-portfolio-chart-wrap { max-width: 280px; margin: 0 auto; }
 }
 
 /* ── Table rows ── */
@@ -710,7 +686,7 @@ textarea:focus-visible {
   position: relative;
   overflow: hidden;
 }
-#register-page.active { display: flex; }
+#register-page.active { display: flex; align-items: center; justify-content: center; }
 
 /* Login-style layered background for register page */
 .reg-bg {
@@ -740,6 +716,7 @@ textarea:focus-visible {
   padding: 1.5rem 1rem;
   position: relative;
   z-index: 1;
+  margin: auto;
 }
 
 /* ── Logo row ── */
@@ -833,8 +810,9 @@ textarea:focus-visible {
   border-radius: var(--radius-lg);
   padding: 2.2rem 2.4rem;
   box-shadow: var(--shadow-lg);
-  overflow: visible;
+  overflow: hidden;
   position: relative;
+  width: 100%;
 }
 
 .reg-card-title {
@@ -1354,9 +1332,12 @@ textarea:focus-visible {
 #register-page { display: none; }
 #register-page.active {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
   overflow-y: auto;
-  padding: 2rem 0;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+  height: 100vh;
 }
 
 /* === SETUP REQUIRED PAGE === */
@@ -1404,7 +1385,7 @@ code { font-family: var(--mono); font-size: 0.8rem; background: var(--surface-3)
   align-items: center; justify-content: center;
   background: var(--bg); position: relative; overflow: hidden;
 }
-#register-page.active { display: flex; }
+#register-page.active { display: flex; align-items: center; justify-content: center; }
 
 /* === BUSINESS PAGE === */
 #business-page {
@@ -1633,8 +1614,17 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
 }
 .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+.btn-primary {
+  background: linear-gradient(135deg, #3fb950 0%, #2da440 100%);
+  color: #fff;
+  border-color: rgba(63,185,80,0.45) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 2px 8px rgba(63,185,80,0.2);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+}
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4dc960 0%, #3fb950 100%);
+  border-color: rgba(77,201,96,0.55) !important;
+}
 .btn-ghost { background: transparent; border: 1px solid var(--border-2); color: var(--text-muted); }
 .btn-ghost:hover:not(:disabled) { border-color: var(--border-2); background: var(--surface-2); color: var(--text); }
 .btn-danger { background: var(--danger-subtle); border: 1px solid var(--danger-border); color: var(--danger); }
@@ -1758,20 +1748,38 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
 .page-header-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
 /* === KPI CARDS === */
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
 .kpi-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-md); padding: 1.1rem 1.25rem;
-  position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem 1.4rem 1.2rem;
+  position: relative; overflow: hidden;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  cursor: default;
 }
-.kpi-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
-.kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
-.kpi-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
-.kpi-icon-wrap { width: 30px; height: 30px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; }
-.kpi-icon-wrap svg { width: 15px; height: 15px; }
-.kpi-value { font-size: 1.8rem; font-weight: 700; line-height: 1; letter-spacing: -0.5px; }
-.kpi-delta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; }
-.kpi-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--kpi-color, var(--accent)); }
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top right, color-mix(in srgb, var(--kpi-color, var(--accent)) 10%, transparent), transparent 65%);
+  pointer-events: none;
+}
+.kpi-card:hover { border-color: color-mix(in srgb, var(--kpi-color, var(--accent)) 40%, transparent); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.35), 0 0 0 1px color-mix(in srgb, var(--kpi-color, var(--accent)) 20%, transparent); }
+.kpi-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--kpi-color, var(--accent)), color-mix(in srgb, var(--kpi-color, var(--accent)) 30%, transparent)); border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.kpi-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+.kpi-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); padding-top: 2px; }
+.kpi-icon-wrap {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--kpi-color, var(--accent)) 25%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--kpi-color, var(--accent)) 20%, transparent);
+  flex-shrink: 0;
+}
+.kpi-icon-wrap svg { width: 18px; height: 18px; }
+.kpi-value { font-size: 1.9rem; font-weight: 800; line-height: 1; letter-spacing: -1px; font-family: var(--mono); }
+.kpi-delta { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.5rem; display: flex; align-items: center; gap: 0.3rem; }
 
 /* === CHARTS === */
 .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
@@ -1996,29 +2004,78 @@ tbody tr:hover td { background: var(--surface-2); }
   display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
 }
 .dash-action-btn {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  padding: 0.45rem 0.9rem; border-radius: var(--radius-md);
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0 1.1rem; height: 38px; border-radius: 10px;
   border: 1px solid transparent; cursor: pointer;
-  font-family: var(--font); font-size: 0.83rem; font-weight: 600;
-  transition: all 0.18s; white-space: nowrap;
+  font-family: var(--font); font-size: 0.8rem; font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap; position: relative; overflow: hidden;
 }
-.dash-action-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
-.dash-action-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-.dash-action-btn:active { transform: scale(0.97); }
+.dash-action-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 55%);
+  pointer-events: none; border-radius: inherit;
+}
+[data-theme="light"] .dash-action-btn::after {
+  background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 55%);
+}
+.dash-action-btn svg { width: 14px; height: 14px; flex-shrink: 0; stroke-width: 2.2px; }
+.dash-action-btn:hover { transform: translateY(-2px); }
+.dash-action-btn:active { transform: scale(0.96) translateY(0); transition-duration: 0.08s; }
+
+/* Disburse Loan — Emerald green, premium */
 .dash-action-primary {
-  background: var(--accent); color: #fff; border-color: var(--accent);
+  background: linear-gradient(135deg, #3fb950 0%, #2da440 100%);
+  color: #fff;
+  border-color: rgba(63,185,80,0.5);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 2px 8px rgba(63,185,80,0.25);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
-.dash-action-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 4px 14px rgba(63,185,80,0.3); }
+.dash-action-primary:hover {
+  background: linear-gradient(135deg, #4dc960 0%, #3fb950 100%);
+  border-color: rgba(77,201,96,0.6);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 6px 20px rgba(63,185,80,0.4);
+}
+
+/* Record Repayment — Sapphire blue, refined */
 .dash-action-info {
-  background: var(--info); color: #fff; border-color: var(--info);
+  background: linear-gradient(135deg, #3d8ef8 0%, #2070e0 100%);
+  color: #fff;
+  border-color: rgba(61,142,248,0.5);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 2px 8px rgba(61,142,248,0.25);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 [data-theme="light"] .dash-action-info { color: #fff; }
-.dash-action-info:hover { opacity: 0.9; box-shadow: 0 4px 14px rgba(88,166,255,0.3); }
-.dash-action-ghost {
-  background: var(--surface-2); color: var(--text);
-  border-color: var(--border-2);
+.dash-action-info:hover {
+  background: linear-gradient(135deg, #5ca0ff 0%, #3d8ef8 100%);
+  border-color: rgba(92,160,255,0.6);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 6px 20px rgba(61,142,248,0.4);
 }
-.dash-action-ghost:hover { background: var(--surface-3); }
+
+/* Add Client — Subtle glass, elevated surface */
+.dash-action-ghost {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: var(--border-2);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 1px 4px rgba(0,0,0,0.2);
+}
+.dash-action-ghost:hover {
+  background: var(--surface-2);
+  border-color: rgba(255,255,255,0.2);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 4px 12px rgba(0,0,0,0.3);
+}
+[data-theme="light"] .dash-action-ghost {
+  background: #ffffff;
+  color: #1f2328;
+  border-color: rgba(0,0,0,0.16);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.9) inset;
+}
+[data-theme="light"] .dash-action-ghost:hover {
+  background: #f3f4f6;
+  border-color: rgba(0,0,0,0.24);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.9) inset;
+}
 
 /* === DUE TODAY PANEL === */
 .dash-due-header {
@@ -2762,7 +2819,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
             </div>
 
             <div class="reg-form-group">
-              <label class="reg-label">Business Logo <span style="color:var(--text-subtle);font-weight:400">(optional)</span></label>
+              <label class="reg-label" for="s3-logo-file">Business Logo <span style="color:var(--text-subtle);font-weight:400">(optional)</span></label>
               <div class="logo-upload-area" id="logo-upload-area">
                 <input type="file" id="s3-logo-file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onchange="regHandleLogoSelect(event)">
                 <div class="logo-upload-icon">🖼️</div>
@@ -2962,13 +3019,13 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 
     <!-- EMAIL -->
     <div class="form-group">
-      <label class="form-label">Email address</label>
+      <label class="form-label" for="login-email">Email address</label>
       <input type="email" class="form-input" id="login-email" placeholder="you@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()">
     </div>
 
     <!-- PASSWORD -->
     <div class="form-group" style="margin-bottom:0.3rem">
-      <label class="form-label">Password</label>
+      <label class="form-label" for="login-pass">Password</label>
       <div class="login-pw-wrap">
         <input type="password" class="form-input" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
         <button type="button" class="login-pw-toggle" id="login-pw-toggle-btn" onclick="loginTogglePw()" title="Show/hide password">
@@ -3048,7 +3105,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     </p>
     <div class="modal-error" id="forgot-modal-error"><i data-lucide="x-circle"></i><span id="forgot-modal-error-text"></span></div>
     <div class="form-group">
-      <label class="form-label">Email Address</label>
+      <label class="form-label" for="forgot-email">Email Address</label>
       <input type="email" class="form-input" id="forgot-email" placeholder="you@lendwise.co.ug" autocomplete="email">
     </div>
     <div class="modal-footer" style="margin-top:1rem;padding-top:1rem">
@@ -3182,24 +3239,36 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         </div>
         <div class="kpi-grid" id="kpi-grid">
           <div class="kpi-card" style="--kpi-color:var(--accent)">
-            <div class="kpi-top"><span class="kpi-label">Active Loans</span><div class="kpi-icon-wrap" style="background:var(--accent-subtle)"><i data-lucide="trending-up" style="color:var(--accent)"></i></div></div>
+            <div class="kpi-top">
+              <span class="kpi-label">Active Loans</span>
+              <div class="kpi-icon-wrap" style="background:var(--accent-subtle)"><i data-lucide="trending-up" style="color:var(--accent)"></i></div>
+            </div>
             <div class="kpi-value text-accent" id="kpi-active">—</div>
-            <div class="kpi-delta" id="kpi-active-sub">Loading…</div>
+            <div class="kpi-delta" id="kpi-active-sub"><i data-lucide="check-circle" style="width:12px;height:12px;color:var(--accent)"></i> Loading…</div>
           </div>
           <div class="kpi-card" style="--kpi-color:var(--danger)">
-            <div class="kpi-top"><span class="kpi-label">Overdue</span><div class="kpi-icon-wrap" style="background:var(--danger-subtle)"><i data-lucide="alert-triangle" style="color:var(--danger)"></i></div></div>
+            <div class="kpi-top">
+              <span class="kpi-label">Overdue</span>
+              <div class="kpi-icon-wrap" style="background:var(--danger-subtle)"><i data-lucide="alert-triangle" style="color:var(--danger)"></i></div>
+            </div>
             <div class="kpi-value text-danger" id="kpi-overdue">—</div>
-            <div class="kpi-delta" id="kpi-overdue-sub">Loading…</div>
+            <div class="kpi-delta" id="kpi-overdue-sub"><i data-lucide="clock" style="width:12px;height:12px;color:var(--danger)"></i> Require immediate attention</div>
           </div>
-          <div class="kpi-card" style="--kpi-color:var(--warning)">
-            <div class="kpi-top"><span class="kpi-label">Pending Approval</span><div class="kpi-icon-wrap" style="background:var(--warning-subtle)"><i data-lucide="clock" style="color:var(--warning)"></i></div></div>
-            <div class="kpi-value text-warning" id="kpi-pending">—</div>
-            <div class="kpi-delta" id="kpi-pending-sub">Awaiting review</div>
+          <div class="kpi-card" style="--kpi-color:var(--purple)">
+            <div class="kpi-top">
+              <span class="kpi-label">Total Collected</span>
+              <div class="kpi-icon-wrap" style="background:var(--purple-subtle)"><i data-lucide="circle-dollar-sign" style="color:var(--purple)"></i></div>
+            </div>
+            <div class="kpi-value" style="color:var(--purple);font-size:1.35rem" id="kpi-collected">—</div>
+            <div class="kpi-delta" id="kpi-collected-sub"><i data-lucide="bar-chart-2" style="width:12px;height:12px;color:var(--purple)"></i> Cumulative repayments received</div>
           </div>
           <div class="kpi-card" style="--kpi-color:var(--info)">
-            <div class="kpi-top"><span class="kpi-label">Total Portfolio</span><div class="kpi-icon-wrap" style="background:var(--info-subtle)"><i data-lucide="banknote" style="color:var(--info)"></i></div></div>
+            <div class="kpi-top">
+              <span class="kpi-label">Total Portfolio</span>
+              <div class="kpi-icon-wrap" style="background:var(--info-subtle)"><i data-lucide="banknote" style="color:var(--info)"></i></div>
+            </div>
             <div class="kpi-value" style="color:var(--info);font-size:1.35rem" id="kpi-portfolio">—</div>
-            <div class="kpi-delta" id="kpi-portfolio-sub">Outstanding principal</div>
+            <div class="kpi-delta" id="kpi-portfolio-sub"><i data-lucide="landmark" style="width:12px;height:12px;color:var(--info)"></i> Outstanding principal</div>
           </div>
         </div>
         <div class="charts-grid">
@@ -3238,29 +3307,83 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
             </div>
           </div>
 
-          <!-- LOANS BY STATUS CHART -->
-          <div class="chart-card">
-            <div class="chart-card-title">Loans by status</div>
-            <div class="chart-container" style="height:220px"><canvas id="chart-status"></canvas></div>
+          <!-- 30-DAY COLLECTION RATE WIDGET -->
+          <div class="chart-card" id="collection-rate-card" style="display:flex;flex-direction:column;gap:0.65rem;padding:1.25rem 1.25rem 0 1.25rem;overflow:hidden">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:0.5rem">
+              <div>
+                <div class="chart-card-title" style="margin-bottom:0.1rem">30-Day Collection Rate</div>
+                <div style="font-size:0.72rem;color:var(--text-muted)">% of installments due in last 30 days that were actually collected</div>
+              </div>
+            </div>
+            <!-- KPI row -->
+            <div style="display:flex;gap:0.6rem">
+              <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:0.7rem 0.85rem">
+                <div id="cr-rate" style="font-size:1.6rem;font-weight:800;color:var(--accent);font-family:var(--mono)">—</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:1px">Collection rate</div>
+              </div>
+              <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:0.7rem 0.85rem">
+                <div id="cr-collected" style="font-size:1.05rem;font-weight:700;color:var(--text);font-family:var(--mono)">—</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:1px">Collected (UGX)</div>
+              </div>
+              <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:0.7rem 0.85rem">
+                <div id="cr-due" style="font-size:1.05rem;font-weight:700;color:var(--text);font-family:var(--mono)">—</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:1px">Due (UGX)</div>
+              </div>
+            </div>
+            <!-- Bar chart -->
+            <div class="chart-container" style="height:220px"><canvas id="chart-collection-rate"></canvas></div>
+            <!-- Legend row -->
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;font-size:0.7rem;color:var(--text-muted);padding:0 0.1rem;padding-bottom:1.25rem">
+              <span style="display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#3fb950"></span>Above 90% — healthy</span>
+              <span style="display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#d29922"></span>75–90% — watch closely</span>
+              <span style="display:flex;align-items:center;gap:0.3rem"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#f85149"></span>Below 75% — act now</span>
+            </div>
+            <!-- Warning banner — flush footer strip, hidden when healthy -->
+            <div id="cr-warning" style="display:none;margin:0 -1.25rem;padding:0.6rem 1.25rem;font-size:0.72rem;font-weight:600;border-radius:0 0 var(--radius-md) var(--radius-md)"></div>
           </div>
         </div>
 
-        <!-- SECOND CHARTS ROW: Portfolio by product (full width) -->
+        <!-- PAR AGING BREAKDOWN -->
         <div style="margin-bottom:1.25rem">
-          <div class="chart-card prod-portfolio-card">
-            <div class="prod-portfolio-header">
+          <div class="chart-card" style="padding:0;overflow:hidden">
+            <!-- Card header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem 0.9rem;border-bottom:1px solid var(--border)">
               <div>
-                <div class="chart-card-title" style="margin-bottom:2px">Portfolio by product</div>
-                <div style="font-size:0.72rem;color:var(--text-muted)">Loan distribution across product types</div>
+                <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.2rem">Portfolio at Risk — Aging</div>
+                <div style="font-size:0.78rem;color:var(--text-muted)">Outstanding principal by days overdue</div>
               </div>
-              <span id="prod-portfolio-total-pill" class="pill pill-info" style="font-size:0.68rem;white-space:nowrap">— loans</span>
+              <div style="display:flex;align-items:center;gap:0.5rem">
+                <div id="par-dash-health-pill" style="display:none;padding:0.25rem 0.75rem;border-radius:100px;font-size:0.68rem;font-weight:700;letter-spacing:0.05em"></div>
+                <button class="btn btn-ghost btn-sm" onclick="loadDashboardPAR()" title="Refresh PAR" style="padding:0 0.5rem"><i data-lucide="refresh-cw" style="width:13px;height:13px"></i></button>
+                <button class="btn btn-ghost btn-sm" onclick="nav('par')" style="padding:0 0.65rem;font-size:0.72rem">Full report <i data-lucide="chevron-right" style="width:12px;height:12px"></i></button>
+              </div>
             </div>
-            <div class="prod-portfolio-body">
-              <div class="prod-portfolio-chart-wrap">
-                <div class="chart-container" style="height:220px"><canvas id="chart-products"></canvas></div>
+
+            <!-- Body -->
+            <div style="padding:1.1rem 1.4rem 0">
+              <!-- 4 bucket rows -->
+              <div id="par-dash-buckets" style="display:flex;flex-direction:column;gap:0.7rem;margin-bottom:1rem">
+                <!-- Rendered by JS -->
+                <div style="color:var(--text-muted);font-size:0.8rem;padding:0.5rem 0">Loading PAR data…</div>
               </div>
-              <div class="prod-portfolio-stats" id="prod-portfolio-stats">
-                <div class="prod-portfolio-stats-loading">Loading…</div>
+
+              <!-- Divider + totals row -->
+              <div style="border-top:1px solid var(--border);padding:0.75rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem">
+                <div style="display:flex;gap:2rem;flex-wrap:wrap">
+                  <div>
+                    <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.2rem">Total PAR</div>
+                    <div style="font-size:1.2rem;font-weight:800;color:var(--text);font-family:var(--mono)" id="par-dash-total">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.2rem">PAR as % of Portfolio</div>
+                    <div style="font-size:1.2rem;font-weight:800;font-family:var(--mono)" id="par-dash-pct">—</div>
+                  </div>
+                  <div>
+                    <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.2rem">Benchmark Target</div>
+                    <div style="font-size:1.2rem;font-weight:800;color:var(--text-muted);font-family:var(--mono)">below 10%</div>
+                  </div>
+                </div>
+                <div id="par-dash-loans-count" style="font-size:0.75rem;color:var(--text-muted)"></div>
               </div>
             </div>
           </div>
@@ -3488,20 +3611,20 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
             <div class="modal-success" id="settings-success" style="margin-bottom:0.75rem"><i data-lucide="check-circle"></i><span>Settings saved successfully!</span></div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Business Name <span style="color:var(--danger)">*</span></label>
+                <label class="form-label" for="biz-name">Business Name <span style="color:var(--danger)">*</span></label>
                 <input type="text" class="form-input" id="settings-bizname" placeholder="e.g. Quick Loans Uganda Ltd">
               </div>
               <div class="form-group">
-                <label class="form-label">Tagline / Slogan</label>
+                <label class="form-label" for="settings-slogan">Tagline / Slogan</label>
                 <input type="text" class="form-input" id="settings-slogan" placeholder="e.g. Fast. Reliable. Trusted.">
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">Physical Address / Contact Info</label>
+              <label class="form-label" for="biz-contacts">Physical Address / Contact Info</label>
               <textarea class="form-input" id="settings-contacts" placeholder="e.g. Plot 42 Kampala Road, Kampala. Tel: +256 700 000000" style="min-height:70px"></textarea>
             </div>
             <div class="form-group">
-              <label class="form-label">Business Type</label>
+              <label class="form-label" for="biz-type">Business Type</label>
               <select class="form-input" id="settings-biztype">
                 <option value="">Select…</option>
                 <option value="microfinance">Microfinance Institution</option>
@@ -3606,7 +3729,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
       <!-- LEFT: form fields -->
       <div>
         <div class="form-group">
-          <label class="form-label">Borrower <span style="color:var(--danger)">*</span></label>
+          <label class="form-label" for="loan-borrower-search">Borrower <span style="color:var(--danger)">*</span></label>
           <div class="search-dropdown-wrap">
             <input type="text" class="form-input" id="loan-borrower-search" placeholder="Type to search borrower…" autocomplete="off" oninput="searchBorrowers(this.value)">
             <input type="hidden" id="loan-borrower-id">
@@ -3615,13 +3738,13 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Loan Product <span style="color:var(--danger)">*</span></label>
+            <label class="form-label" for="loan-product">Loan Product <span style="color:var(--danger)">*</span></label>
             <select class="form-input" id="loan-product" onchange="onProductChange()">
               <option value="">Select product…</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Disbursement Channel</label>
+            <label class="form-label" for="loan-channel">Disbursement Channel</label>
             <select class="form-input" id="loan-channel">
               <option value="CASH">Cash</option>
               <option value="MOBILE_MONEY">Mobile Money</option>
@@ -3632,23 +3755,23 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         <input type="hidden" id="loan-term">
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Principal Amount (UGX) <span style="color:var(--danger)">*</span></label>
+            <label class="form-label" for="loan-amount">Principal Amount (UGX) <span style="color:var(--danger)">*</span></label>
             <input type="number" class="form-input" id="loan-amount" placeholder="500000" oninput="loanUpdatePreview()">
             <div class="form-hint" id="loan-amount-hint"></div>
           </div>
           <div class="form-group">
-            <label class="form-label">Start Date</label>
+            <label class="form-label" for="loan-start">Start Date</label>
             <input type="date" class="form-input" id="loan-start">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Processing Fee (UGX)</label>
+            <label class="form-label" for="loan-processing-fee">Processing Fee (UGX)</label>
             <input type="number" class="form-input" id="loan-processing-fee" placeholder="0" min="0" oninput="loanUpdatePreview()">
             <div class="form-hint">One-time fee charged at disbursement</div>
           </div>
           <div class="form-group">
-            <label class="form-label">Notes</label>
+            <label class="form-label" for="loan-notes">Notes</label>
             <textarea class="form-input" id="loan-notes" placeholder="Optional notes…"></textarea>
           </div>
         </div>
@@ -3656,7 +3779,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         <!-- COLLATERAL -->
         <div style="margin-top:0.5rem">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
-            <label class="form-label" style="margin:0">Collateral</label>
+            <span class="form-label" style="margin:0">Collateral</span>
             <button type="button" class="btn btn-ghost btn-sm" onclick="addCollateralRow()" style="font-size:0.75rem;padding:2px 10px"><i data-lucide="plus"></i> Add</button>
           </div>
           <div id="collateral-list" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -3666,7 +3789,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         <!-- GUARANTORS -->
         <div style="margin-top:0.75rem">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
-            <label class="form-label" style="margin:0">Guarantors</label>
+            <span class="form-label" style="margin:0">Guarantors</span>
             <button type="button" class="btn btn-ghost btn-sm" onclick="addGuarantorRow()" style="font-size:0.75rem;padding:2px 10px"><i data-lucide="plus"></i> Add</button>
           </div>
           <div id="guarantor-list" style="display:flex;flex-direction:column;gap:8px"></div>
@@ -3717,31 +3840,31 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     <div class="modal-error" id="borrower-modal-error"><i data-lucide="x-circle"></i><span id="borrower-modal-error-text"></span></div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Full Name <span style="color:var(--danger)">*</span></label>
+        <label class="form-label" for="b-name">Full Name <span style="color:var(--danger)">*</span></label>
         <input type="text" class="form-input" id="b-name" placeholder="John Doe">
       </div>
       <div class="form-group">
-        <label class="form-label">National ID No <span style="color:var(--danger)">*</span></label>
+        <label class="form-label" for="b-nid">National ID No <span style="color:var(--danger)">*</span></label>
         <input type="text" class="form-input" id="b-nid" placeholder="CM9600123456ABCD">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Primary Phone <span style="color:var(--danger)">*</span></label>
+        <label class="form-label" for="b-phone">Primary Phone <span style="color:var(--danger)">*</span></label>
         <input type="tel" class="form-input" id="b-phone" placeholder="+256 700 000000">
       </div>
       <div class="form-group">
-        <label class="form-label">Secondary Phone</label>
+        <label class="form-label" for="b-phone2">Secondary Phone</label>
         <input type="tel" class="form-input" id="b-phone2" placeholder="+256 700 000001">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Date of Birth</label>
+        <label class="form-label" for="b-dob">Date of Birth</label>
         <input type="date" class="form-input" id="b-dob">
       </div>
       <div class="form-group">
-        <label class="form-label">KYC Status</label>
+        <label class="form-label" for="b-kyc">KYC Status</label>
         <select class="form-input" id="b-kyc">
           <option value="PENDING">Pending</option>
           <option value="VERIFIED">Verified</option>
@@ -3750,12 +3873,12 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Address</label>
+      <label class="form-label" for="b-address">Address</label>
       <input type="text" class="form-input" id="b-address" placeholder="Kampala, Uganda">
     </div>
     <div class="form-row three">
       <div class="form-group">
-        <label class="form-label">Employment Type</label>
+        <label class="form-label" for="b-emp">Employment Type</label>
         <select class="form-input" id="b-emp">
           <option value="EMPLOYED">Employed</option>
           <option value="SELF_EMPLOYED">Self Employed</option>
@@ -3764,11 +3887,11 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Employer Name</label>
+        <label class="form-label" for="b-employer">Employer Name</label>
         <input type="text" class="form-input" id="b-employer" placeholder="Company name">
       </div>
       <div class="form-group">
-        <label class="form-label">Monthly Income (UGX)</label>
+        <label class="form-label" for="b-income">Monthly Income (UGX)</label>
         <input type="number" class="form-input" id="b-income" placeholder="1000000">
       </div>
     </div>
@@ -3788,7 +3911,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     </div>
     <div class="modal-error" id="payment-modal-error"><i data-lucide="x-circle"></i><span id="payment-modal-error-text"></span></div>
     <div class="form-group">
-      <label class="form-label">Loan <span style="color:var(--danger)">*</span></label>
+      <label class="form-label" for="payment-loan-search">Loan <span style="color:var(--danger)">*</span></label>
       <div class="search-dropdown-wrap">
         <input type="text" class="form-input" id="pay-loan-search" placeholder="Search by loan ref or borrower…" autocomplete="off" oninput="searchLoansForPayment(this.value)">
         <input type="hidden" id="pay-loan-id">
@@ -3816,11 +3939,11 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Amount Paid (UGX) <span style="color:var(--danger)">*</span></label>
+        <label class="form-label" for="pay-amount">Amount Paid (UGX) <span style="color:var(--danger)">*</span></label>
         <input type="number" class="form-input" id="pay-amount" placeholder="100000">
       </div>
       <div class="form-group">
-        <label class="form-label">Payment Method</label>
+        <label class="form-label" for="pay-method">Payment Method</label>
         <select class="form-input" id="pay-method">
           <option value="CASH">Cash</option>
           <option value="MOBILE_MONEY">Mobile Money</option>
@@ -3830,16 +3953,16 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Payment Date</label>
+        <label class="form-label" for="pay-date">Payment Date</label>
         <input type="date" class="form-input" id="pay-date">
       </div>
       <div class="form-group">
-        <label class="form-label">Receipt Number</label>
+        <label class="form-label" for="pay-receipt">Receipt Number</label>
         <input type="text" class="form-input" id="pay-receipt" placeholder="Auto-generated if blank">
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Notes</label>
+      <label class="form-label" for="pay-notes">Notes</label>
       <textarea class="form-input" id="pay-notes" placeholder="Optional notes…" rows="2" style="resize:none;min-height:unset"></textarea>
     </div>
     <div class="modal-footer" style="margin-top:0.75rem;padding-top:0.75rem">
@@ -3859,27 +3982,27 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     <div class="modal-error" id="staff-modal-error"><i data-lucide="x-circle"></i><span id="staff-modal-error-text"></span></div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Full Name <span style="color:var(--danger)">*</span></label>
+        <label class="form-label" for="st-name">Full Name <span style="color:var(--danger)">*</span></label>
         <input type="text" class="form-input" id="st-name" placeholder="Jane Atim">
       </div>
       <div class="form-group">
-        <label class="form-label">Email <span style="color:var(--danger)">*</span></label>
+        <label class="form-label" for="st-email">Email <span style="color:var(--danger)">*</span></label>
         <input type="email" class="form-input" id="st-email" placeholder="jane@lendwise.co.ug">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Password <span style="color:var(--danger)">*</span></label>
+        <label class="form-label" for="st-pass">Password <span style="color:var(--danger)">*</span></label>
         <input type="password" class="form-input" id="st-pass" placeholder="Min 8 characters">
       </div>
       <div class="form-group">
-        <label class="form-label">Phone</label>
+        <label class="form-label" for="st-phone">Phone</label>
         <input type="tel" class="form-input" id="st-phone" placeholder="+256 700 000000">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Role</label>
+        <label class="form-label" for="st-role">Role</label>
         <select class="form-input" id="st-role">
           <option value="LOAN_OFFICER">Loan Officer</option>
           <option value="CASHIER">Cashier</option>
@@ -3890,7 +4013,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Branch</label>
+        <label class="form-label" for="st-branch">Branch</label>
         <select class="form-input" id="st-branch"><option value="">Select branch…</option></select>
       </div>
     </div>
@@ -3918,18 +4041,18 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
       <div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Product Name <span style="color:var(--danger)">*</span></label>
+            <label class="form-label" for="pr-name">Product Name <span style="color:var(--danger)">*</span></label>
             <input type="text" class="form-input" id="pr-name" placeholder="e.g. Daily 30-Day Loan" oninput="prAutoCode(this.value)">
           </div>
           <div class="form-group">
-            <label class="form-label">Product Code <span style="color:var(--danger)">*</span></label>
+            <label class="form-label" for="pr-code">Product Code <span style="color:var(--danger)">*</span></label>
             <input type="text" class="form-input" id="pr-code" placeholder="Auto-generated" title="Auto-generated from name — you can edit this" oninput="this.dataset.manualEdit='1'" onfocus="this.dataset.manualEdit=this.value?'1':''">
           </div>
         </div>
 
         <!-- Product Type selector -->
         <div class="form-group">
-          <label class="form-label">Product Type <span style="color:var(--danger)">*</span></label>
+          <label class="form-label" for="pr-product-type">Product Type <span style="color:var(--danger)">*</span></label>
           <select class="form-input" id="pr-product-type" onchange="prOnTypeChange()">
             <option value="">Select a product type…</option>
             <optgroup label="Daily Repayment">
@@ -3956,7 +4079,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         <!-- Rate, Term, Fee -->
         <div class="form-row three">
           <div class="form-group">
-            <label class="form-label" id="pr-rate-label">Interest Rate (%)</label>
+            <label class="form-label" id="pr-rate-label" for="pr-rate">Interest Rate (%)</label>
             <div style="position:relative">
               <input type="number" step="0.01" class="form-input" id="pr-rate"
                      placeholder="e.g. 10" style="padding-right:2.6rem"
@@ -3966,7 +4089,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
             <div class="form-hint" id="pr-rate-hint">Select a product type first</div>
           </div>
           <div class="form-group">
-            <label class="form-label" id="pr-term-label">Term (Days) <span style="color:var(--danger)">*</span></label>
+            <label class="form-label" id="pr-term-label" for="pr-term-days">Term (Days) <span style="color:var(--danger)">*</span></label>
             <input type="number" class="form-input" id="pr-term-days"
                    placeholder="e.g. 30" value="30" oninput="prUpdatePreview()">
             <div class="form-hint" id="pr-term-hint"></div>
@@ -3977,11 +4100,11 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         <!-- Amount range -->
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Min Amount (UGX)</label>
+            <label class="form-label" for="pr-min">Min Amount (UGX)</label>
             <input type="number" class="form-input" id="pr-min" placeholder="50,000" oninput="prUpdatePreview()">
           </div>
           <div class="form-group">
-            <label class="form-label">Max Amount (UGX)</label>
+            <label class="form-label" for="pr-max">Max Amount (UGX)</label>
             <input type="number" class="form-input" id="pr-max" placeholder="5,000,000">
           </div>
         </div>
@@ -3993,7 +4116,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         <input type="hidden" id="pr-maxterm">
 
         <div class="form-group">
-          <label class="form-label">Description</label>
+          <label class="form-label" for="pr-desc">Description</label>
           <textarea class="form-input" id="pr-desc" placeholder="Brief description of this product…" style="min-height:60px"></textarea>
         </div>
       </div>
@@ -4016,15 +4139,15 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     </div>
     <div class="modal-error" id="branch-modal-error"><i data-lucide="x-circle"></i><span id="branch-modal-error-text"></span></div>
     <div class="form-group">
-      <label class="form-label">Branch Name <span style="color:var(--danger)">*</span></label>
+      <label class="form-label" for="branch-name">Branch Name <span style="color:var(--danger)">*</span></label>
       <input type="text" class="form-input" id="branch-name" placeholder="e.g. Kampala Central Branch">
     </div>
     <div class="form-group">
-      <label class="form-label">Location / Address</label>
+      <label class="form-label" for="branch-location">Location / Address</label>
       <input type="text" class="form-input" id="branch-location" placeholder="e.g. Plot 12, Kampala Road">
     </div>
     <div class="form-group">
-      <label class="form-label">Status</label>
+      <label class="form-label" for="branch-status">Status</label>
       <select class="form-input" id="branch-status">
         <option value="true">Active</option>
         <option value="false">Inactive</option>
@@ -4384,7 +4507,15 @@ async function boot() {
           }
         } catch(_) {}
       }
-      showApp();
+      // If a business exists in the DB, always go straight to the app —
+      // never show the setup/business page again regardless of device or localStorage state
+      if (window.currentBusiness?.id) {
+        showApp();
+      } else {
+        // Authenticated but no business found — run setup to create one
+        showBusiness();
+        setTimeout(() => doBusinessSetup(), 400);
+      }
     } else if (!hasRegistered) {
       // No session, no prior registration — fresh install, show registration
       showRegister();
@@ -4603,6 +4734,11 @@ function showRegister() {
 }
 
 function showBusiness() {
+  // Guard: if a business already exists, never show setup page — go straight to app
+  if (window.currentBusiness?.id) {
+    showApp();
+    return;
+  }
   document.getElementById('register-page').classList.remove('active');
   document.getElementById('login-page').classList.remove('active');
   hideWorkspacePage();
@@ -5376,7 +5512,7 @@ function setupAnimations() {
     const duration = 700;
     const start = performance.now();
     const fmt = isUGX
-      ? v => 'UGX ' + Math.round(v).toLocaleString('en-UG', { maximumFractionDigits: 0 })
+      ? v => 'UGX ' + ugxRound(v).toLocaleString('en-UG', { maximumFractionDigits: 0 })
       : v => Math.round(v).toLocaleString();
     function step(now) {
       const t = Math.min((now - start) / duration, 1);
@@ -5467,9 +5603,16 @@ function showModalError(errorElId, textElId, msg) {
 }
 
 // === FORMAT HELPERS ===
+// Uganda's lowest denomination is UGX 100. All monetary values are
+// rounded to the nearest 100 shillings before display or storage.
+function ugxRound(n) {
+  // Always ceil to nearest 100 UGX — rounds in favour of the business.
+  // e.g. UGX 1,833 → UGX 1,900 | UGX 1,800 → UGX 1,800 (exact, unchanged)
+  return Math.ceil(Number(n) / 100) * 100;
+}
 function formatUGX(n) {
   if (n == null || n === '') return '—';
-  return 'UGX ' + Number(n).toLocaleString('en-UG', { maximumFractionDigits: 0 });
+  return 'UGX ' + ugxRound(n).toLocaleString('en-UG', { maximumFractionDigits: 0 });
 }
 function formatDate(d) {
   if (!d) return '—';
@@ -5598,7 +5741,7 @@ async function loadDashboard() {
     const bizId = window.currentBusiness?.id || null;
     if (!bizId) { _renderDashboardData({ loans: [], recent: [], prods: [], prodMap: {} }); return; }
     const [loansRes, recentRes, prodsRes] = await Promise.all([
-      sb.from('loans').select('id, status, principal_amount, outstanding_principal, maturity_date, client_id, product_id').eq('business_id', bizId),
+      sb.from('loans').select('id, status, principal_amount, outstanding_principal, amount_paid, maturity_date, client_id, product_id').eq('business_id', bizId),
       sb.from('loans').select('id, loan_reference, status, principal_amount, outstanding_principal, created_at, maturity_date, client_id, product_id').eq('business_id', bizId).order('created_at', { ascending: false }).limit(10),
       sb.from('loan_products').select('id, product_name').eq('business_id', bizId),
     ]);
@@ -5631,7 +5774,7 @@ async function loadDashboard() {
   } catch(e) {
     log('Dashboard error', e);
     if (!cached) {
-      ['kpi-active','kpi-overdue','kpi-pending'].forEach(id => document.getElementById(id).textContent = '—');
+      ['kpi-active','kpi-overdue','kpi-collected'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '—'; });
       document.getElementById('kpi-portfolio').textContent = '—';
       document.getElementById('recent-loans-tbody').innerHTML = errorStateRow(parseSupabaseError(e), 'loadDashboard');
       if (window.lucide) lucide.createIcons();
@@ -5650,7 +5793,6 @@ async function loadDashboardDueToday() {
   if (!listEl) return;
 
   listEl.innerHTML = '<div class="dash-due-loading">Loading today\'s installments…</div>';
-  if (pillEl) pillEl.textContent = '— installments';
 
   try {
     const bizId = window.currentBusiness?.id || null;
@@ -5659,110 +5801,103 @@ async function loadDashboardDueToday() {
       return;
     }
 
-    const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const todayStr = new Date().toISOString().slice(0, 10);
 
-    // 1. Fetch all active loans for this business (with fields needed to compute schedule)
-    const { data: loanRows, error: loanErr } = await sb
+    // Fetch active/overdue loans — no repayment_schedules table needed,
+    // schedule is generated client-side via generateLoanSchedule()
+    const { data: loans, error: loansErr } = await sb
       .from('loans')
-      .select('id, loan_reference, client_id, principal_amount, total_repayable, total_interest, installment_amount, repayment_frequency, loan_term_months, disbursement_date, created_at, status')
+      .select('id, loan_reference, client_id, principal_amount, total_interest, total_repayable, installment_amount, loan_term_months, repayment_frequency, disbursement_date, created_at, status, maturity_date')
       .eq('business_id', bizId)
-      .in('status', ['active', 'overdue', 'defaulted']);
-    if (loanErr) throw loanErr;
+      .in('status', ['active', 'overdue']);
+    if (loansErr) throw loansErr;
 
-    const loans = loanRows || [];
-    if (!loans.length) {
+    if (!loans || !loans.length) {
       if (pillEl) pillEl.textContent = '0 installments';
       if (paidEl)  paidEl.textContent  = '0';
       if (pendEl)  pendEl.textContent  = '0';
       if (missEl)  missEl.textContent  = '0';
       if (totalAmtEl) totalAmtEl.textContent = formatUGX(0);
-      listEl.innerHTML = '<div class="dash-due-empty">No active loans found.</div>';
+      listEl.innerHTML = '<div class="dash-due-empty">No installments due today. Great job!</div>';
       return;
     }
 
-    // 2. Fetch all repayments for these loans in one batch
+    // Batch-fetch repayments for all these loans
     const loanIds = loans.map(l => l.id);
-    const { data: pmtRows } = await sb
-      .from('repayments')
-      .select('loan_id, payment_date, amount_paid')
-      .in('loan_id', loanIds)
-      .order('payment_date', { ascending: true });
-    // Group payments by loan_id
-    const pmtByLoan = {};
-    (pmtRows || []).forEach(p => {
-      if (!pmtByLoan[p.loan_id]) pmtByLoan[p.loan_id] = [];
-      pmtByLoan[p.loan_id].push(p);
-    });
-
-    // 3. Compute schedule for each loan and find installments due today
-    const todayItems = [];
-    for (const loan of loans) {
-      const repayments = pmtByLoan[loan.id] || [];
-      const schedule = _computeScheduleForDueToday({ ...loan, repayments });
-      if (!schedule) continue;
-      const todayRow = schedule.find(r => r.due_date === todayStr);
-      if (todayRow) {
-        todayItems.push({ loan, row: todayRow });
-      }
+    let repayments = [];
+    if (loanIds.length) {
+      const { data: repData } = await sb
+        .from('repayments')
+        .select('loan_id, amount_paid, payment_date')
+        .eq('business_id', bizId)
+        .in('loan_id', loanIds)
+        .order('payment_date', { ascending: true });
+      repayments = repData || [];
     }
 
-    // 4. Resolve client names
-    const uniqueClientIds = [...new Set(loans.map(l => l.client_id).filter(Boolean))];
+    // Group repayments by loan_id
+    const repByLoan = {};
+    repayments.forEach(r => {
+      if (!repByLoan[r.loan_id]) repByLoan[r.loan_id] = [];
+      repByLoan[r.loan_id].push(r);
+    });
+
+    // Batch-fetch client names
+    const clientIds = [...new Set(loans.map(l => l.client_id).filter(Boolean))];
     let clientMap = {};
-    if (uniqueClientIds.length) {
-      const { data: clients } = await sb.from('clients').select('id, full_name').eq('business_id', bizId).in('id', uniqueClientIds);
+    if (clientIds.length) {
+      const { data: clients } = await sb.from('clients').select('id, full_name').eq('business_id', bizId).in('id', clientIds);
       clientMap = Object.fromEntries((clients || []).map(c => [c.id, c.full_name]));
     }
 
-    // 5. Compute summary counts
-    let paid = 0, pending = 0, missed = 0, totalDue = 0;
-    todayItems.forEach(({ row }) => {
-      const st = row.status;
-      if (st === 'PAID')    paid++;
-      else if (st === 'MISSED' || st === 'PARTIAL') missed++;
-      else pending++;
-      totalDue += Number(row.total_due || 0);
+    // Run generateLoanSchedule per loan, pick installment due today
+    const rows = [];
+    loans.forEach(loan => {
+      const schedule = generateLoanSchedule({ ...loan, repayments: repByLoan[loan.id] || [] });
+      if (!schedule) return;
+      const inst = schedule.find(s => s.due_date === todayStr);
+      if (inst) rows.push({ ...inst, loan_id: loan.id, loan_reference: loan.loan_reference, client_name: clientMap[loan.client_id] || '—' });
     });
 
-    if (pillEl) pillEl.textContent = todayItems.length + ' installment' + (todayItems.length !== 1 ? 's' : '');
+    // Summary counts
+    let paid = 0, pending = 0, missed = 0, totalDue = 0;
+    rows.forEach(r => {
+      if (r.status === 'PAID')   paid++;
+      else if (r.status === 'MISSED') missed++;
+      else pending++;
+      totalDue += Number(r.total_due || 0);
+    });
+
+    if (pillEl) pillEl.textContent = rows.length + ' installment' + (rows.length !== 1 ? 's' : '');
     if (paidEl)  paidEl.textContent  = paid;
     if (pendEl)  pendEl.textContent  = pending;
     if (missEl)  missEl.textContent  = missed;
     if (totalAmtEl) totalAmtEl.textContent = formatUGX(totalDue);
 
-    if (!todayItems.length) {
-      listEl.innerHTML = '<div class="dash-due-empty">✓ No installments due today. All clear!</div>';
+    if (!rows.length) {
+      listEl.innerHTML = '<div class="dash-due-empty">No installments due today. Great job!</div>';
       return;
     }
 
-    // 6. Render rows
-    const statusPillHtml = (st) => {
+    const statusPillHtml = st => {
       if (st === 'PAID')    return '<span class="pill pill-green">Paid</span>';
       if (st === 'MISSED')  return '<span class="pill pill-red">Missed</span>';
       if (st === 'PARTIAL') return '<span class="pill pill-yellow">Partial</span>';
       return '<span class="pill pill-blue">Pending</span>';
     };
-    const getInitials = (name) => (name || '?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    const getInitialsLocal = name => (name || '?').trim().split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase();
 
-    listEl.innerHTML = todayItems.map(({ loan, row }) => {
-      const clientName = clientMap[loan.client_id] || '—';
-      const initials   = getInitials(clientName);
-      const st         = row.status;
-      const avatarBg   = st === 'PAID'    ? 'var(--accent-subtle)'
-                       : st === 'MISSED'  ? 'var(--danger-subtle)'
-                       : st === 'PARTIAL' ? 'var(--warning-subtle)'
-                       :                   'var(--info-subtle)';
-      const avatarColor= st === 'PAID'    ? 'var(--accent)'
-                       : st === 'MISSED'  ? 'var(--danger)'
-                       : st === 'PARTIAL' ? 'var(--warning)'
-                       :                   'var(--info)';
+    listEl.innerHTML = rows.map(r => {
+      const initials    = getInitialsLocal(r.client_name);
+      const avatarBg    = r.status === 'PAID' ? 'var(--accent-subtle)'  : r.status === 'MISSED' ? 'var(--danger-subtle)' : 'var(--info-subtle)';
+      const avatarColor = r.status === 'PAID' ? 'var(--accent)'         : r.status === 'MISSED' ? 'var(--danger)'        : 'var(--info)';
       return `
-        <div class="dash-due-item" onclick="openLoanDrawer('${loan.id}')" style="cursor:pointer" title="View loan">
+        <div class="dash-due-item" onclick="openLoanDrawer('${r.loan_id}')" style="cursor:pointer" title="Open loan">
           <div class="dash-due-avatar" style="background:${avatarBg};color:${avatarColor}">${initials}</div>
-          <div class="dash-due-name" title="${clientName}">${clientName}</div>
-          <div class="dash-due-ref">${loan.loan_reference || '—'}</div>
-          <div class="dash-due-amt">${formatUGX(row.total_due)}</div>
-          ${statusPillHtml(st)}
+          <div class="dash-due-name" title="${r.client_name}">${r.client_name}</div>
+          <div class="dash-due-ref">${r.loan_reference || '—'}</div>
+          <div class="dash-due-amt">${formatUGX(r.total_due)}</div>
+          ${statusPillHtml(r.status)}
         </div>`;
     }).join('');
 
@@ -5770,269 +5905,370 @@ async function loadDashboardDueToday() {
 
   } catch(e) {
     log('Due today error:', e);
-    const msg = e?.message || e?.details || String(e) || 'Unknown error';
-    if (listEl) listEl.innerHTML = `
-      <div style="padding:1rem;text-align:center">
-        <div style="color:var(--danger);font-size:0.82rem;font-weight:600;margin-bottom:4px">Could not load due today data</div>
-        <div style="color:var(--text-muted);font-size:0.72rem;font-family:var(--mono)">${msg}</div>
-      </div>`;
-    if (pillEl) { pillEl.textContent = 'Error'; pillEl.className = 'pill pill-red'; }
+    if (listEl) listEl.innerHTML = '<div class="dash-due-empty" style="color:var(--danger)">Could not load due today data.</div>';
   }
-}
-
-// Lightweight schedule generator for Due Today panel (no UI dependency)
-function _computeScheduleForDueToday(loan) {
-  const principal  = Number(loan.principal_amount || 0);
-  const term       = Number(loan.loan_term_months || 0);
-  const freq       = (loan.repayment_frequency || 'monthly').toLowerCase();
-  const startStr   = loan.disbursement_date || loan.created_at;
-  if (!principal || !term || !startStr) return null;
-
-  const totalRepayable  = Number(loan.total_repayable || principal);
-  const stepMap         = { daily: 1, weekly: 7, biweekly: 14, monthly: 30 };
-  const step            = stepMap[freq] || 30;
-  const numInstallments = freq === 'daily'  ? term * 30
-                        : freq === 'weekly' ? Math.ceil(term * 4.33)
-                        : term;
-  if (numInstallments <= 0 || numInstallments > 3650) return null;
-
-  const storedInst = Number(loan.installment_amount || 0);
-  const stdInst    = storedInst || Math.floor(totalRepayable / numInstallments);
-  const lastInst   = totalRepayable - stdInst * (numInstallments - 1);
-
-  const startDate = new Date(startStr); startDate.setHours(0,0,0,0);
-  const today     = new Date(); today.setHours(0,0,0,0);
-  const todayStr  = today.toISOString().split('T')[0];
-
-  const paymentPool = (loan.repayments || []).map(p => ({
-    date: p.payment_date ? p.payment_date.slice(0,10) : null,
-    remaining: Number(p.amount_paid || 0),
-  })).filter(p => p.date && p.remaining > 0);
-
-  // Only generate up to today + 1 installment (we only care about today's row)
-  for (let i = 1; i <= numInstallments; i++) {
-    const dueDate = new Date(startDate);
-    dueDate.setDate(startDate.getDate() + step * i);
-    const dueDateStr = dueDate.toISOString().split('T')[0];
-    const thisTotal  = i === numInstallments ? lastInst : stdInst;
-
-    let allocated = 0;
-    for (const pmt of paymentPool) {
-      if (pmt.remaining <= 0 || pmt.date > dueDateStr) continue;
-      const take = Math.min(pmt.remaining, thisTotal - allocated);
-      allocated += take; pmt.remaining -= take;
-      if (allocated >= thisTotal) break;
-    }
-
-    const paid_amount = Math.round(Math.min(allocated, thisTotal));
-    const isPastDue   = dueDate < today;
-    let status;
-    if (paid_amount >= thisTotal - 0.5)  status = 'PAID';
-    else if (paid_amount > 0)            status = 'PARTIAL';
-    else if (isPastDue)                  status = 'MISSED';
-    else                                 status = 'PENDING';
-
-    // Only return this row if it matches today — early-exit optimization
-    if (dueDateStr === todayStr) {
-      return [{ installment_no: i, due_date: dueDateStr, total_due: thisTotal, paid_amount, status }];
-    }
-    // Past today — no point continuing
-    if (dueDate > today) return null;
-  }
-  return null;
 }
 
 function _renderDashboardData({ loans, recent, prodMap }) {
   const today = new Date();
   const active   = loans.filter(l => l.status === 'active').length;
   const overdue  = loans.filter(l => l.status === 'active' && l.maturity_date && new Date(l.maturity_date) < today).length;
-  const pending  = loans.filter(l => l.status === 'pending').length;
+  const collected = loans.reduce((sum, l) => sum + Number(l.amount_paid || 0), 0);
   const closed   = loans.filter(l => l.status === 'completed').length;
   const portfolio = loans.filter(l => ['active','defaulted'].includes(l.status))
     .reduce((sum, l) => sum + Number(l.outstanding_principal || 0), 0);
 
-  document.getElementById('kpi-active-sub').textContent = `${closed} completed this month`;
-  document.getElementById('kpi-overdue-sub').textContent = 'Require immediate attention';
+  document.getElementById('kpi-active-sub').innerHTML = `<i data-lucide="check-circle" style="width:12px;height:12px;color:var(--accent)"></i> ${closed} fully repaid`;
+  document.getElementById('kpi-overdue-sub').innerHTML = `<i data-lucide="clock" style="width:12px;height:12px;color:var(--danger)"></i> Require immediate attention`;
 
   // Animate KPI numbers rolling up — falls back to plain textContent if not ready
   const _kpiAnim = window._animateKpi;
   if (_kpiAnim) {
     _kpiAnim(document.getElementById('kpi-active'),    String(active));
     _kpiAnim(document.getElementById('kpi-overdue'),   String(overdue));
-    _kpiAnim(document.getElementById('kpi-pending'),   String(pending));
+    _kpiAnim(document.getElementById('kpi-collected'), formatUGX(collected));
     _kpiAnim(document.getElementById('kpi-portfolio'), formatUGX(portfolio));
   } else {
     document.getElementById('kpi-active').textContent    = active;
     document.getElementById('kpi-overdue').textContent   = overdue;
-    document.getElementById('kpi-pending').textContent   = pending;
+    document.getElementById('kpi-collected').textContent = formatUGX(collected);
     document.getElementById('kpi-portfolio').textContent = formatUGX(portfolio);
   }
+
+  // Sub-label: show how many loans are fully repaid
+  const collectedSubEl = document.getElementById('kpi-collected-sub');
+  if (collectedSubEl) {
+    const loanCount = loans.filter(l => Number(l.amount_paid || 0) > 0).length;
+    collectedSubEl.innerHTML = `<i data-lucide="bar-chart-2" style="width:12px;height:12px;color:var(--purple)"></i> Across ${loanCount} loan${loanCount !== 1 ? 's' : ''}`;
+  }
+  if (window.lucide) lucide.createIcons();
 
   const badge = document.getElementById('nav-overdue-badge');
   if (badge) { badge.textContent = overdue; badge.style.display = overdue > 0 ? '' : 'none'; }
 
-  renderStatusChart(loans);
-  if (prodMap) {
-    renderProductChart(loans.map(l => ({ ...l, product_name: prodMap[l.product_id] || 'Other' })));
-  }
+  renderCollectionRateChart();
+  loadDashboardPAR();
   renderRecentLoans(recent || []);
 }
 
-function renderStatusChart(loans) {
-  // Normalize: DB stores lowercase ('active','pending'), colour map needs uppercase
-  const statusColors = {
-    pending:    '#d29922', approved:  '#58a6ff', active:    '#3fb950',
-    overdue:    '#f85149', closed:    '#7d8590', completed: '#56d364',
-    defaulted:  '#f85149', written_off:'#484f58', disbursed:'#bc8cff',
-    restructured:'#e3b341'
-  };
-  const labelDisplay = {
-    pending:'Pending', approved:'Approved', active:'Active',
-    overdue:'Overdue', closed:'Closed', completed:'Completed',
-    defaulted:'Defaulted', written_off:'Written Off', disbursed:'Disbursed',
-    restructured:'Restructured'
-  };
-  const counts = {};
-  loans.forEach(l => {
-    const s = (l.status || 'unknown').toLowerCase();
-    counts[s] = (counts[s] || 0) + 1;
-  });
-  // Sort by count descending for a cleaner chart
-  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]);
-  const labels  = sorted.map(([s]) => labelDisplay[s] || s.charAt(0).toUpperCase()+s.slice(1));
-  const values  = sorted.map(([,v]) => v);
-  const colors  = sorted.map(([s]) => statusColors[s] || '#7d8590');
-  // Gradient fill — slightly lighter top border gives depth
-  const borderColors = colors.map(c => c);
-
-  const ctx = document.getElementById('chart-status');
+async function renderCollectionRateChart() {
+  const ctx = document.getElementById('chart-collection-rate');
   if (!ctx) return;
-  if (charts.status) { charts.status.destroy(); delete charts.status; }
-  charts.status = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        backgroundColor: colors.map(c => c + 'cc'),  // slight transparency
-        borderColor: colors,
-        borderWidth: 2,
-        borderRadius: 8,
-        borderSkipped: false,
-        hoverBackgroundColor: colors,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => ' ' + ctx.parsed.y + ' loan' + (ctx.parsed.y !== 1 ? 's' : '')
+
+  const bizId = window.currentBusiness?.id || null;
+  if (!bizId) return;
+
+  try {
+    // Fetch active + overdue loans with schedule fields
+    const { data: loans, error: loansErr } = await sb
+      .from('loans')
+      .select('id, loan_reference, principal_amount, total_interest, total_repayable, installment_amount, loan_term_months, repayment_frequency, disbursement_date, created_at, status, maturity_date')
+      .eq('business_id', bizId)
+      .in('status', ['active', 'overdue', 'completed', 'closed']);
+    if (loansErr) throw loansErr;
+    if (!loans || !loans.length) return;
+
+    const loanIds = loans.map(l => l.id);
+    const { data: repData } = await sb
+      .from('repayments')
+      .select('loan_id, amount_paid, payment_date')
+      .eq('business_id', bizId)
+      .in('loan_id', loanIds)
+      .order('payment_date', { ascending: true });
+    const repayments = repData || [];
+
+    const repByLoan = {};
+    repayments.forEach(r => {
+      if (!repByLoan[r.loan_id]) repByLoan[r.loan_id] = [];
+      repByLoan[r.loan_id].push(r);
+    });
+
+    // Build 6-month buckets (last 6 months including current)
+    const now = new Date();
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleString('en', { month: 'short' }) });
+    }
+
+    // For each month, compute due & collected across all loans
+    const monthStats = months.map(({ year, month, label }) => {
+      const firstDay = new Date(year, month, 1);
+      const lastDay  = new Date(year, month + 1, 0);
+      const fStr = firstDay.toISOString().slice(0, 10);
+      const lStr = lastDay.toISOString().slice(0, 10);
+
+      let due = 0, collected = 0;
+      loans.forEach(loan => {
+        const schedule = generateLoanSchedule({ ...loan, repayments: repByLoan[loan.id] || [] });
+        if (!schedule) return;
+        schedule.forEach(inst => {
+          if (inst.due_date >= fStr && inst.due_date <= lStr) {
+            due       += Number(inst.total_due || 0);
+            collected += Number(inst.paid_amount || 0);
+          }
+        });
+      });
+
+      const rate = due > 0 ? Math.round((collected / due) * 100) : null;
+      return { label, due, collected, rate };
+    });
+
+    // 30-day window for the KPI numbers (current month)
+    const cur = monthStats[monthStats.length - 1];
+    const rateEl = document.getElementById('cr-rate');
+    const collEl = document.getElementById('cr-collected');
+    const dueEl  = document.getElementById('cr-due');
+    const warnEl = document.getElementById('cr-warning');
+
+    if (rateEl) {
+      const r = cur.rate;
+      const color = r === null ? 'var(--text-muted)' : r >= 90 ? '#3fb950' : r >= 75 ? '#d29922' : '#f85149';
+      rateEl.style.color = color;
+      rateEl.textContent = r !== null ? r + '%' : '—';
+    }
+    if (collEl) collEl.textContent = formatUGX(cur.collected);
+    if (dueEl)  dueEl.textContent  = formatUGX(cur.due);
+
+    if (warnEl) {
+      const r = cur.rate;
+      const legendEl = warnEl.previousElementSibling;
+      if (r !== null && r < 85) {
+        warnEl.style.display = '';
+        if (legendEl) legendEl.style.paddingBottom = '0.65rem';
+        if (r < 75) {
+          warnEl.style.background  = 'rgba(248,81,73,0.15)';
+          warnEl.style.color       = 'var(--danger)';
+          warnEl.style.borderTop   = '1px solid var(--danger-border)';
+          warnEl.textContent       = '⚠ Below 75% — systemic collection problem. Immediate action required.';
+        } else {
+          warnEl.style.background  = 'rgba(210,153,34,0.15)';
+          warnEl.style.color       = 'var(--warning)';
+          warnEl.style.borderTop   = '1px solid var(--warning-border)';
+          warnEl.textContent       = '⚡ Below 85% — watch closely. Collection efficiency is declining.';
+        }
+      } else {
+        warnEl.style.display = 'none';
+        if (legendEl) legendEl.style.paddingBottom = '1.25rem';
+      }
+    }
+
+    const hasData = monthStats.map(m => m.due > 0);
+    const realRates = monthStats.filter((m, i) => hasData[i]).map(m => m.rate);
+    const yMin = realRates.length ? Math.max(0, Math.floor(Math.min(...realRates) / 10) * 10 - 10) : 0;
+
+    // Real bars — coloured by threshold, null for months without data
+    const realColors = monthStats.map((m, i) =>
+      !hasData[i] ? 'transparent' : m.rate >= 90 ? '#3fb950' : m.rate >= 75 ? '#d29922' : '#f85149'
+    );
+    const realData = monthStats.map((m, i) => hasData[i] ? m.rate : null);
+
+    // Ghost bars for months with no data — fill nearly full height so no dead space at bottom
+    const ghostHeight = 97;
+    const ghostData  = monthStats.map((m, i) => hasData[i] ? null : ghostHeight);
+    const ghostColors = monthStats.map(() => 'rgba(255,255,255,0.045)');
+
+    if (charts.collectionRate) { charts.collectionRate.destroy(); delete charts.collectionRate; }
+    charts.collectionRate = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: monthStats.map(m => m.label),
+        datasets: [
+          // Ghost dataset (rendered first, behind real bars)
+          {
+            data: ghostData,
+            backgroundColor: ghostColors,
+            borderRadius: 6,
+            borderSkipped: false,
+            order: 2,
+          },
+          // Real data bars
+          {
+            data: realData,
+            backgroundColor: realColors,
+            borderRadius: 6,
+            borderSkipped: false,
+            order: 1,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            filter: item => item.datasetIndex === 1, // only show tooltip for real bars
+            callbacks: {
+              title: ([item]) => item ? item.label + (monthStats[item.dataIndex].due > 0 ? '' : ' (no data)') : '',
+              label: item => {
+                if (!item) return '';
+                const m = monthStats[item.dataIndex];
+                return m.due > 0
+                  ? ` ${item.raw}%  ·  ${formatUGX(m.collected)} of ${formatUGX(m.due)} due`
+                  : ' No installments in this period';
+              }
+            }
+          },
+          // Draw threshold reference lines via annotation-style plugin shim
+          afterDraw: undefined,
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#7d8590', font: { size: 11 } }, stacked: false },
+          y: {
+            min: yMin, max: 100,
+            grid: { color: 'rgba(255,255,255,0.06)' },
+            ticks: { color: '#7d8590', font: { size: 11 }, callback: v => v + '%' }
           }
         }
       },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: '#7d8590', font: { size: 11 } } },
-        y: {
-          grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
-          ticks: { color: '#7d8590', font: { size: 11 }, stepSize: 1, precision: 0 },
-          border: { display: false }
+      plugins: [{
+        // Draw subtle 85% and 90% threshold lines
+        id: 'thresholdLines',
+        afterDraw(chart) {
+          const { ctx: c, chartArea: { left, right }, scales: { y } } = chart;
+          [[90, 'rgba(63,185,80,0.25)'], [75, 'rgba(248,81,73,0.25)']].forEach(([val, color]) => {
+            if (val < yMin || val > 100) return;
+            const yPos = y.getPixelForValue(val);
+            c.save();
+            c.beginPath();
+            c.setLineDash([4, 4]);
+            c.strokeStyle = color;
+            c.lineWidth = 1;
+            c.moveTo(left, yPos);
+            c.lineTo(right, yPos);
+            c.stroke();
+            c.restore();
+          });
         }
-      }
+      }]
+    });
+  } catch(e) {
+    log('Collection rate chart error:', e);
+  }
+}
+
+async function loadDashboardPAR() {
+  const bucketsEl  = document.getElementById('par-dash-buckets');
+  const totalEl    = document.getElementById('par-dash-total');
+  const pctEl      = document.getElementById('par-dash-pct');
+  const healthEl   = document.getElementById('par-dash-health-pill');
+  const countEl    = document.getElementById('par-dash-loans-count');
+  if (!bucketsEl) return;
+
+  const bizId = window.currentBusiness?.id || null;
+  if (!bizId) { bucketsEl.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;padding:0.5rem 0">No data available.</div>'; return; }
+
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+
+    // Fetch all active/overdue/defaulted loans to compute total portfolio too
+    const [overdueRes, allRes] = await Promise.all([
+      sb.from('loans')
+        .select('id, outstanding_principal, maturity_date, status')
+        .eq('business_id', bizId)
+        .in('status', ['active', 'defaulted'])
+        .lt('maturity_date', today),
+      sb.from('loans')
+        .select('outstanding_principal')
+        .eq('business_id', bizId)
+        .in('status', ['active', 'defaulted']),
+    ]);
+
+    const overdue = overdueRes.data || [];
+    const allLoans = allRes.data || [];
+    const totalPortfolio = allLoans.reduce((s, l) => s + Number(l.outstanding_principal || 0), 0);
+
+    const now = new Date();
+    const buckets = [
+      { label: '1 – 30 days',  min: 1,   max: 30,  color: '#f6a623', glow: 'rgba(246,166,35,0.25)'  },
+      { label: '31 – 60 days', min: 31,  max: 60,  color: '#f07f3a', glow: 'rgba(240,127,58,0.25)'  },
+      { label: '61 – 90 days', min: 61,  max: 90,  color: '#e05252', glow: 'rgba(224,82,82,0.25)'   },
+      { label: '90+ days',     min: 91,  max: Infinity, color: '#f85149', glow: 'rgba(248,81,73,0.25)' },
+    ];
+
+    // Tally each overdue loan into buckets
+    buckets.forEach(b => { b.amount = 0; b.count = 0; });
+    overdue.forEach(l => {
+      const days = l.maturity_date ? Math.max(1, Math.floor((now - new Date(l.maturity_date)) / 86400000)) : 0;
+      const b = buckets.find(b => days >= b.min && days <= b.max);
+      if (b) { b.amount += Number(l.outstanding_principal || 0); b.count++; }
+    });
+
+    const totalPAR = buckets.reduce((s, b) => s + b.amount, 0);
+    const parPct   = totalPortfolio > 0 ? (totalPAR / totalPortfolio) * 100 : 0;
+    const maxAmt   = Math.max(...buckets.map(b => b.amount), 1);
+
+    // Render bucket rows
+    bucketsEl.innerHTML = buckets.map(b => {
+      const barPct = Math.round((b.amount / maxAmt) * 100);
+      const isEmpty = b.amount === 0;
+      return `
+        <div style="display:grid;grid-template-columns:120px 1fr auto;align-items:center;gap:0.85rem">
+          <div style="font-size:0.75rem;font-weight:600;color:${isEmpty ? 'var(--text-subtle)' : 'var(--text-muted)'};white-space:nowrap">${b.label}</div>
+          <div style="position:relative;height:10px;background:var(--surface-3);border-radius:100px;overflow:visible">
+            <div style="
+              position:absolute;inset:0;
+              width:${barPct}%;
+              background:${isEmpty ? 'var(--surface-3)' : `linear-gradient(90deg, ${b.color}, ${b.color}cc)`};
+              border-radius:100px;
+              transition:width 0.6s cubic-bezier(0.16,1,0.3,1);
+              ${!isEmpty ? `box-shadow:0 0 8px ${b.glow}` : ''}
+            "></div>
+          </div>
+          <div style="font-size:0.8rem;font-weight:700;font-family:var(--mono);color:${isEmpty ? 'var(--text-subtle)' : b.color};min-width:90px;text-align:right">
+            ${isEmpty ? '—' : formatUGX(b.amount)}
+            ${!isEmpty ? `<span style="font-size:0.65rem;font-weight:500;color:var(--text-muted);margin-left:3px">(${b.count})</span>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    // Totals
+    if (totalEl) totalEl.textContent = formatUGX(totalPAR);
+    if (pctEl) {
+      const pctStr = parPct.toFixed(1) + '%';
+      const healthy = parPct < 10;
+      pctEl.textContent = pctStr;
+      pctEl.style.color = healthy ? 'var(--accent)' : parPct < 20 ? 'var(--warning)' : 'var(--danger)';
     }
-  });
+    if (countEl) countEl.textContent = overdue.length > 0 ? `${overdue.length} overdue loan${overdue.length !== 1 ? 's' : ''}` : 'No overdue loans';
+
+    // Health pill
+    if (healthEl) {
+      healthEl.style.display = '';
+      const healthy = parPct < 10;
+      healthEl.textContent = healthy ? '✓ Healthy' : parPct < 20 ? '⚠ Elevated' : '✕ Critical';
+      healthEl.style.background = healthy ? 'var(--accent-subtle)' : parPct < 20 ? 'var(--warning-subtle)' : 'var(--danger-subtle)';
+      healthEl.style.color = healthy ? 'var(--accent)' : parPct < 20 ? 'var(--warning)' : 'var(--danger)';
+      healthEl.style.border = `1px solid ${healthy ? 'var(--accent-border)' : parPct < 20 ? 'var(--warning-border)' : 'var(--danger-border)'}`;
+    }
+
+  } catch(e) {
+    log('PAR dash error:', e);
+    if (bucketsEl) bucketsEl.innerHTML = '<div style="color:var(--danger);font-size:0.8rem;padding:0.5rem 0">Could not load PAR data.</div>';
+  }
 }
 
 function renderProductChart(loans) {
-  const byProduct = {};
-  loans.forEach(l => {
-    const name = l.product_name || 'Unknown';
-    if (!byProduct[name]) byProduct[name] = { count: 0, total: 0 };
-    byProduct[name].count++;
-    byProduct[name].total += Number(l.principal_amount || 0);
-  });
-  // Sort by count desc
-  const sorted = Object.entries(byProduct).sort((a, b) => b[1].count - a[1].count);
-  const labels = sorted.map(e => e[0]);
-  const values = sorted.map(e => e[1].count);
-  const amounts = sorted.map(e => e[1].total);
+  const counts = {};
+  loans.forEach(l => { const name = l.product_name || 'Unknown'; counts[name] = (counts[name] || 0) + 1; });
+  const labels = Object.keys(counts);
+  const values = labels.map(l => counts[l]);
   const palette = ['#3fb950','#58a6ff','#bc8cff','#d29922','#f85149','#e3b341','#2f81f7','#56d364'];
-  const total = values.reduce((s, v) => s + v, 0);
 
-  // Update pill
-  const pill = document.getElementById('prod-portfolio-total-pill');
-  if (pill) pill.textContent = total + ' loan' + (total !== 1 ? 's' : '');
-
-  // Doughnut chart — no built-in legend (we render our own)
   const ctx = document.getElementById('chart-products');
   if (!ctx) return;
   if (charts.products) { charts.products.destroy(); delete charts.products; }
-  // Center label plugin (scoped to this chart)
-  const centerLabelPlugin = {
-    id: 'centerLabel',
-    afterDraw(chart) {
-      const { ctx, chartArea: { top, bottom, left, right } } = chart;
-      const cx = (left + right) / 2, cy = (top + bottom) / 2;
-      ctx.save();
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#e6edf3';
-      ctx.font = 'bold 22px Inter, sans-serif';
-      ctx.fillText(total, cx, cy - 8);
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#7d8590';
-      ctx.font = '11px Inter, sans-serif';
-      ctx.fillText('loans', cx, cy + 10);
-      ctx.restore();
-    }
-  };
   charts.products = new Chart(ctx, {
     type: 'doughnut',
-    data: { labels, datasets: [{ data: values, backgroundColor: palette.slice(0, labels.length), borderWidth: 3, borderColor: 'var(--surface, #161b22)', hoverBorderColor: 'var(--surface, #161b22)' }] },
+    data: { labels, datasets: [{ data: values, backgroundColor: palette.slice(0, labels.length), borderWidth: 0 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const pct = total ? Math.round(ctx.parsed / total * 100) : 0;
-              return ' ' + ctx.parsed + ' loans (' + pct + '%)';
-            }
-          }
-        }
-      },
-      cutout: '68%'
-    },
-    plugins: [centerLabelPlugin]
+      plugins: { legend: { position: 'bottom', labels: { color: '#7d8590', font: { size: 11 }, padding: 16, boxWidth: 12, boxHeight: 12 } } },
+      cutout: '62%'
+    }
   });
-
-  // Render sidebar stats table
-  const statsEl = document.getElementById('prod-portfolio-stats');
-  if (!statsEl) return;
-  if (!labels.length) {
-    statsEl.innerHTML = '<div class="prod-portfolio-stats-loading">No loan data yet</div>';
-    return;
-  }
-  const maxCount = Math.max(...values);
-  statsEl.innerHTML = sorted.map(([ name, d ], i) => {
-    const color = palette[i] || '#7d8590';
-    const pct = total ? Math.round(d.count / total * 100) : 0;
-    const barPct = maxCount ? Math.round(d.count / maxCount * 100) : 0;
-    return '<div class="prod-stat-row">' +
-      '<div class="prod-stat-dot" style="background:' + color + '"></div>' +
-      '<div class="prod-stat-name" title="' + name + '">' + name + '</div>' +
-      '<div class="prod-stat-bar-wrap"><div class="prod-stat-bar" style="width:' + barPct + '%;background:' + color + '"></div></div>' +
-      '<div class="prod-stat-count">' + d.count + ' <span style="color:var(--text-muted);font-weight:400">(' + pct + '%)</span></div>' +
-      '<div class="prod-stat-amt">' + formatUGX(d.total) + '</div>' +
-    '</div>';
-  }).join('') +
-  '<div class="prod-portfolio-footer" style="padding:0.65rem 0.9rem;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border)">' +
-    '<span style="font-size:0.75rem;color:var(--text-muted);font-weight:600">TOTAL</span>' +
-    '<div style="display:flex;gap:1rem;align-items:center">' +
-      '<span style="font-size:0.78rem;color:var(--text-muted)">' + total + ' loans</span>' +
-      '<span style="font-size:0.82rem;font-weight:700;color:var(--text)">' + formatUGX(amounts.reduce((s,v)=>s+v,0)) + '</span>' +
-    '</div>' +
-  '</div>';
 }
 
 function renderRecentLoans(loans) {
@@ -6507,18 +6743,18 @@ function loanUpdatePreview() {
   const term         = parseInt(document.getElementById('loan-term').value) || Math.round((product.max_term_days || 30) / 30);
   const termDays     = term * 30;
 
-  const totalInterest = Math.round(interestType === 'flat'
+  const totalInterest = ugxRound(interestType === 'flat'
     ? amount * (rate / 100) * term
     : amount * (rate / 100) * term * 0.5);
   const totalRepayable  = amount + totalInterest;
   const numInstalments  = repayFreq === 'daily' ? termDays : repayFreq === 'weekly' ? Math.ceil(term * 4.33) : term;
-  const installmentAmt  = Math.round(totalRepayable / numInstalments);
+  const installmentAmt  = Math.floor(totalRepayable / numInstalments / 100) * 100;
   const freqLabel       = repayFreq === 'daily' ? 'Daily payment' : repayFreq === 'weekly' ? 'Weekly payment' : 'Monthly payment';
 
   const pv = (label, value, accent) =>
     `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border);font-size:0.78rem">
       <span style="color:var(--text-muted)">${label}</span>
-      <span style="font-weight:600;color:${accent||'var(--text)'}">UGX ${Math.round(value).toLocaleString()}</span></div>`;
+      <span style="font-weight:600;color:${accent||'var(--text)'}">UGX ${ugxRound(value).toLocaleString()}</span></div>`;
 
   rows.innerHTML =
     pv('Principal',       amount)                              +
@@ -6664,7 +6900,7 @@ async function submitNewLoan() {
     const repayFreq    = product?.repayment_frequency?.toLowerCase() || 'monthly';
     const termDays     = term * 30; // approximate days from months
     // Round total interest to nearest whole UGX to avoid sub-shilling rounding artefacts
-    const totalInterest = Math.round(interestType === 'flat'
+    const totalInterest = ugxRound(interestType === 'flat'
       ? amount * (rate / 100) * term
       : amount * (rate / 100) * term * 0.5);
     const totalRepayable = amount + totalInterest;
@@ -6673,7 +6909,8 @@ async function submitNewLoan() {
                          : repayFreq === 'weekly'  ? Math.ceil(term * 4.33)
                          : repayFreq === 'monthly' ? term
                          : term; // fallback to months
-    const installmentAmount = Math.round(totalRepayable / numInstalments);
+    // Round to nearest 100 UGX (Uganda lowest denomination), floor so last instalment absorbs remainder
+    const installmentAmount = Math.floor(totalRepayable / numInstalments / 100) * 100;
 
     const maturityDate = startDate
       ? new Date(new Date(startDate).setMonth(new Date(startDate).getMonth() + term)).toISOString().split('T')[0]
@@ -6860,7 +7097,7 @@ async function openLoanDrawer(loanId) {
     const displayStatus = isOverdue ? 'OVERDUE' : loan.status.toUpperCase();
     const totalRepayable = Number(loan.total_repayable || loan.principal_amount || 0);
     const amountPaid = Number(loan.amount_paid || 0);
-    const outstanding = Number(loan.outstanding_principal || 0);
+    const outstanding = Number(loan.outstanding_principal || 0) + Number(loan.outstanding_interest || 0);
     const pct = totalRepayable > 0 ? Math.min(100, Math.round((amountPaid / totalRepayable) * 100)) : 0;
     const statusColor = isOverdue ? 'var(--danger)' : loan.status === 'active' ? 'var(--accent)' : loan.status === 'completed' || loan.status === 'closed' ? 'var(--text-muted)' : 'var(--warning)';
     const statusBg    = isOverdue ? 'var(--danger-subtle)' : loan.status === 'active' ? 'var(--accent-subtle)' : 'var(--surface-3)';
@@ -7212,9 +7449,10 @@ function generateLoanSchedule(loan) {
                         : term;
   if (numInstallments <= 0 || numInstallments > 3650) return null;
 
-  const storedInstallment = Number(loan.installment_amount || 0);
-  const stdInstallment    = storedInstallment || Math.floor(totalRepayable / numInstallments);
-  const lastInstallment   = totalRepayable - stdInstallment * (numInstallments - 1);
+  // Always use Math.floor so the last instalment absorbs any remainder,
+  // ensuring all instalments sum exactly to totalRepayable.
+  const stdInstallment  = Math.floor(totalRepayable / numInstallments / 100) * 100;
+  const lastInstallment = totalRepayable - stdInstallment * (numInstallments - 1);
 
   const startDate = new Date(startStr);
   startDate.setHours(0, 0, 0, 0);
@@ -7245,7 +7483,7 @@ function generateLoanSchedule(loan) {
       if (allocated >= thisTotal) break;
     }
 
-    const paid_amount = Math.round(Math.min(allocated, thisTotal));
+    const paid_amount = ugxRound(Math.min(allocated, thisTotal));
     const isPastDue   = dueDate < today && loan.status !== 'pending' && loan.status !== 'completed';
 
     let status;
@@ -7985,6 +8223,7 @@ async function sigCapSubmit(key) { await sigCapHandleSubmit(key, 'Borrower', 'Le
 function printLoanAgreement() {
   const content = document.getElementById('loan-agreement-doc');
   if (!content) { showToast('Open the Agreement tab first', 'warning'); return; }
+  if (window.location.protocol === 'file:') { showToast('Print is unavailable when opened from a local file. Serve via a web server (e.g. VS Code Live Server) to enable printing.', 'warning', 6000); return; }
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html>
 <html>
@@ -8036,7 +8275,7 @@ async function prefillLoanForPayment(loanId, loanRef) {
       // Pre-fill amount with installment due (not full outstanding)
       const amountEl = document.getElementById('pay-amount');
       if (amountEl && loan.installment_amount > 0) {
-        amountEl.value = Math.round(loan.installment_amount);
+        amountEl.value = ugxRound(loan.installment_amount);
         amountEl.style.borderColor = 'var(--accent)';
         setTimeout(() => { amountEl.style.borderColor = ''; }, 1500);
       }
@@ -8752,7 +8991,7 @@ function selectLoanById(id) {
 function prefillOutstanding(amount) {
   const amountEl = document.getElementById('pay-amount');
   if (amountEl && amount > 0) {
-    amountEl.value = Math.round(amount);
+    amountEl.value = ugxRound(amount);
     amountEl.style.borderColor = 'var(--accent)';
     setTimeout(() => { amountEl.style.borderColor = ''; }, 1500);
   }
@@ -8828,14 +9067,16 @@ async function submitNewPayment() {
       .eq('id', loanId).single();
     if (loanCheckErr) throw loanCheckErr;
     if (loanCheck) {
-      const totalOutstanding = Number(loanCheck.outstanding_principal || 0) + Number(loanCheck.outstanding_interest || 0);
+      const rawOutstanding = Number(loanCheck.outstanding_principal || 0) + Number(loanCheck.outstanding_interest || 0);
+      const totalOutstanding = Math.ceil(rawOutstanding); // ceil so we never block a legitimate full payoff
       if (loanCheck.status === 'completed' || loanCheck.status === 'closed') {
         showModalError('payment-modal-error', 'payment-modal-error-text', 'This loan is already fully paid.');
         btn.disabled = false; btn.innerHTML = '<i data-lucide="credit-card"></i> Record Payment';
         if (window.lucide) lucide.createIcons();
         return;
       }
-      if (totalOutstanding > 0 && amount > totalOutstanding + 1) { // +1 for float dust tolerance
+      // Only block genuine overpayments (more than 500 UGX over outstanding) — never block exact payoffs
+      if (totalOutstanding > 0 && amount > totalOutstanding + 500) {
         showModalError('payment-modal-error', 'payment-modal-error-text',
           `Payment amount (${formatUGX(amount)}) exceeds outstanding balance (${formatUGX(totalOutstanding)}). Please enter the correct amount.`);
         btn.disabled = false; btn.innerHTML = '<i data-lucide="credit-card"></i> Record Payment';
@@ -8872,12 +9113,14 @@ async function submitNewPayment() {
       .eq('id', loanId).single();
     if (loanFetchErr) throw loanFetchErr;
     if (loan) {
-      const curPrincipal = Number(loan.outstanding_principal || 0);
-      const curInterest  = Number(loan.outstanding_interest  || 0);
-      // Deduct from principal first, carry leftover into interest
-      const newPrincipal = Math.max(0, curPrincipal - amount);
-      const leftover     = Math.max(0, amount - curPrincipal);
-      const newInterest  = Math.max(0, curInterest  - leftover);
+      const curPrincipal  = Number(loan.outstanding_principal || 0);
+      const curInterest   = Number(loan.outstanding_interest  || 0);
+      const curTotal      = curPrincipal + curInterest;
+      // Deduct from interest first, then principal (standard amortisation order)
+      let remaining       = amount;
+      const newInterest   = Math.max(0, curInterest - remaining);
+      remaining           = Math.max(0, remaining - curInterest);
+      const newPrincipal  = Math.max(0, curPrincipal - remaining);
       const newAmountPaid = (Number(loan.amount_paid) || 0) + amount;
       const updates = {
         outstanding_principal: newPrincipal,
@@ -8885,8 +9128,8 @@ async function submitNewPayment() {
         amount_paid:           newAmountPaid,
         updated_at:            new Date().toISOString(),
       };
-      // < 1 handles float dust (e.g. 0.000001) so loan marks closed reliably
-      if (newPrincipal < 1 && newInterest < 1) updates.status = 'completed'; // FIX: was 'closed' — dashboard KPI counts 'completed'; using 'closed' caused fully-paid loans to never appear in completed count
+      // Mark completed when both balances are negligible (< 1 UGX handles float dust)
+      if (newPrincipal < 1 && newInterest < 1) updates.status = 'completed';
       const { error: updateErr } = await tbl('loans').update(updates).eq('id', loanId);
       if (updateErr) throw updateErr;
     }
@@ -9518,7 +9761,7 @@ function prOnTypeChange() {
   if (window.lucide) lucide.createIcons();
 }
 
-function prFmtUGX(n) { return 'UGX ' + Math.round(n).toLocaleString(); }
+function prFmtUGX(n) { return 'UGX ' + ugxRound(n).toLocaleString(); }
 
 function prHideHighlights() { /* preview panel removed */ }
 
@@ -10149,6 +10392,7 @@ function downloadFile(content, filename, mimeType) {
 }
 
 function printLoansTable(data) {
+  if (window.location.protocol === 'file:') { showToast('Print is unavailable when opened from a local file. Serve via a web server to enable printing.', 'warning', 6000); return; }
   const rows = data.map(l => `<tr>
     <td>${l.loan_reference||''}</td><td>${l.borrower_name||''}</td>
     <td>${l.product_name||''}</td>
@@ -10182,7 +10426,7 @@ function printLoansTable(data) {
   <table><thead><tr><th>Reference</th><th>Borrower</th><th>Product</th><th>Principal</th><th>Outstanding</th><th>Status</th><th>Due Date</th></tr></thead>
   <tbody>${rows}</tbody></table>
   <div class="ftr">LendWise Loan Management System — Confidential</div>
-  \u003Cscript>window.onload=()=>window.print()\u003C/script>
+  <script>window.onload=()=>window.print()<\/script>
 </body></html>`);
   win.document.close();
 }
@@ -10724,29 +10968,29 @@ function initRegisterPage() {
         <div class="modal-error" id="profile-details-error" style="margin-bottom:0.75rem"><i data-lucide="x-circle"></i><span id="profile-details-error-text"></span></div>
         <div class="modal-success" id="profile-details-success" style="margin-bottom:0.75rem"><i data-lucide="check-circle"></i><span>Profile updated successfully!</span></div>
         <div class="form-group">
-          <label class="form-label">Full Name</label>
+          <label class="form-label" for="profile-fullname">Full Name</label>
           <input type="text" class="form-input" id="profile-fullname" placeholder="Your full name">
         </div>
         <div class="form-group">
-          <label class="form-label">Email Address</label>
+          <label class="form-label" for="profile-email">Email Address</label>
           <input type="email" class="form-input" id="profile-email" disabled style="opacity:0.5;cursor:not-allowed">
           <div class="form-hint">Email cannot be changed here. Contact your admin.</div>
         </div>
         <div class="form-group">
-          <label class="form-label">Phone Number</label>
+          <label class="form-label" for="profile-phone">Phone Number</label>
           <input type="tel" class="form-input" id="profile-phone" placeholder="+256 700 000000">
         </div>
         <div class="form-group">
-          <label class="form-label">Role</label>
+          <label class="form-label" for="profile-role-field">Role</label>
           <input type="text" class="form-input" id="profile-role-field" disabled style="opacity:0.5;cursor:not-allowed">
           <div class="form-hint">Role is managed by your administrator.</div>
         </div>
         <div class="form-group">
-          <label class="form-label">Branch</label>
+          <label class="form-label" for="profile-branch-field">Branch</label>
           <input type="text" class="form-input" id="profile-branch-field" disabled style="opacity:0.5;cursor:not-allowed">
         </div>
         <div class="form-group" id="profile-bizname-group" style="display:none">
-          <label class="form-label">Business / Lender Name</label>
+          <label class="form-label" for="profile-bizname">Business / Lender Name</label>
           <input type="text" class="form-input" id="profile-bizname" placeholder="e.g. Quick Loans Uganda Ltd">
           <div class="form-hint">This name appears on all loan agreements as the lender.</div>
         </div>
@@ -10759,11 +11003,11 @@ function initRegisterPage() {
         <div class="modal-success" id="profile-pass-success" style="margin-bottom:0.75rem"><i data-lucide="check-circle"></i><span>Password changed successfully!</span></div>
         <div class="info-banner" style="margin-bottom:1rem"><i data-lucide="info"></i><span>Choose a strong password of at least 8 characters.</span></div>
         <div class="form-group">
-          <label class="form-label">New Password</label>
+          <label class="form-label" for="profile-new-pass">New Password</label>
           <input type="password" class="form-input" id="profile-new-pass" placeholder="New password">
         </div>
         <div class="form-group">
-          <label class="form-label">Confirm New Password</label>
+          <label class="form-label" for="profile-confirm-pass">Confirm New Password</label>
           <input type="password" class="form-input" id="profile-confirm-pass" placeholder="Confirm new password">
         </div>
         <div style="margin-top:1rem">
@@ -10823,42 +11067,42 @@ function initRegisterPage() {
         <div class="cw-step-heading">Personal Details</div>
         <div class="cw-grid2">
           <div class="cw-fg" id="cwfg-fname">
-            <label class="cw-label">Full Name <span>*</span></label>
+            <label class="cw-label" for="cw-fname">Full Name <span>*</span></label>
             <input class="cw-input" id="cw-fname" placeholder="e.g. Sarah Namukasa" autocomplete="name" oninput="cwClearErr('cwfg-fname')">
             <div class="cw-err-msg">Full name is required</div>
           </div>
           <div class="cw-fg" id="cwfg-nid">
-            <label class="cw-label">National ID Number <span>*</span></label>
+            <label class="cw-label" for="cw-nid">National ID Number <span>*</span></label>
             <input class="cw-input" id="cw-nid" placeholder="CM9600123456ABCD" oninput="cwClearErr('cwfg-nid')">
             <div class="cw-err-msg">National ID is required</div>
           </div>
         </div>
         <div class="cw-grid3">
           <div class="cw-fg" id="cwfg-dob">
-            <label class="cw-label">Date of Birth <span>*</span></label>
+            <label class="cw-label" for="cw-dob">Date of Birth <span>*</span></label>
             <input class="cw-input" id="cw-dob" type="date" oninput="cwClearErr('cwfg-dob')">
             <div class="cw-err-msg">Date of birth required</div>
           </div>
           <div class="cw-fg">
-            <label class="cw-label">Gender</label>
+            <label class="cw-label" for="cw-gender">Gender</label>
             <select class="cw-input" id="cw-gender">
               <option value="">Select…</option>
               <option>Male</option><option>Female</option><option>Other</option>
             </select>
           </div>
           <div class="cw-fg" id="cwfg-phone">
-            <label class="cw-label">Phone Number <span>*</span></label>
+            <label class="cw-label" for="cw-phone">Phone Number <span>*</span></label>
             <input class="cw-input" id="cw-phone" type="tel" placeholder="+256 700 000000" oninput="cwClearErr('cwfg-phone')">
             <div class="cw-err-msg">Phone is required</div>
           </div>
         </div>
         <div class="cw-grid2">
           <div class="cw-fg">
-            <label class="cw-label">Email Address</label>
+            <label class="cw-label" for="cw-email">Email Address</label>
             <input class="cw-input" id="cw-email" type="email" placeholder="optional@email.com">
           </div>
           <div class="cw-fg" id="cwfg-addr">
-            <label class="cw-label">Physical Address <span>*</span></label>
+            <label class="cw-label" for="cw-addr">Physical Address <span>*</span></label>
             <input class="cw-input" id="cw-addr" placeholder="Plot 12, Kampala Road" oninput="cwClearErr('cwfg-addr')">
             <div class="cw-err-msg">Address is required</div>
           </div>
@@ -10867,15 +11111,15 @@ function initRegisterPage() {
           <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">Next of Kin <span style="font-size:0.7rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-subtle)">(optional)</span></div>
           <div class="cw-grid3">
             <div class="cw-fg" id="cwfg-kin-name">
-              <label class="cw-label">Full Name</label>
+              <label class="cw-label" for="cw-kin-name">Full Name</label>
               <input class="cw-input" id="cw-kin-name" placeholder="John Doe">
             </div>
             <div class="cw-fg" id="cwfg-kin-phone">
-              <label class="cw-label">Phone</label>
+              <label class="cw-label" for="cw-kin-phone">Phone</label>
               <input class="cw-input" id="cw-kin-phone" placeholder="+256 700 111111">
             </div>
             <div class="cw-fg">
-              <label class="cw-label">Relationship</label>
+              <label class="cw-label" for="cw-kin-rel">Relationship</label>
               <select class="cw-input" id="cw-kin-rel">
                 <option value="">Select…</option>
                 <option>Spouse</option><option>Parent</option><option>Sibling</option>
@@ -10885,7 +11129,7 @@ function initRegisterPage() {
           </div>
         </div>
         <div class="cw-fg">
-          <label class="cw-label">Employment Type</label>
+          <label class="cw-label" for="cw-employment">Employment Type</label>
           <select class="cw-input" id="cw-employment">
             <option value="">Select…</option>
             <option>Employed</option><option>Self-Employed</option>
@@ -10893,7 +11137,7 @@ function initRegisterPage() {
           </select>
         </div>
         <div class="cw-fg">
-          <label class="cw-label">Notes / Additional Info</label>
+          <label class="cw-label" for="cw-doc-notes">Notes / Additional Info</label>
           <textarea class="cw-input" id="cw-doc-notes" placeholder="Any other relevant information about this client…" style="min-height:60px"></textarea>
         </div>
       </div>
@@ -10904,7 +11148,7 @@ function initRegisterPage() {
         <div class="cw-notice"><span class="cw-notice-icon">ℹ</span> Upload supporting documents for this client's records. All fields are optional but recommended for completeness.</div>
         <div class="cw-doc-grid">
           <div class="cw-doc-item">
-            <label>National ID — Front</label>
+            <label for="cwdoc1">National ID — Front</label>
             <div class="cw-photo-upload" onclick="document.getElementById('cwdoc1').click()">
               <input type="file" id="cwdoc1" accept="image/*,application/pdf" onclick="event.stopPropagation()" onchange="cwPreviewDoc(this,'cwdoc1-prev','cwdoc1-icon')">
               <img class="cw-photo-preview" id="cwdoc1-prev" src="" style="display:none">
@@ -10913,7 +11157,7 @@ function initRegisterPage() {
             </div>
           </div>
           <div class="cw-doc-item">
-            <label>National ID — Back</label>
+            <label for="cwdoc2">National ID — Back</label>
             <div class="cw-photo-upload" onclick="document.getElementById('cwdoc2').click()">
               <input type="file" id="cwdoc2" accept="image/*,application/pdf" onclick="event.stopPropagation()" onchange="cwPreviewDoc(this,'cwdoc2-prev','cwdoc2-icon')">
               <img class="cw-photo-preview" id="cwdoc2-prev" src="" style="display:none">
@@ -10922,7 +11166,7 @@ function initRegisterPage() {
             </div>
           </div>
           <div class="cw-doc-item">
-            <label>Proof of Income / Pay Slip</label>
+            <label for="cwdoc3">Proof of Income / Pay Slip</label>
             <div class="cw-photo-upload" onclick="document.getElementById('cwdoc3').click()">
               <input type="file" id="cwdoc3" accept="image/*,application/pdf" onclick="event.stopPropagation()" onchange="cwPreviewDoc(this,'cwdoc3-prev','cwdoc3-icon')">
               <img class="cw-photo-preview" id="cwdoc3-prev" src="" style="display:none">
@@ -10931,7 +11175,7 @@ function initRegisterPage() {
             </div>
           </div>
           <div class="cw-doc-item">
-            <label>Business Registration (if any)</label>
+            <label for="cwdoc4">Business Registration (if any)</label>
             <div class="cw-photo-upload" onclick="document.getElementById('cwdoc4').click()">
               <input type="file" id="cwdoc4" accept="image/*,application/pdf" onclick="event.stopPropagation()" onchange="cwPreviewDoc(this,'cwdoc4-prev','cwdoc4-icon')">
               <img class="cw-photo-preview" id="cwdoc4-prev" src="" style="display:none">
@@ -11871,7 +12115,7 @@ function printLoanSchedule() {
   const bizName = (() => { try { return JSON.parse(sessionStorage.getItem('lw_session'))?.businessName || 'LendWise LMS'; } catch(_) { return 'LendWise LMS'; } })();
   const totalPaid   = scheduleRows.reduce((s, r) => s + Number(r.paid_amount || 0), 0);
   const totalDue    = scheduleRows.reduce((s, r) => s + Number(r.total_due || 0), 0);
-  const outstanding = Number(loan.outstanding_principal || 0);
+  const outstanding = Number(loan.outstanding_principal || 0) + Number(loan.outstanding_interest || 0);
   const progress    = scheduleRows.length ? Math.round((paidCount / scheduleRows.length) * 100) : 0;
   const isOverdue   = loan.maturity_date && new Date(loan.maturity_date) < new Date() && loan.status === 'active';
   const loanStatus  = isOverdue ? 'OVERDUE' : (loan.status || '').toUpperCase();
@@ -11934,6 +12178,7 @@ tfoot td:nth-child(2){text-align:right}tfoot td:nth-child(3){text-align:right;co
 <tfoot><tr><td colspan="2" style="font-weight:700">TOTALS</td><td style="text-align:right">${formatUGX(totalDue)}</td><td style="text-align:right;color:#16a34a">${formatUGX(totalPaid)}</td><td></td></tr></tfoot></table>
 <div class="footer"><div class="footer-note">This is an official repayment statement generated by ${bizName} on ${printDate}.<br>For queries, please contact your loan officer. This document is computer-generated and valid without a physical signature.</div><div><div class="sig-line"></div><div class="sig-label">Authorised Officer</div></div></div>
 </div></body></html>`;
+  if (window.location.protocol === 'file:') { showToast('Print is unavailable when opened from a local file. Serve via a web server to enable printing.', 'warning', 6000); return; }
   const win = window.open('', '_blank', 'width=900,height=700');
   win.document.write(html);
   win.document.close();
