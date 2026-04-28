@@ -1401,7 +1401,7 @@ code { font-family: var(--mono); font-size: 0.8rem; background: var(--surface-3)
   align-items: center; justify-content: center;
   background: var(--bg); position: relative; overflow: hidden;
 }
-#login-page.active { display: flex; }
+#login-page.active { display: flex; align-items: center; justify-content: center; }
 .login-bg {
   position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(ellipse 60% 50% at 15% 30%, rgba(63,185,80,0.07) 0%, transparent 70%),
@@ -1849,23 +1849,100 @@ tbody tr:hover td { background: var(--surface-2); }
 .pill-gray { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); }
 
 /* === MODAL === */
-.modal-backdrop { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
+.modal-backdrop { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 1rem; }
 .modal-backdrop.open { display: flex; }
-.modal { background: var(--surface); border: 1px solid var(--border-2); border-radius: var(--radius-lg); padding: 1.75rem; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
-.modal-lg { max-width: 680px; }
-.modal-xl { max-width: 800px; }
-.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
-.modal-title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.2px; }
-.modal-close { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-muted); transition: all 0.15s; cursor: pointer; }
-.modal-close:hover { border-color: var(--danger-border); color: var(--danger); }
+
+/* Scroll lock on body when any modal is open */
+body.modal-open {
+  overflow: hidden;
+  /* iOS Safari fix: prevent background scroll bleed-through on mobile */
+  position: fixed;
+  width: 100%;
+  /* top is set dynamically by JS to preserve scroll position */
+}
+
+.modal { background: var(--surface); border: 1px solid var(--border-2); border-radius: var(--radius-lg); width: 100%; max-width: 560px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 24px 64px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04); animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
+.modal-lg { max-width: 700px; }
+.modal-xl { max-width: 860px; }
+
+/* --- Professional left-aligned modal header --- */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(to bottom, var(--surface-3) 0%, var(--surface-2) 100%);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  flex-shrink: 0;
+  position: relative;
+}
+.modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent) 0%, rgba(63,185,80,0.4) 50%, transparent 100%);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex: 1;
+  min-width: 0;
+}
+.modal-header-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.modal-header-icon svg { width: 18px; height: 18px; }
+.modal-header-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.modal-title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.25px; color: var(--text); line-height: 1.2; }
+.modal-subtitle { font-size: 0.75rem; color: var(--text-muted); font-weight: 400; line-height: 1.3; margin-top: 1px; }
+.modal-close {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: all 0.15s;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.modal-close:hover { border-color: var(--danger-border); color: var(--danger); background: var(--danger-subtle); }
 .modal-close svg { width: 14px; height: 14px; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
-.modal-error { display: none; padding: 0.6rem 0.85rem; background: var(--danger-subtle); border: 1px solid var(--danger-border); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--danger); margin-bottom: 0.75rem; }
+.modal-body { padding: 1.5rem; flex: 1; overflow-y: auto; }
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  flex-shrink: 0;
+}
+/* Single action button fills the footer width */
+.modal-footer .btn:only-child {
+  width: 100%;
+  justify-content: center;
+}
+.modal-error { display: none; padding: 0.6rem 0.85rem; background: var(--danger-subtle); border: 1px solid var(--danger-border); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--danger); margin: 0 1.5rem 0.85rem; }
 .modal-error.show { display: flex; align-items: center; gap: 0.5rem; }
 .modal-error svg { width: 13px; height: 13px; flex-shrink: 0; }
-.modal-success { display: none; padding: 0.6rem 0.85rem; background: var(--accent-subtle); border: 1px solid var(--accent-border); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--accent); margin-bottom: 0.75rem; }
+.modal-success { display: none; padding: 0.6rem 0.85rem; background: var(--accent-subtle); border: 1px solid var(--accent-border); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--accent); margin: 0 1.5rem 0.85rem; }
 .modal-success.show { display: flex; align-items: center; gap: 0.5rem; }
 .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+/* Light theme modal header adjustments */
+[data-theme="light"] .modal-header {
+  background: linear-gradient(to bottom, #f0f2f5 0%, #f6f8fa 100%);
+}
+[data-theme="light"] .modal-header::before {
+  background: linear-gradient(90deg, var(--accent) 0%, rgba(26,127,55,0.35) 50%, transparent 100%);
+}
 
 /* === DRAWER === */
 .drawer-backdrop { display: none; position: fixed; inset: 0; z-index: 150; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); }
@@ -1995,19 +2072,38 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
 [data-theme="light"] .dash-qa-purple { color: #fff; }
 
 /* === DASHBOARD TOPBAR (new) === */
+/* === DASHBOARD TOPBAR === */
 .dash-topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
 }
-.dash-topbar-left {}
+/* Title block sits inline, doesn't grow */
+.dash-topbar-title-block {
+  flex-shrink: 0;
+}
 .dash-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.4px; }
 .dash-subtitle { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.15rem; }
-.dash-topbar-right {
-  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+/* Buttons sit immediately after the title, left-aligned */
+.dash-topbar-btns {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+/* Keep old class names working if referenced elsewhere */
+.dash-topbar-left { flex-shrink: 0; }
+.dash-topbar-right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+/* Grouped columns inside the topbar-right — now a flat single row */
+.dash-btn-col {
+  display: contents; /* children flow directly into the flex row */
 }
 .dash-action-btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0 1.1rem; height: 38px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0 1.15rem; height: 38px; border-radius: 10px;
   border: 1px solid transparent; cursor: pointer;
   font-family: var(--font); font-size: 0.8rem; font-weight: 600;
   letter-spacing: 0.01em;
@@ -2026,7 +2122,7 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
 .dash-action-btn:hover { transform: translateY(-2px); }
 .dash-action-btn:active { transform: scale(0.96) translateY(0); transition-duration: 0.08s; }
 
-/* Disburse Loan — Emerald green, premium */
+/* Disburse Loan — Emerald green */
 .dash-action-primary {
   background: linear-gradient(135deg, #3fb950 0%, #2da440 100%);
   color: #fff;
@@ -2040,7 +2136,7 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
   box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 6px 20px rgba(63,185,80,0.4);
 }
 
-/* Record Repayment — Sapphire blue, refined */
+/* Record Payment — Sapphire blue */
 .dash-action-info {
   background: linear-gradient(135deg, #3d8ef8 0%, #2070e0 100%);
   color: #fff;
@@ -2055,29 +2151,20 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
   box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 6px 20px rgba(61,142,248,0.4);
 }
 
-/* Add Client — Subtle glass, elevated surface */
+/* Add Client — Purple */
 .dash-action-ghost {
-  background: var(--surface-3);
-  color: var(--text);
-  border-color: var(--border-2);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 1px 4px rgba(0,0,0,0.2);
+  background: linear-gradient(135deg, #a371f7 0%, #8250df 100%);
+  color: #fff;
+  border-color: rgba(163,113,247,0.5);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 2px 8px rgba(130,80,223,0.25);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 .dash-action-ghost:hover {
-  background: var(--surface-2);
-  border-color: rgba(255,255,255,0.2);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 4px 12px rgba(0,0,0,0.3);
+  background: linear-gradient(135deg, #b687ff 0%, #a371f7 100%);
+  border-color: rgba(182,135,255,0.6);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 6px 20px rgba(130,80,223,0.4);
 }
-[data-theme="light"] .dash-action-ghost {
-  background: #ffffff;
-  color: #1f2328;
-  border-color: rgba(0,0,0,0.16);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.9) inset;
-}
-[data-theme="light"] .dash-action-ghost:hover {
-  background: #f3f4f6;
-  border-color: rgba(0,0,0,0.24);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.9) inset;
-}
+[data-theme="light"] .dash-action-ghost { color: #fff; }
 
 /* === DUE TODAY PANEL === */
 .dash-due-header {
@@ -2128,11 +2215,11 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
 }
 .dash-due-ref {
   font-size: 0.7rem; color: var(--text-muted); font-family: var(--mono);
-  white-space: nowrap;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;
 }
 .dash-due-amt {
   font-size: 0.78rem; font-weight: 600; font-family: var(--mono);
-  white-space: nowrap; color: var(--text);
+  white-space: nowrap; color: var(--text); flex-shrink: 0;
 }
 .dash-due-footer {
   display: flex; justify-content: space-between; align-items: center;
@@ -2152,7 +2239,6 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
 @media (max-width: 900px) {
   :root { --sidebar-w: 220px; }
   .dash-quick-actions { gap: 0.6rem; }
-  .dash-topbar { flex-direction: column; align-items: flex-start; }
   .charts-grid { grid-template-columns: 1fr; }
   .topbar-search { width: 160px; }
 }
@@ -2203,10 +2289,10 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
   .page-header-left h1 { font-size: 1.15rem; }
   .page-header-actions { flex-wrap: wrap; gap: 0.4rem; }
 
-  /* Dashboard new topbar */
-  .dash-topbar { flex-direction: column; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; }
-  .dash-topbar-right { gap: 0.4rem; }
-  .dash-action-btn { padding: 0.4rem 0.7rem; font-size: 0.78rem; }
+  /* Dashboard topbar — stack title above buttons on mobile */
+  .dash-topbar { flex-direction: column; align-items: flex-start; gap: 0.6rem; margin-bottom: 1rem; }
+  .dash-topbar-btns { gap: 0.4rem; flex-wrap: wrap; }
+  .dash-action-btn { padding: 0 0.8rem; height: 36px; font-size: 0.78rem; }
 
   /* Dashboard quick actions: stack on small screens */
   .dash-quick-actions {
@@ -2235,8 +2321,9 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
   .modal {
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     max-height: 92vh; max-width: 100%;
-    padding: 1.25rem 1rem;
+    overflow: hidden;
   }
+  .modal-body { padding: 1rem; overflow-y: auto; }
 
   /* Table toolbar */
   .table-toolbar { gap: 0.5rem; padding: 0.75rem 0.85rem; }
@@ -2302,6 +2389,961 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
   .hamburger-btn { display: none; }
   .sidebar-overlay { display: none !important; }
   .mobile-bottom-nav { display: none; }
+}
+
+/* ================================================================
+   MOBILE RESPONSIVENESS — COMPREHENSIVE FIX
+   Targets all horizontal overflow, layout & UX issues on phones
+   ================================================================ */
+
+/* Global overflow guard */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure all chart containers are fluid */
+.chart-container {
+  position: relative;
+  width: 100%;
+}
+
+/* Ensure table wrappers always allow horizontal scroll but don't overflow the page */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+/* Prevent fixed-width inputs from overflowing */
+input, select, textarea {
+  max-width: 100%;
+}
+
+/* Searchable dropdown — never wider than viewport */
+.search-dropdown-results {
+  min-width: 0;
+  max-width: calc(100vw - 2rem);
+}
+
+/* ── 900px (tablet) ── */
+@media (max-width: 900px) {
+  :root { --sidebar-w: 220px; }
+  .topbar-search { width: 140px; }
+  .charts-grid { grid-template-columns: 1fr; }
+  .dash-topbar-btns { flex-wrap: wrap; }
+  .dash-quick-actions { gap: 0.5rem; flex-wrap: wrap; }
+}
+
+/* ── 768px (mobile) — core layout fixes ── */
+@media (max-width: 768px) {
+  html { font-size: 14px; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    transform: translateX(-100%);
+    width: min(80vw, 280px);
+    z-index: 300;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  /* Sidebar overlay */
+  .sidebar-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 299;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(2px);
+  }
+  .sidebar-overlay.open { display: block; }
+
+  /* ── Main wrap — full width when sidebar hidden ── */
+  .main-wrap { margin-left: 0; min-width: 0; }
+
+  /* ── Topbar ── */
+  .topbar {
+    padding: 0 0.85rem;
+    gap: 0.4rem;
+    height: var(--header-h);
+    flex-wrap: nowrap;
+  }
+  .topbar-title {
+    font-size: 0.875rem;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .topbar-search { display: none; }
+  .topbar-actions { gap: 0.3rem; flex-shrink: 0; }
+
+  /* Hamburger: shown on mobile */
+  .hamburger-btn {
+    display: flex;
+    width: 34px; height: 34px;
+    align-items: center; justify-content: center;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer; flex-shrink: 0;
+  }
+  .hamburger-btn svg { width: 16px; height: 16px; }
+
+  /* ── Page content ── */
+  .page-content {
+    padding: 0.85rem 0.75rem;
+    padding-bottom: 5.5rem; /* room for bottom nav */
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-bottom: 0.85rem;
+  }
+  .page-header-left h1 { font-size: 1.1rem; }
+  .page-header-left p { font-size: 0.8rem; }
+  .page-header-actions { width: 100%; flex-wrap: wrap; gap: 0.4rem; }
+  .page-header-actions .btn { flex: 1; min-width: 0; justify-content: center; }
+
+  /* ── Dashboard topbar ── */
+  .dash-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-bottom: 0.85rem;
+  }
+  .dash-topbar-btns {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .dash-action-btn {
+    flex: 1;
+    min-width: calc(50% - 0.25rem);
+    justify-content: center;
+    padding: 0 0.75rem;
+    font-size: 0.8rem;
+    height: 40px;
+  }
+
+  /* ── Dashboard quick actions ── */
+  .dash-quick-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .dash-qa-btn { padding: 0.45rem 0.75rem; }
+  .dash-qa-sub { display: none; }
+
+  /* ── KPI grid ── */
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+  }
+  .kpi-card { padding: 1rem 1rem 0.85rem; }
+  .kpi-value { font-size: 1.4rem; letter-spacing: -0.5px; }
+  .kpi-label { font-size: 0.65rem; }
+  .kpi-icon-wrap { width: 32px; height: 32px; }
+  .kpi-icon-wrap svg { width: 15px; height: 15px; }
+
+  /* ── Charts ── */
+  .charts-grid { grid-template-columns: 1fr; gap: 0.65rem; margin-bottom: 0.85rem; }
+  .chart-card { padding: 1rem; }
+
+  /* ── Forms ── */
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .form-row.three { grid-template-columns: 1fr; }
+  .form-row > * { margin-bottom: 0.85rem; }
+
+  /* ── Table toolbar ── */
+  .table-toolbar {
+    gap: 0.4rem;
+    padding: 0.65rem 0.75rem;
+    flex-wrap: wrap;
+  }
+  .table-toolbar-title { font-size: 0.82rem; }
+  .table-search input { width: 80px; }
+  .table-actions { margin-left: 0; width: 100%; justify-content: flex-end; display: flex; }
+  .table-filter { font-size: 0.75rem; }
+
+  /* ── Table cells ── */
+  thead th {
+    font-size: 0.64rem;
+    padding: 0.45rem 0.6rem;
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  /* ── Drawers — full width on mobile ── */
+  .drawer {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-left: none;
+    border-top: 1px solid var(--border-2);
+  }
+  #loan-drawer { width: 100% !important; }
+  #loan-drawer .table-wrap { overflow-x: auto; }
+  #loan-drawer table { font-size: 0.75rem; min-width: 560px; }
+  #loan-drawer table th, #loan-drawer table td { padding: 0.4rem 0.5rem; }
+
+  /* ── Modals — bottom sheet style ── */
+  .modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .modal {
+    border-radius: 20px 20px 0 0;
+    border-top: 1px solid var(--border-2);
+    max-height: 92vh;
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  .modal-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+  }
+  /* Drag handle above title */
+  .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-radius: 20px 20px 0 0;
+    padding: 1rem;
+    padding-top: 1.4rem;
+  }
+  .modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0.55rem; left: 50%; transform: translateX(-50%);
+    width: 40px; height: 4px;
+    background: var(--border-2);
+    border-radius: 2px;
+  }
+  /* Footer: sticky at bottom */
+  .modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem env(safe-area-inset-bottom, 0.75rem);
+    border-radius: 0;
+  }
+  .modal-footer .btn { width: 100%; justify-content: center; }
+  .modal-lg, .modal-xl { max-width: 100%; }
+
+  /* Collapse the Create New Loan two-column grid on all mobile sizes */
+  #loan-details-step { grid-template-columns: 1fr !important; }
+  /* Make QR code responsive */
+  #loan-sig-qr-img { max-width: min(190px, calc(100vw - 80px)) !important; width: 100% !important; height: auto !important; }
+  /* Touch-friendly inputs — 16px prevents iOS Safari auto-zoom on focus */
+  .modal .form-input,
+  .modal select.form-input,
+  .modal textarea.form-input { min-height: 40px; font-size: 15px; }
+
+  /* ── Product & Branch modal — compact mobile layout ── */
+  #product-modal .modal-body,
+  #branch-modal .modal-body { padding: 0.85rem 1rem; gap: 0; }
+
+  /* All form-rows inside these modals go single-column on mobile */
+  #product-modal .form-row,
+  #product-modal .form-row.three,
+  #branch-modal .form-row { grid-template-columns: 1fr; gap: 0; }
+
+  /* Tighter form groups inside product/branch modals */
+  #product-modal .form-group,
+  #branch-modal .form-group { margin-bottom: 0.7rem; }
+
+  /* Compact inputs — smaller height to avoid the "too tall" feel */
+  #product-modal .form-input,
+  #product-modal select.form-input,
+  #product-modal textarea.form-input,
+  #branch-modal .form-input,
+  #branch-modal select.form-input { height: 36px; min-height: 36px; font-size: 0.875rem; padding: 0 0.75rem; }
+  #product-modal textarea.form-input { height: auto; min-height: 52px; padding: 0.5rem 0.75rem; }
+
+  /* Compact labels */
+  #product-modal .form-label,
+  #branch-modal .form-label { font-size: 0.68rem; margin-bottom: 0.25rem; }
+
+  /* Smaller form hints */
+  #product-modal .form-hint { font-size: 0.68rem; }
+
+  /* Product type description pill — reduce padding */
+  #pr-type-desc { font-size: 0.73rem !important; padding: 6px 8px !important; line-height: 1.5 !important; }
+
+  /* ── Buttons ── */
+  .btn { min-height: 44px; }
+  .btn-sm { min-height: 36px; }
+  .btn-icon { min-height: 36px; min-width: 36px; }
+
+  /* ── Pills ── */
+  .pill { font-size: 0.6rem; padding: 2px 5px; }
+
+  /* ── Notifications dropdown ── */
+  .notif-dropdown {
+    right: 0.5rem !important;
+    left: 0.5rem !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  /* ── Toast ── */
+  #toast-container {
+    top: auto;
+    bottom: 5.5rem;
+    right: 0.65rem;
+    left: 0.65rem;
+    max-width: 100%;
+  }
+  .toast { min-width: 0; width: 100%; max-width: 100%; font-size: 0.82rem; }
+
+  /* ── Login box ── */
+  .login-box {
+    padding: 1.5rem 1.1rem;
+    margin: 0.75rem;
+    max-width: 100%;
+    border-radius: var(--radius-lg);
+  }
+
+  /* Login: sit slightly above center — padding-bottom pushes visual center up ~15% */
+  #login-page { padding: 1rem; align-items: center; justify-content: center; min-height: 100vh; padding-bottom: 18vh; }
+
+  /* Recent loans table: hide Reference + Product columns on mobile for compact no-scroll layout */
+  #recent-loans-tbody tr td:first-child,
+  .recent-loans-table thead th:first-child,
+  #recent-loans-tbody tr td:nth-child(4),
+  .recent-loans-table thead th:nth-child(4) { display: none; }
+
+  /* Make remaining columns fill nicely */
+  .recent-loans-table { table-layout: fixed; width: 100%; }
+  .recent-loans-table thead th:nth-child(2) { width: 35%; }
+  .recent-loans-table thead th:nth-child(3) { width: 22%; }
+  .recent-loans-table thead th:nth-child(5) { width: 22%; }
+  .recent-loans-table thead th:nth-child(6) { width: 21%; }
+
+  /* ── Mobile bottom nav ── */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    padding: 0.3rem 0 calc(0.3rem + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.3);
+  }
+  .mobile-nav-item {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px; padding: 0.25rem 0.15rem;
+    background: none; border: none;
+    color: var(--text-muted);
+    cursor: pointer; font-family: var(--font);
+    font-size: 0.58rem; font-weight: 600;
+    min-width: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .mobile-nav-item.active { color: var(--accent); }
+  .mobile-nav-item span {
+    white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; max-width: 52px;
+  }
+
+  /* ── Logout button visible in sidebar footer ── */
+  .logout-btn { flex-shrink: 0; }
+
+  /* ── Pagination ── */
+  .pagination { flex-wrap: wrap; gap: 0.4rem; }
+  .pagination-controls { margin-left: 0; }
+  .pagination-info { width: 100%; }
+
+  /* ── Dashboard due today summary ── */
+  .dash-due-summary { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .dash-due-sum-val { font-size: 1.1rem; }
+
+  /* ── Profile drawer ── */
+  .profile-photo { width: 72px; height: 72px; }
+
+  /* ── Plan cards in register ── */
+  .plan-cards { grid-template-columns: 1fr; gap: 0.5rem; }
+
+  /* ── CW wizard ── */
+  .cw-modal { max-height: 95vh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+  .cw-header { padding: 1rem 1.1rem 0; }
+  .cw-body { padding: 1rem 1.1rem; }
+  .cw-footer { padding: 0.75rem 1.1rem; flex-wrap: wrap; gap: 0.5rem; }
+  .cw-footer .btn { flex: 1; justify-content: center; }
+  .cw-side-layout { grid-template-columns: 1fr; }
+  .cw-loan-summary { position: static; }
+  .cw-grid2, .cw-grid3 { grid-template-columns: 1fr; }
+  .cw-guar-grid { grid-template-columns: 1fr; }
+  .cw-doc-grid { grid-template-columns: 1fr; }
+  .cw-prog-lbl { display: none; }
+  .cw-review-grid { grid-template-columns: 1fr; }
+
+  /* ── Setup box ── */
+  .setup-box { padding: 1.5rem 1.1rem; margin: 0.75rem; }
+  #setup-page { align-items: flex-start; padding-top: 2rem; }
+
+  /* ── Workspace grid ── */
+  .workspace-grid { grid-template-columns: 1fr; }
+
+  /* ── Reg wizard ── */
+  .reg-wrapper { padding: 1rem 0.75rem; max-width: 100%; }
+  .reg-card { padding: 1.25rem 1rem; }
+  .otp-box { width: 40px; height: 50px; font-size: 1.2rem; }
+  .reg-step-label { display: none; }
+
+  /* ── Info rows in drawers ── */
+  .info-row { flex-direction: row; flex-wrap: wrap; gap: 0.25rem; }
+  .info-value { max-width: 100%; text-align: right; flex: 1; }
+
+  /* ── Tabs overflow scroll ── */
+  .tabs { overflow-x: auto; flex-wrap: nowrap; gap: 0; }
+  .tab-btn { flex-shrink: 0; font-size: 0.8rem; padding: 0.55rem 0.85rem; }
+
+  /* ── Offline banner ── */
+  #offline-banner { padding: 0.4rem 0.85rem; font-size: 0.78rem; }
+
+  /* ── Loan drawer table wider than screen — allow scroll ── */
+  body.borrower-drawer-open #loan-drawer-bg.open { left: 0; }
+
+  /* ── Loans page table: fits card with no horizontal scroll ── */
+  .loans-mobile-currency-note { display: block !important; }
+  #view-loans .table-hint { display: none !important; }
+  #view-loans .table-wrap { overflow-x: hidden !important; }
+  #view-loans table { table-layout: fixed; width: 100%; }
+  /* Hide Principal & Repayable columns on mobile */
+  #view-loans thead th:nth-child(2),
+  #view-loans tbody td:nth-child(2),
+  #view-loans thead th:nth-child(3),
+  #view-loans tbody td:nth-child(3) { display: none; }
+  /* Remaining 4 columns: Borrower | Remaining | Status | Due Date */
+  #view-loans thead th:nth-child(1) { width: 32%; }
+  #view-loans thead th:nth-child(4) { width: 33%; }
+  #view-loans thead th:nth-child(5) { width: 18%; text-align: center; padding: 0.5rem 0.15rem; }
+  #view-loans thead th:nth-child(6) { width: 17%; text-align: right; }
+  /* Remaining col: no internal overflow */
+  #view-loans tbody td:nth-child(4) { padding-left: 0.3rem; padding-right: 0.3rem; }
+  #view-loans tbody td:nth-child(4) > div { min-width: 0 !important; }
+  /* Status pill */
+  #view-loans tbody td:nth-child(5) { text-align: center; padding-left: 0.1rem; padding-right: 0.1rem; }
+  /* Due date */
+  #view-loans tbody td:nth-child(6) { font-size: 0.68rem; white-space: nowrap; text-align: right; }
+}
+
+/* ── 480px (small phones) ── */
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .kpi-card { padding: 0.85rem 0.85rem 0.75rem; }
+  .kpi-value { font-size: 1.25rem; }
+
+  .page-content { padding: 0.65rem 0.65rem 5.5rem; }
+
+  .dash-action-btn { font-size: 0.74rem; }
+
+  .chart-card { padding: 0.85rem; }
+
+  .table-toolbar { padding: 0.55rem 0.65rem; }
+  thead th { font-size: 0.62rem; padding: 0.4rem 0.5rem; }
+  tbody td { padding: 0.45rem 0.5rem; font-size: 0.78rem; }
+
+  .modal-body { padding: 0.75rem; }
+  .modal-title { font-size: 0.95rem; }
+  /* Stack all two/three column form rows to single column inside modals */
+  .modal .form-row,
+  .modal .form-row.three { grid-template-columns: 1fr; }
+  /* Touch-friendly inputs — 16px prevents iOS Safari zoom on focus */
+  .modal .form-input,
+  .modal select.form-input,
+  .modal textarea.form-input { min-height: 44px; font-size: 16px; }
+  /* Collapse the Create New Loan two-column grid (inline style override) */
+  #loan-details-step { grid-template-columns: 1fr !important; }
+  /* Make the QR image responsive in Step 2 */
+  #loan-sig-qr-img { max-width: min(190px, calc(100vw - 80px)) !important; width: 100% !important; height: auto !important; }
+
+  .login-box { margin: 0.5rem; padding: 1.25rem 0.9rem; }
+
+  .btn { font-size: 0.82rem; }
+  .btn-lg { height: 44px; font-size: 0.88rem; }
+
+  .dash-due-summary { grid-template-columns: 1fr 1fr 1fr; }
+  .dash-due-sum-val { font-size: 0.95rem; }
+
+  /* OTP boxes smaller on tiny screens */
+  .otp-box { width: 36px; height: 44px; font-size: 1.1rem; gap: 6px; }
+  .otp-row { gap: 6px; }
+
+  /* Setup / register pages */
+  .reg-card { padding: 1rem 0.85rem; }
+  .setup-box { padding: 1.1rem 0.9rem; }
+
+  /* Toasts at full width */
+  #toast-container { right: 0.5rem; left: 0.5rem; }
+}
+
+/* ── Very small (≤380px) ── */
+@media (max-width: 380px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .kpi-value { font-size: 1.3rem; }
+  .dash-qa-sub { display: none; }
+  .btn { font-size: 0.8rem; padding: 0 0.65rem; }
+  .mobile-nav-item svg { width: 18px; height: 18px; }
+  .mobile-nav-item { font-size: 0.55rem; }
+  .page-content { padding: 0.5rem 0.5rem 5.5rem; }
+}
+
+/* Desktop: hide mobile-only elements */
+@media (min-width: 769px) {
+  .hamburger-btn { display: none !important; }
+  .sidebar-overlay { display: none !important; }
+  .mobile-bottom-nav { display: none !important; }
+}
+
+/* ================================================================
+   PROFESSIONAL MOBILE PAGE REDESIGN (≤768px)
+   All pages: Loans, Clients, Payments, Portfolio, PAR, Audit,
+   Staff, Loan Products, Branches, Settings
+   ================================================================ */
+@media (max-width: 768px) {
+
+  /* ── Global: tighter page-level spacing ── */
+  .page-header { padding-bottom: 0.65rem; margin-bottom: 0.85rem; }
+  .page-header-left h1 { font-size: 1.1rem; font-weight: 700; }
+  .page-header-left p { font-size: 0.75rem; margin-top: 1px; }
+  .table-card { border-radius: var(--radius-md); overflow: hidden; }
+
+  /* ── Toolbar: search + filter stacked neatly ── */
+  .table-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.65rem 0.75rem;
+    align-items: center;
+  }
+  .table-search { flex: 1; min-width: 0; }
+  .table-search input { width: 100%; }
+  .table-filter { height: 34px; font-size: 0.8rem; flex-shrink: 0; }
+  .table-actions { margin-left: auto; }
+
+  /* ── Table base: consistent compact sizing ── */
+  thead th {
+    font-size: 0.6rem !important;
+    padding: 0.45rem 0.55rem !important;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 0.55rem 0.55rem !important;
+    font-size: 0.78rem !important;
+    vertical-align: middle;
+  }
+  .pill { font-size: 0.58rem !important; padding: 2px 5px !important; letter-spacing: 0.02em; }
+
+  /* ================================================================
+     CLIENTS PAGE
+     Show: Avatar+Name | Phone | Active Loans | Joined
+     Hide: Total Repayable (col 4)
+     ================================================================ */
+  #view-borrowers .table-wrap { overflow-x: hidden !important; }
+  #view-borrowers table { table-layout: fixed; width: 100%; }
+  #view-borrowers thead th:nth-child(2),
+  #view-borrowers tbody td:nth-child(2),
+  #view-borrowers thead th:nth-child(4),
+  #view-borrowers tbody td:nth-child(4) { display: none; }
+  #view-borrowers thead th:nth-child(1) { width: 56%; }
+  #view-borrowers thead th:nth-child(3) { width: 24%; text-align: center; }
+  #view-borrowers thead th:nth-child(5) { width: 20%; text-align: right; }
+  #view-borrowers tbody td:nth-child(1) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 0; }
+  #view-borrowers tbody td:nth-child(3) { text-align: center; }
+  #view-borrowers tbody td:nth-child(5) { font-size: 0.68rem !important; text-align: right; color: var(--text-muted); }
+  /* Compact avatar */
+  #view-borrowers tbody td:nth-child(1) > div { gap: 0.4rem; }
+  #view-borrowers tbody td:nth-child(1) img,
+  #view-borrowers tbody td:nth-child(1) > div > div:first-child { width: 24px !important; height: 24px !important; font-size: 0.6rem !important; }
+
+  /* ================================================================
+     PAYMENTS PAGE
+     Show: Borrower | Amount | Method | Date
+     Hide: Collected By (col 5)
+     ================================================================ */
+  #view-payments .table-wrap { overflow-x: hidden !important; }
+  #view-payments table { table-layout: fixed; width: 100%; }
+  #view-payments thead th:nth-child(5),
+  #view-payments tbody td:nth-child(5) { display: none; }
+  #view-payments thead th:nth-child(1) { width: 32%; }
+  #view-payments thead th:nth-child(2) { width: 24%; text-align: right; }
+  #view-payments thead th:nth-child(3) { width: 22%; text-align: center; }
+  #view-payments thead th:nth-child(4) { width: 22%; text-align: right; }
+  #view-payments tbody td:nth-child(1) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 0; }
+  #view-payments tbody td:nth-child(2) { text-align: right; font-size: 0.75rem !important; white-space: nowrap; }
+  #view-payments tbody td:nth-child(3) { text-align: center; }
+  #view-payments tbody td:nth-child(4) { font-size: 0.68rem !important; text-align: right; white-space: nowrap; color: var(--text-muted); }
+
+  /* ================================================================
+     PORTFOLIO PAGE — PAR KPI cards 2-col, chart full-width
+     ================================================================ */
+  #view-portfolio .kpi-grid { grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.85rem; }
+  #view-portfolio .kpi-card { padding: 0.85rem 0.85rem 0.7rem; }
+  #view-portfolio .kpi-value { font-size: 1.3rem; }
+  #view-portfolio .charts-grid { gap: 0.75rem; }
+  /* Product performance table */
+  #view-portfolio .table-wrap { overflow-x: hidden !important; }
+  #view-portfolio table { table-layout: fixed; width: 100%; }
+  /* Hide Avg Loan Size (col 4) */
+  #view-portfolio thead th:nth-child(4),
+  #view-portfolio tbody td:nth-child(4) { display: none; }
+  #view-portfolio thead th:nth-child(1) { width: 34%; }
+  #view-portfolio thead th:nth-child(2) { width: 18%; text-align: center; }
+  #view-portfolio thead th:nth-child(3) { width: 32%; text-align: right; }
+  #view-portfolio thead th:nth-child(5) { width: 16%; text-align: center; }
+  #view-portfolio tbody td:nth-child(1) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 0; }
+  #view-portfolio tbody td:nth-child(2) { text-align: center; }
+  #view-portfolio tbody td:nth-child(3) { font-size: 0.72rem !important; text-align: right; white-space: nowrap; }
+  #view-portfolio tbody td:nth-child(5) { text-align: center; }
+
+  /* ================================================================
+     PAR REPORT PAGE
+     Show: Borrower | Days Overdue | Status
+     Hide: Reference (col 1), Principal (col 3), Penalties (col 5)
+     ================================================================ */
+  #view-par .table-wrap { overflow-x: hidden !important; }
+  #view-par table { table-layout: fixed; width: 100%; }
+  #view-par thead th:nth-child(1),
+  #view-par tbody td:nth-child(1),
+  #view-par thead th:nth-child(3),
+  #view-par tbody td:nth-child(3),
+  #view-par thead th:nth-child(5),
+  #view-par tbody td:nth-child(5) { display: none; }
+  #view-par thead th:nth-child(2) { width: 45%; }
+  #view-par thead th:nth-child(4) { width: 30%; text-align: center; }
+  #view-par thead th:nth-child(6) { width: 25%; text-align: center; }
+  #view-par tbody td:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 0; }
+  #view-par tbody td:nth-child(4) { text-align: center; }
+  #view-par tbody td:nth-child(6) { text-align: center; }
+
+  /* ================================================================
+     AUDIT TRAIL PAGE
+     Show: Time | Action | Table | By
+     Hide: Record ID (col 4)
+     ================================================================ */
+  #view-audit .table-wrap { overflow-x: hidden !important; }
+  #view-audit table { table-layout: fixed; width: 100%; }
+  #view-audit thead th:nth-child(4),
+  #view-audit tbody td:nth-child(4) { display: none; }
+  #view-audit thead th:nth-child(1) { width: 22%; }
+  #view-audit thead th:nth-child(2) { width: 18%; text-align: center; }
+  #view-audit thead th:nth-child(3) { width: 30%; }
+  #view-audit thead th:nth-child(5) { width: 30%; }
+  #view-audit tbody td:nth-child(1) { font-size: 0.68rem !important; white-space: nowrap; color: var(--text-muted); }
+  #view-audit tbody td:nth-child(2) { text-align: center; }
+  #view-audit tbody td:nth-child(3) { font-size: 0.7rem !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 0; font-family: var(--mono); color: var(--text-muted); }
+  #view-audit tbody td:nth-child(5) { font-size: 0.72rem !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 0; }
+
+  /* ================================================================
+     STAFF PAGE
+     Show: Name+Avatar | Role | Status | Actions
+     Hide: Branch (col 3), Phone (col 4), Joined (col 6)
+     ================================================================ */
+  #view-staff .table-wrap { overflow-x: hidden !important; }
+  #view-staff table { table-layout: fixed; width: 100%; }
+  #view-staff thead th:nth-child(3),
+  #view-staff tbody td:nth-child(3),
+  #view-staff thead th:nth-child(4),
+  #view-staff tbody td:nth-child(4),
+  #view-staff thead th:nth-child(6),
+  #view-staff tbody td:nth-child(6) { display: none; }
+  #view-staff thead th:nth-child(1) { width: 35%; }
+  #view-staff thead th:nth-child(2) { width: 20%; text-align: center; }
+  #view-staff thead th:nth-child(5) { width: 15%; text-align: center; }
+  #view-staff thead th:nth-child(7) { width: 30%; text-align: right; }
+  #view-staff tbody td:nth-child(1) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 0; }
+  #view-staff tbody td:nth-child(2) { text-align: center; }
+  #view-staff tbody td:nth-child(5) { text-align: center; }
+  /* Compact avatar in staff */
+  #view-staff tbody td:nth-child(1) > div { gap: 0.35rem; }
+  #view-staff tbody td:nth-child(1) > div > div:first-child { width: 24px !important; height: 24px !important; border-radius: 5px !important; font-size: 0.6rem !important; }
+  /* Stack role dropdown + toggle button vertically */
+  #view-staff .td-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; }
+  #view-staff .td-actions select { width: 100%; max-width: 110px; height: 26px; font-size: 0.68rem; }
+  #view-staff .td-actions .btn { width: 100%; max-width: 110px; justify-content: center; padding: 0; height: 26px; font-size: 0.72rem; }
+
+  /* ================================================================
+     LOAN PRODUCTS PAGE
+     Show: Product name+desc | Rate | Status | Actions
+     Hide: Code, Min/Max, Method, Frequency, Term
+     ================================================================ */
+  #view-products .table-wrap { overflow-x: hidden !important; }
+  #view-products table { table-layout: fixed; width: 100%; }
+  #view-products thead th:nth-child(2),
+  #view-products tbody td:nth-child(2),
+  #view-products thead th:nth-child(3),
+  #view-products tbody td:nth-child(3),
+  #view-products thead th:nth-child(4),
+  #view-products tbody td:nth-child(4),
+  #view-products thead th:nth-child(6),
+  #view-products tbody td:nth-child(6),
+  #view-products thead th:nth-child(7),
+  #view-products tbody td:nth-child(7) { display: none; }
+  #view-products thead th:nth-child(1) { width: 44%; }
+  #view-products thead th:nth-child(5) { width: 22%; text-align: right; }
+  #view-products thead th:nth-child(8) { width: 18%; text-align: center; }
+  #view-products thead th:nth-child(9) { width: 16%; text-align: right; }
+  #view-products tbody td:nth-child(1) { overflow: hidden; max-width: 0; }
+  #view-products tbody td:nth-child(1) strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #view-products tbody td:nth-child(1) span { display: none; } /* hide description on mobile */
+  #view-products tbody td:nth-child(5) { text-align: right; font-size: 0.72rem !important; white-space: nowrap; color: var(--accent); font-weight: 600; }
+  #view-products tbody td:nth-child(8) { text-align: center; }
+  #view-products tbody td:nth-child(9) { text-align: right; }
+  /* Compact action buttons */
+  #view-products .td-actions-wrap { flex-direction: column; gap: 0.25rem; align-items: flex-end; }
+  #view-products .td-actions-wrap .btn { width: 28px; height: 28px; padding: 0; justify-content: center; }
+
+  /* ================================================================
+     BRANCHES PAGE
+     Show: Branch Name | Status | Actions
+     Hide: Location (col 2), Created (col 4)
+     ================================================================ */
+  #view-branches .table-wrap { overflow-x: hidden !important; }
+  #view-branches table { table-layout: fixed; width: 100%; }
+  #view-branches thead th:nth-child(2),
+  #view-branches tbody td:nth-child(2),
+  #view-branches thead th:nth-child(4),
+  #view-branches tbody td:nth-child(4) { display: none; }
+  #view-branches thead th:nth-child(1) { width: 55%; }
+  #view-branches thead th:nth-child(3) { width: 25%; text-align: center; }
+  #view-branches thead th:nth-child(5) { width: 20%; text-align: right; }
+  #view-branches tbody td:nth-child(1) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 0; }
+  #view-branches tbody td:nth-child(3) { text-align: center; }
+  #view-branches tbody td:nth-child(5) { text-align: right; }
+
+  /* ================================================================
+     SETTINGS PAGE — full-width, stacked nicely
+     ================================================================ */
+  #view-settings > div { max-width: 100% !important; gap: 0.85rem !important; }
+  #view-settings .table-card { padding: 1.1rem !important; }
+  #view-settings .form-row { grid-template-columns: 1fr !important; gap: 0 !important; }
+  #view-settings .form-group { margin-bottom: 0.75rem; }
+  #view-settings .form-label { font-size: 0.78rem; }
+  #view-settings .form-input { font-size: 0.85rem; }
+  #view-settings button.btn { width: 100%; justify-content: center; height: 42px; font-size: 0.88rem; }
+  /* Settings section titles */
+  #view-settings [style*="text-transform:uppercase"],
+  #view-settings [style*="text-transform: uppercase"] { font-size: 0.65rem !important; }
+
+  /* ================================================================
+     PAGE HEADERS — action buttons always in a row, never overflow
+     ================================================================ */
+  .page-header-actions { flex-wrap: nowrap !important; gap: 0.35rem !important; }
+  .page-header-actions .btn { white-space: nowrap; flex-shrink: 0; }
+  /* On very small screens, shrink "Add X" button text */
+  .page-header-actions .btn-primary { padding: 0 0.65rem !important; font-size: 0.78rem !important; }
+  .page-header-actions .btn-ghost { padding: 0 0.5rem !important; }
+
+  /* ================================================================
+     PAGINATION — tighter on mobile
+     ================================================================ */
+  .pagination { padding: 0.5rem 0.75rem; gap: 0.3rem; }
+  .page-btn { min-width: 30px; height: 30px; font-size: 0.75rem; padding: 0 0.4rem; }
+  .pagination-info { font-size: 0.72rem; }
+
+  /* ================================================================
+     PORTFOLIO — chart card title sizing
+     ================================================================ */
+  .chart-card-title { font-size: 0.8rem; }
+  .chart-container canvas { border-radius: var(--radius-sm); }
+
+  /* ================================================================
+     TOOLBAR TITLE (used in Portfolio, PAR)
+     ================================================================ */
+  .table-toolbar-title { font-size: 0.82rem; font-weight: 600; }
+
+} /* end @media (max-width: 768px) */
+
+/* ================================================================
+   DASHBOARD PANELS — MOBILE FIX
+   Due Today, 30-Day Collection Rate, PAR Aging
+   ================================================================ */
+
+/* ── Due Today panel ── */
+.dash-due-header {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+#dash-due-total-pill {
+  flex-shrink: 0;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  /* Due Today card */
+  #dash-due-today-card {
+    padding: 1rem 0.9rem;
+  }
+  .dash-due-header {
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+  #dash-due-total-pill {
+    align-self: flex-start;
+  }
+  .dash-due-summary {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 0.75rem;
+  }
+  .dash-due-sum-card {
+    padding: 0.5rem 0.4rem;
+  }
+  .dash-due-sum-val {
+    font-size: 1.1rem;
+  }
+  .dash-due-sum-lbl {
+    font-size: 0.58rem;
+    letter-spacing: 0.03em;
+  }
+  /* Due item rows — prevent overflow */
+  .dash-due-item {
+    gap: 0.4rem;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+  .dash-due-name {
+    font-size: 0.78rem;
+    flex: 1;
+    min-width: 0;
+  }
+  .dash-due-ref {
+    display: none; /* hide ref on mobile — saves space; name+amount are enough */
+  }
+  .dash-due-amt {
+    font-size: 0.76rem;
+    flex-shrink: 0;
+  }
+  .dash-due-footer {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.65rem;
+    padding-top: 0.6rem;
+  }
+  .dash-due-total-amt {
+    font-size: 0.88rem;
+  }
+
+  /* 30-Day Collection Rate card */
+  #collection-rate-card {
+    padding: 1rem 0.9rem 0 0.9rem !important;
+    gap: 0.5rem !important;
+    overflow: hidden;
+  }
+  /* Title row — stack on mobile */
+  #collection-rate-card > div:first-child {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.2rem;
+  }
+  /* KPI row — 3 mini stat boxes */
+  #collection-rate-card > div:nth-child(2) {
+    gap: 0.4rem !important;
+    flex-wrap: nowrap;
+  }
+  #collection-rate-card > div:nth-child(2) > div {
+    flex: 1;
+    padding: 0.55rem 0.5rem !important;
+    min-width: 0;
+  }
+  /* Rate value — shrink font */
+  #cr-rate {
+    font-size: 1.2rem !important;
+  }
+  /* Collected / Due values */
+  #cr-collected,
+  #cr-due {
+    font-size: 0.78rem !important;
+    word-break: break-all;
+  }
+  /* Sub labels */
+  #collection-rate-card > div:nth-child(2) > div > div:last-child {
+    font-size: 0.6rem !important;
+  }
+  /* Chart — reduce height on mobile */
+  #collection-rate-card .chart-container {
+    height: 160px !important;
+  }
+  /* Legend row */
+  #collection-rate-card > div:nth-last-child(2) {
+    font-size: 0.62rem !important;
+    gap: 0.5rem !important;
+    flex-wrap: wrap;
+    padding-bottom: 0.85rem !important;
+  }
+  /* Warning banner */
+  #cr-warning {
+    margin: 0 -0.9rem !important;
+    padding: 0.5rem 0.9rem !important;
+    font-size: 0.68rem !important;
+  }
+
+  /* PAR Aging card */
+  #par-dash-buckets {
+    gap: 0.5rem !important;
+  }
+  /* PAR totals footer row — stack instead of side-by-side */
+  #par-dash-buckets ~ div {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.6rem !important;
+  }
+  /* PAR totals numbers row — wrap the 3 stat boxes */
+  #par-dash-buckets ~ div > div:first-child {
+    gap: 0.75rem !important;
+    flex-wrap: wrap;
+  }
+  #par-dash-total,
+  #par-dash-pct {
+    font-size: 1rem !important;
+  }
+  /* PAR card header buttons */
+  #par-dash-buckets ~ div ~ div,
+  .chart-card [style*="display:flex;align-items:center;justify-content:space-between;padding:1.1rem"] {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Even tighter on small phones */
+  .dash-due-sum-val { font-size: 1rem; }
+  .dash-due-sum-lbl { font-size: 0.55rem; }
+  .dash-due-sum-card { padding: 0.4rem 0.35rem; }
+
+  #cr-rate { font-size: 1.05rem !important; }
+  #cr-collected, #cr-due { font-size: 0.72rem !important; }
+
+  #collection-rate-card .chart-container { height: 130px !important; }
+
+  /* Stack the 3 KPI boxes vertically if they really won't fit */
+  #collection-rate-card > div:nth-child(2) {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.3rem !important;
+  }
 }
 
 /* === MISC UTILITIES === */
@@ -3177,8 +4219,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
       <input type="email" class="form-input" id="forgot-email" placeholder="you@lendwise.co.ug" autocomplete="email">
     </div>
     <div class="modal-footer" style="margin-top:1rem;padding-top:1rem">
-      <button class="btn btn-ghost" onclick="closeModal('forgot-pw-modal')">Cancel</button>
-      <button class="btn btn-primary" id="forgot-submit-btn" onclick="submitForgotPassword()">
+      <button class="btn btn-primary" id="forgot-submit-btn" onclick="submitForgotPassword()" style="width:100%;justify-content:center">
         <i data-lucide="mail"></i> Send Reset Link
       </button>
     </div>
@@ -3281,24 +4322,24 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 
       <!-- DASHBOARD -->
       <div class="view active" id="view-dashboard">
-        <!-- DASHBOARD TOP BAR: title + quick action buttons -->
+        <!-- DASHBOARD TOP BAR: title + quick action buttons in one left-aligned row -->
         <div class="dash-topbar">
-          <div class="dash-topbar-left">
+          <div class="dash-topbar-title-block">
             <h1 class="dash-title">Dashboard</h1>
             <p class="dash-subtitle" id="dash-date-label">Portfolio overview and key metrics</p>
           </div>
-          <div class="dash-topbar-right">
+          <div class="dash-topbar-btns">
             <button class="dash-action-btn dash-action-primary" onclick="openModal('new-loan-modal')" id="dash-btn-new-loan">
               <i data-lucide="file-plus" style="width:14px;height:14px"></i>
-              Disburse loan
+              Disburse Loan
             </button>
             <button class="dash-action-btn dash-action-info" onclick="openModal('new-payment-modal')" id="dash-btn-record-payment">
               <i data-lucide="credit-card" style="width:14px;height:14px"></i>
-              Record repayment
+              Record Payment
             </button>
             <button class="dash-action-btn dash-action-ghost" onclick="openClientWizard()">
               <i data-lucide="user-plus" style="width:14px;height:14px"></i>
-              Add client
+              Add Client
             </button>
             <button class="btn btn-ghost btn-sm" onclick="loadDashboard()" title="Refresh dashboard" style="padding:0 0.6rem">
               <i data-lucide="refresh-cw"></i>
@@ -3457,11 +4498,17 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
           </div>
         </div>
         <div class="table-card">
-          <div class="table-toolbar">
-            <span class="table-toolbar-title">Recent Loans</span>
-            <div class="table-actions"><button class="btn btn-ghost btn-sm" onclick="nav('loans')">View all <i data-lucide="chevron-right"></i></button></div>
+          <div class="table-toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.85rem 1rem">
+            <div style="display:flex;flex-direction:column;gap:0.1rem">
+              <span class="table-toolbar-title" style="font-size:0.9rem;font-weight:700;color:var(--text);letter-spacing:-0.1px">Recent Loans</span>
+              <span style="font-size:0.72rem;color:var(--text-muted)">Last 10 disbursements</span>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="nav('loans')" style="display:inline-flex;align-items:center;gap:0.3rem;white-space:nowrap;flex-shrink:0">
+              View all <i data-lucide="arrow-right" style="width:13px;height:13px"></i>
+            </button>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Reference</th><th>Borrower</th><th>Amount</th><th>Product</th><th>Status</th><th>Date</th></tr></thead><tbody id="recent-loans-tbody"></tbody></table></div>
+          <div class="table-hint" style="padding:0.4rem 1rem 0;font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:0.35rem"><i data-lucide="mouse-pointer-2" style="width:12px;height:12px"></i> Tap a row to view full loan details</div>
+          <div class="table-wrap"><table class="recent-loans-table"><thead><tr><th>Reference</th><th>Borrower</th><th>Amount</th><th>Product</th><th>Status</th><th>Date</th></tr></thead><tbody id="recent-loans-tbody"></tbody></table></div>
         </div>
       </div>
 
@@ -3495,7 +4542,8 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
             </div>
           </div>
           <div class="table-hint" style="padding:0.4rem 1rem 0;font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:0.35rem"><i data-lucide="mouse-pointer-2" style="width:12px;height:12px"></i> Double-click a row to view full loan details</div>
-          <div class="table-wrap"><table><thead><tr><th>Borrower</th><th>Principal</th><th>Total Repayable</th><th>Remaining</th><th>Status</th><th>Due Date</th></tr></thead><tbody id="loans-tbody"></tbody></table></div>
+          <div class="loans-mobile-currency-note" style="display:none;padding:0.25rem 1rem 0;font-size:0.68rem;color:var(--text-subtle);font-style:italic">All amounts in UGX</div>
+          <div class="table-wrap"><table><thead><tr><th>Borrower</th><th>Principal</th><th>Repayable</th><th>Remaining</th><th>Status</th><th>Due Date</th></tr></thead><tbody id="loans-tbody"></tbody></table></div>
           <div class="pagination" id="loans-pagination"></div>
         </div>
       </div>
@@ -3752,11 +4800,19 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 <div class="modal-backdrop" id="new-loan-modal">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <div class="modal-title">Create New Loan</div>
+      <div class="modal-header-left">
+        <div class="modal-header-icon" style="background:var(--accent-subtle);border:1px solid var(--accent-border);color:var(--accent)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="modal-header-text">
+          <div class="modal-title">Create New Loan</div>
+          <div class="modal-subtitle">Fill in borrower details and loan terms below</div>
+        </div>
+      </div>
       <button class="modal-close" onclick="closeModal('new-loan-modal')"><i data-lucide="x"></i></button>
     </div>
-    <div class="modal-error" id="loan-modal-error"><i data-lucide="x-circle"></i><span id="loan-modal-error-text"></span></div>
-
+    <div class="modal-error" id="loan-modal-error" style="margin-top:1rem"><i data-lucide="x-circle"></i><span id="loan-modal-error-text"></span></div>
+    <div class="modal-body">
     <!-- STEP 2: Signature collection (hidden until step 2) -->
     <div id="loan-sig-step" style="display:none;padding:0.5rem 0 0.25rem">
       <div style="text-align:center;margin-bottom:1rem">
@@ -3877,7 +4933,8 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
           </div>
         </div>
       </div>
-    </div>
+    </div><!-- /loan-details-step -->
+    </div><!-- /modal-body -->
     <!-- Step indicator strip -->
     <div id="loan-step-indicator" style="display:flex;gap:0;border-top:1px solid var(--border);padding:0.6rem 1.5rem;background:var(--surface-2);font-size:0.72rem;color:var(--text-muted)">
       <span id="loan-step-ind-1" style="font-weight:700;color:var(--accent)">① Loan Details</span>
@@ -3886,7 +4943,6 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     </div>
     <!-- Step 1 footer -->
     <div class="modal-footer" id="loan-footer-step1">
-      <button class="btn btn-ghost" onclick="closeModal('new-loan-modal')">Cancel</button>
       <button class="btn btn-primary" id="loan-next-btn" onclick="loanGoToSignStep()"><i data-lucide="pen-line"></i> Next: Sign Agreement →</button>
     </div>
     <!-- Step 2 footer -->
@@ -3902,69 +4958,78 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 <div class="modal-backdrop" id="new-borrower-modal">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <div class="modal-title">Register Borrower</div>
+      <div class="modal-header-left">
+        <div class="modal-header-icon" style="background:var(--accent-subtle);border:1px solid var(--accent-border);color:var(--accent)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="modal-header-text">
+          <div class="modal-title">Register Borrower</div>
+          <div class="modal-subtitle">Add a new client to your loan portfolio</div>
+        </div>
+      </div>
       <button class="modal-close" onclick="closeModal('new-borrower-modal')"><i data-lucide="x"></i></button>
     </div>
     <div class="modal-error" id="borrower-modal-error"><i data-lucide="x-circle"></i><span id="borrower-modal-error-text"></span></div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label" for="b-name">Full Name <span style="color:var(--danger)">*</span></label>
-        <input type="text" class="form-input" id="b-name" placeholder="John Doe">
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="b-name">Full Name <span style="color:var(--danger)">*</span></label>
+          <input type="text" class="form-input" id="b-name" placeholder="John Doe">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="b-nid">National ID No <span style="color:var(--danger)">*</span></label>
+          <input type="text" class="form-input" id="b-nid" placeholder="CM9600123456ABCD">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="b-phone">Primary Phone <span style="color:var(--danger)">*</span></label>
+          <input type="tel" class="form-input" id="b-phone" placeholder="+256 700 000000">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="b-phone2">Secondary Phone</label>
+          <input type="tel" class="form-input" id="b-phone2" placeholder="+256 700 000001">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="b-dob">Date of Birth</label>
+          <input type="date" class="form-input" id="b-dob">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="b-kyc">KYC Status</label>
+          <select class="form-input" id="b-kyc">
+            <option value="PENDING">Pending</option>
+            <option value="VERIFIED">Verified</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </div>
       </div>
       <div class="form-group">
-        <label class="form-label" for="b-nid">National ID No <span style="color:var(--danger)">*</span></label>
-        <input type="text" class="form-input" id="b-nid" placeholder="CM9600123456ABCD">
+        <label class="form-label" for="b-address">Address</label>
+        <input type="text" class="form-input" id="b-address" placeholder="Kampala, Uganda">
       </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label" for="b-phone">Primary Phone <span style="color:var(--danger)">*</span></label>
-        <input type="tel" class="form-input" id="b-phone" placeholder="+256 700 000000">
+      <div class="form-row three">
+        <div class="form-group">
+          <label class="form-label" for="b-emp">Employment Type</label>
+          <select class="form-input" id="b-emp">
+            <option value="EMPLOYED">Employed</option>
+            <option value="SELF_EMPLOYED">Self Employed</option>
+            <option value="BUSINESS">Business</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="b-employer">Employer Name</label>
+          <input type="text" class="form-input" id="b-employer" placeholder="Company name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="b-income">Monthly Income (UGX)</label>
+          <input type="number" class="form-input" id="b-income" placeholder="1000000">
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label" for="b-phone2">Secondary Phone</label>
-        <input type="tel" class="form-input" id="b-phone2" placeholder="+256 700 000001">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label" for="b-dob">Date of Birth</label>
-        <input type="date" class="form-input" id="b-dob">
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="b-kyc">KYC Status</label>
-        <select class="form-input" id="b-kyc">
-          <option value="PENDING">Pending</option>
-          <option value="VERIFIED">Verified</option>
-          <option value="REJECTED">Rejected</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label" for="b-address">Address</label>
-      <input type="text" class="form-input" id="b-address" placeholder="Kampala, Uganda">
-    </div>
-    <div class="form-row three">
-      <div class="form-group">
-        <label class="form-label" for="b-emp">Employment Type</label>
-        <select class="form-input" id="b-emp">
-          <option value="EMPLOYED">Employed</option>
-          <option value="SELF_EMPLOYED">Self Employed</option>
-          <option value="BUSINESS">Business</option>
-          <option value="OTHER">Other</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="b-employer">Employer Name</label>
-        <input type="text" class="form-input" id="b-employer" placeholder="Company name">
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="b-income">Monthly Income (UGX)</label>
-        <input type="number" class="form-input" id="b-income" placeholder="1000000">
-      </div>
-    </div>
+    </div><!-- /modal-body -->
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('new-borrower-modal')">Cancel</button>
       <button class="btn btn-primary" id="borrower-submit-btn" onclick="submitNewBorrower()"><i data-lucide="user-plus"></i> Register</button>
     </div>
   </div>
@@ -3974,10 +5039,19 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 <div class="modal-backdrop" id="new-payment-modal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">Record Payment</div>
+      <div class="modal-header-left">
+        <div class="modal-header-icon" style="background:var(--info-subtle);border:1px solid var(--info-border);color:var(--info)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
+        <div class="modal-header-text">
+          <div class="modal-title">Record Payment</div>
+          <div class="modal-subtitle">Log a repayment against an active loan</div>
+        </div>
+      </div>
       <button class="modal-close" onclick="closeModal('new-payment-modal')"><i data-lucide="x"></i></button>
     </div>
-    <div class="modal-error" id="payment-modal-error"><i data-lucide="x-circle"></i><span id="payment-modal-error-text"></span></div>
+    <div class="modal-error" id="payment-modal-error" style="margin-top:1rem"><i data-lucide="x-circle"></i><span id="payment-modal-error-text"></span></div>
+    <div class="modal-body">
     <div class="form-group">
       <label class="form-label" for="payment-loan-search">Loan <span style="color:var(--danger)">*</span></label>
       <div class="search-dropdown-wrap">
@@ -4033,8 +5107,8 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
       <label class="form-label" for="pay-notes">Notes</label>
       <textarea class="form-input" id="pay-notes" placeholder="Optional notes…" rows="2" style="resize:none;min-height:unset"></textarea>
     </div>
-    <div class="modal-footer" style="margin-top:0.75rem;padding-top:0.75rem">
-      <button class="btn btn-ghost" onclick="closeModal('new-payment-modal')">Cancel</button>
+    </div><!-- /modal-body -->
+    <div class="modal-footer">
       <button class="btn btn-primary" id="payment-submit-btn" onclick="submitNewPayment()"><i data-lucide="credit-card"></i> Record Payment</button>
     </div>
   </div>
@@ -4044,10 +5118,19 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 <div class="modal-backdrop" id="new-staff-modal">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <div class="modal-title">Add Staff Member</div>
+      <div class="modal-header-left">
+        <div class="modal-header-icon" style="background:var(--purple-subtle);border:1px solid rgba(188,140,255,0.3);color:var(--purple)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        </div>
+        <div class="modal-header-text">
+          <div class="modal-title">Add Staff Member</div>
+          <div class="modal-subtitle">Create a new team member account and assign their role</div>
+        </div>
+      </div>
       <button class="modal-close" onclick="closeModal('new-staff-modal')"><i data-lucide="x"></i></button>
     </div>
-    <div class="modal-error" id="staff-modal-error"><i data-lucide="x-circle"></i><span id="staff-modal-error-text"></span></div>
+    <div class="modal-error" id="staff-modal-error" style="margin-top:1rem"><i data-lucide="x-circle"></i><span id="staff-modal-error-text"></span></div>
+    <div class="modal-body">
     <div class="form-row">
       <div class="form-group">
         <label class="form-label" for="st-name">Full Name <span style="color:var(--danger)">*</span></label>
@@ -4087,8 +5170,8 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     </div>
     <!-- hidden legacy stubs -->
     <div id="staff-setup-panel" style="display:none"><div id="staff-sql-block"></div><a id="staff-supabase-link" href="#"></a></div>
+    </div><!-- /modal-body -->
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('new-staff-modal')">Cancel</button>
       <button class="btn btn-primary" id="staff-submit-btn" onclick="submitNewStaff()"><i data-lucide="user-plus"></i> Create Account</button>
     </div>
   </div>
@@ -4096,101 +5179,106 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 
 <!-- LOAN PRODUCT MODAL (ENHANCED) -->
 <div class="modal-backdrop" id="product-modal">
-  <div class="modal modal-xl" style="max-width:860px">
+  <div class="modal modal-xl" style="max-width:720px">
     <div class="modal-header">
-      <div class="modal-title" id="product-modal-title">Add Loan Product</div>
+      <div class="modal-header-left">
+        <div class="modal-header-icon" style="background:var(--warning-subtle);border:1px solid var(--warning-border);color:var(--warning)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="modal-header-text">
+          <div class="modal-title" id="product-modal-title">Add Loan Product</div>
+          <div class="modal-subtitle">Configure repayment type, rate, term and limits</div>
+        </div>
+      </div>
       <button class="modal-close" onclick="closeModal('product-modal')"><i data-lucide="x"></i></button>
     </div>
-    <div class="modal-error" id="product-modal-error">
+    <div class="modal-error" id="product-modal-error" style="margin-top:1rem">
       <i data-lucide="x-circle"></i><span id="product-modal-error-text"></span>
     </div>
     <input type="hidden" id="product-edit-id">
-
-      <div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="pr-name">Product Name <span style="color:var(--danger)">*</span></label>
-            <input type="text" class="form-input" id="pr-name" placeholder="e.g. Daily 30-Day Loan" oninput="prAutoCode(this.value)">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="pr-code">Product Code <span style="color:var(--danger)">*</span></label>
-            <input type="text" class="form-input" id="pr-code" placeholder="Auto-generated" title="Auto-generated from name — you can edit this" oninput="this.dataset.manualEdit='1'" onfocus="this.dataset.manualEdit=this.value?'1':''">
-          </div>
-        </div>
-
-        <!-- Product Type selector -->
+    <div class="modal-body">
+      <div class="form-row">
         <div class="form-group">
-          <label class="form-label" for="pr-product-type">Product Type <span style="color:var(--danger)">*</span></label>
-          <select class="form-input" id="pr-product-type" onchange="prOnTypeChange()">
-            <option value="">Select a product type…</option>
-            <optgroup label="Daily Repayment">
-              <option value="daily_flat">Daily repayment — Flat interest (Principal × rate ÷ days)</option>
-              <option value="daily_reducing">Daily repayment — Reducing balance</option>
-            </optgroup>
-            <optgroup label="Weekly Repayment">
-              <option value="weekly_flat">Weekly repayment — Flat interest</option>
-              <option value="weekly_reducing">Weekly repayment — Reducing balance</option>
-            </optgroup>
-            <optgroup label="Monthly Repayment">
-              <option value="monthly_flat">Monthly repayment — Flat interest</option>
-              <option value="monthly_reducing">Monthly repayment — Reducing balance</option>
-              <option value="monthly_bullet">Monthly bullet — Pay everything at end of term</option>
-            </optgroup>
-            <optgroup label="Group / SACCO">
-              <option value="group_weekly">Group loan — Weekly cycle (flat)</option>
-              <option value="group_monthly">Group loan — Monthly cycle (flat)</option>
-            </optgroup>
-          </select>
-          <div id="pr-type-desc" style="display:none;margin-top:6px;padding:8px 10px;background:var(--info-subtle);border:1px solid var(--info-border);border-radius:var(--radius-sm);font-size:0.78rem;color:var(--text);line-height:1.6"></div>
+          <label class="form-label" for="pr-name">Product Name <span style="color:var(--danger)">*</span></label>
+          <input type="text" class="form-input" id="pr-name" placeholder="e.g. Daily 30-Day Loan" oninput="prAutoCode(this.value)">
         </div>
-
-        <!-- Rate, Term, Fee -->
-        <div class="form-row three">
-          <div class="form-group">
-            <label class="form-label" id="pr-rate-label" for="pr-rate">Interest Rate (%)</label>
-            <div style="position:relative">
-              <input type="number" step="0.01" class="form-input" id="pr-rate"
-                     placeholder="e.g. 10" style="padding-right:2.6rem"
-                     oninput="prUpdatePreview()">
-              <span style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);font-size:0.75rem;color:var(--text-muted);pointer-events:none">%</span>
-            </div>
-            <div class="form-hint" id="pr-rate-hint">Select a product type first</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" id="pr-term-label" for="pr-term-days">Term (Days) <span style="color:var(--danger)">*</span></label>
-            <input type="number" class="form-input" id="pr-term-days"
-                   placeholder="e.g. 30" value="30" oninput="prUpdatePreview()">
-            <div class="form-hint" id="pr-term-hint"></div>
-          </div>
-
-        </div>
-
-        <!-- Amount range -->
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="pr-min">Min Amount (UGX)</label>
-            <input type="number" class="form-input" id="pr-min" placeholder="50,000" oninput="prUpdatePreview()">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="pr-max">Max Amount (UGX)</label>
-            <input type="number" class="form-input" id="pr-max" placeholder="5,000,000">
-          </div>
-        </div>
-
-        <!-- Hidden legacy fields for DB compat -->
-        <input type="hidden" id="pr-method">
-        <input type="hidden" id="pr-freq">
-        <input type="hidden" id="pr-minterm">
-        <input type="hidden" id="pr-maxterm">
-
         <div class="form-group">
-          <label class="form-label" for="pr-desc">Description</label>
-          <textarea class="form-input" id="pr-desc" placeholder="Brief description of this product…" style="min-height:60px"></textarea>
+          <label class="form-label" for="pr-code">Product Code <span style="color:var(--danger)">*</span></label>
+          <input type="text" class="form-input" id="pr-code" placeholder="Auto-generated" title="Auto-generated from name — you can edit this" oninput="this.dataset.manualEdit='1'" onfocus="this.dataset.manualEdit=this.value?'1':''">
         </div>
       </div>
 
+      <!-- Product Type selector -->
+      <div class="form-group">
+        <label class="form-label" for="pr-product-type">Product Type <span style="color:var(--danger)">*</span></label>
+        <select class="form-input" id="pr-product-type" onchange="prOnTypeChange()">
+          <option value="">Select a product type…</option>
+          <optgroup label="Daily Repayment">
+            <option value="daily_flat">Daily — Flat interest</option>
+            <option value="daily_reducing">Daily — Reducing balance</option>
+          </optgroup>
+          <optgroup label="Weekly Repayment">
+            <option value="weekly_flat">Weekly — Flat interest</option>
+            <option value="weekly_reducing">Weekly — Reducing balance</option>
+          </optgroup>
+          <optgroup label="Monthly Repayment">
+            <option value="monthly_flat">Monthly — Flat interest</option>
+            <option value="monthly_reducing">Monthly — Reducing balance</option>
+            <option value="monthly_bullet">Monthly bullet — Pay at end of term</option>
+          </optgroup>
+          <optgroup label="Group / SACCO">
+            <option value="group_weekly">Group loan — Weekly cycle (flat)</option>
+            <option value="group_monthly">Group loan — Monthly cycle (flat)</option>
+          </optgroup>
+        </select>
+        <div id="pr-type-desc" style="display:none;margin-top:6px;padding:8px 10px;background:var(--info-subtle);border:1px solid var(--info-border);border-radius:var(--radius-sm);font-size:0.78rem;color:var(--text);line-height:1.6"></div>
+      </div>
+
+      <!-- Rate + Term side by side -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" id="pr-rate-label" for="pr-rate">Interest Rate (%)</label>
+          <div style="position:relative">
+            <input type="number" step="0.01" class="form-input" id="pr-rate"
+                   placeholder="e.g. 10" style="padding-right:2.6rem"
+                   oninput="prUpdatePreview()">
+            <span style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);font-size:0.75rem;color:var(--text-muted);pointer-events:none">%</span>
+          </div>
+          <div class="form-hint" id="pr-rate-hint">Select a product type first</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="pr-term-label" for="pr-term-days">Term (Days) <span style="color:var(--danger)">*</span></label>
+          <input type="number" class="form-input" id="pr-term-days"
+                 placeholder="e.g. 30" value="30" oninput="prUpdatePreview()">
+          <div class="form-hint" id="pr-term-hint"></div>
+        </div>
+      </div>
+
+      <!-- Amount range -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="pr-min">Min Amount (UGX)</label>
+          <input type="number" class="form-input" id="pr-min" placeholder="50,000" oninput="prUpdatePreview()">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pr-max">Max Amount (UGX)</label>
+          <input type="number" class="form-input" id="pr-max" placeholder="5,000,000">
+        </div>
+      </div>
+
+      <!-- Hidden legacy fields for DB compat -->
+      <input type="hidden" id="pr-method">
+      <input type="hidden" id="pr-freq">
+      <input type="hidden" id="pr-minterm">
+      <input type="hidden" id="pr-maxterm">
+
+      <div class="form-group">
+        <label class="form-label" for="pr-desc">Description</label>
+        <textarea class="form-input" id="pr-desc" placeholder="Brief description of this product…" style="min-height:60px;resize:vertical"></textarea>
+      </div>
+    </div><!-- /modal-body -->
+
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('product-modal')">Cancel</button>
       <button class="btn btn-primary" id="product-submit-btn" onclick="submitProduct()">
         <i data-lucide="save"></i> Save Product
       </button>
@@ -4200,29 +5288,38 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 
 <!-- BRANCH MODAL -->
 <div class="modal-backdrop" id="branch-modal">
-  <div class="modal">
+  <div class="modal" style="max-width:440px">
     <div class="modal-header">
-      <div class="modal-title" id="branch-modal-title">Add Branch</div>
+      <div class="modal-header-left">
+        <div class="modal-header-icon" style="background:var(--info-subtle);border:1px solid var(--info-border);color:var(--info)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="modal-header-text">
+          <div class="modal-title" id="branch-modal-title">Add Branch</div>
+          <div class="modal-subtitle">Register a new office or service location</div>
+        </div>
+      </div>
       <button class="modal-close" onclick="closeModal('branch-modal')"><i data-lucide="x"></i></button>
     </div>
-    <div class="modal-error" id="branch-modal-error"><i data-lucide="x-circle"></i><span id="branch-modal-error-text"></span></div>
-    <div class="form-group">
-      <label class="form-label" for="branch-name">Branch Name <span style="color:var(--danger)">*</span></label>
-      <input type="text" class="form-input" id="branch-name" placeholder="e.g. Kampala Central Branch">
-    </div>
-    <div class="form-group">
-      <label class="form-label" for="branch-location">Location / Address</label>
-      <input type="text" class="form-input" id="branch-location" placeholder="e.g. Plot 12, Kampala Road">
-    </div>
-    <div class="form-group">
-      <label class="form-label" for="branch-status">Status</label>
-      <select class="form-input" id="branch-status">
-        <option value="true">Active</option>
-        <option value="false">Inactive</option>
-      </select>
-    </div>
+    <div class="modal-error" id="branch-modal-error" style="margin-top:1rem"><i data-lucide="x-circle"></i><span id="branch-modal-error-text"></span></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="branch-name">Branch Name <span style="color:var(--danger)">*</span></label>
+        <input type="text" class="form-input" id="branch-name" placeholder="e.g. Kampala Central Branch">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="branch-location">Location / Address</label>
+        <input type="text" class="form-input" id="branch-location" placeholder="e.g. Plot 12, Kampala Road">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="branch-status">Status</label>
+        <select class="form-input" id="branch-status">
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+      </div>
+    </div><!-- /modal-body -->
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('branch-modal')">Cancel</button>
       <button class="btn btn-primary" id="branch-submit-btn" onclick="submitBranch()"><i data-lucide="save"></i> Save Branch</button>
     </div>
   </div>
@@ -4284,8 +5381,18 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 // === CONFIGURATION ===
 const SUPABASE_URL = 'https://pzxitzwxmlawtxegmjns.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6eGl0end4bWxhd3R4ZWdtam5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNTcwOTksImV4cCI6MjA5MTkzMzA5OX0.zXaycSgQ80TRb8BtKhpUf32R1ZtcFVd5Nk4YmaqyOYk';
+
+// === OPTIMIZED LUCIDE: only processes un-rendered icons instead of full DOM scan ===
+// Replaces lucide.createIcons() — 102 full DOM scans → targeted scans only
+function _lucide() {
+  if (!window.lucide) return;
+  const unrendered = document.querySelectorAll('i[data-lucide]:not([data-rendered])');
+  if (!unrendered.length) return;
+  unrendered.forEach(el => el.setAttribute('data-rendered', '1'));
+  lucide.createIcons();
+}
 const DEBUG = false;
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 
 const isConfigured =
   SUPABASE_URL !== 'YOUR_SUPABASE_URL' &&
@@ -4324,8 +5431,8 @@ let _loanSearchTimer = null;
 let _pendingStaffData = null;
 let _currentView = null;
 
-// === CLIENT-SIDE CACHE (1 minute TTL) ===
-const CACHE_TTL = 60 * 1000;
+// === CLIENT-SIDE CACHE (5 minute TTL) ===
+const CACHE_TTL = 5 * 60 * 1000;
 const _cache = {};
 function cacheSet(key, data) { _cache[key] = { data, ts: Date.now() }; }
 function cacheGet(key) {
@@ -4486,7 +5593,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // If phone scanned a signature QR, show the signing UI
   if (typeof cwCheckIfSigCapturePage === 'function' && cwCheckIfSigCapturePage()) return;
 
-  if (window.lucide) lucide.createIcons();
+  _lucide();
   if (!isConfigured) {
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('setup-page').classList.add('active');
@@ -4498,8 +5605,17 @@ window.addEventListener('DOMContentLoaded', () => {
   setupAnimations(); // initialise ripple effect and anim-rows system
   // No manual business setup form — provisioning is fully automatic
 
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 });
+
+// ── Mobile device detection ───────────────────────────────────────
+// Portrait phone/tablet → bypass QR and open capture/sign directly.
+// Landscape tablet (innerWidth > 900) is treated as desktop so the
+// operator can still show a QR to the client's phone.
+function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod|Touch/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 1 && window.innerWidth <= 900);
+}
 
 async function boot() {
   const loadBar = document.getElementById('load-bar');
@@ -4509,7 +5625,7 @@ async function boot() {
   loadBar.style.width = '30%';
   loadLabel.textContent = 'Checking session…';
 
-  const minWait = new Promise(r => setTimeout(r, 1000));
+  const minWait = new Promise(r => setTimeout(r, 0)); // removed artificial delay
 
   try {
     loadLabel.textContent = 'Checking setup…';
@@ -4543,6 +5659,15 @@ async function boot() {
       } catch(_) {}
       // Auto-find business if not in session (authenticated, so RLS allows this)
       if (!window.currentBusiness) {
+        // Fast path: use localStorage cache (valid for 24h) to skip a DB round-trip
+        try {
+          const bizCache = JSON.parse(localStorage.getItem('lw_biz_cache') || 'null');
+          if (bizCache && bizCache.id && (Date.now() - bizCache.ts < 86400000)) {
+            window.currentBusiness = { id: bizCache.id, name: bizCache.name, logo_url: null, plan: 'free', role: bizCache.role || 'SUPER_ADMIN' };
+          }
+        } catch(_) {}
+      }
+      if (!window.currentBusiness) {
         try {
           // Try as owner (businesses table has no is_active column)
           const { data: ownedBiz } = await sb.from('businesses')
@@ -4570,6 +5695,8 @@ async function boot() {
               sess2.plan         = window.currentBusiness.plan || 'free';
               sess2.role         = window.currentBusiness.role;
               sessionStorage.setItem('lw_session', JSON.stringify(sess2));
+              // Also persist to localStorage so returning users skip this fetch entirely
+              localStorage.setItem('lw_biz_cache', JSON.stringify({ id: sess2.businessId, name: sess2.businessName, role: sess2.role, ts: Date.now() }));
             } catch(_) {}
           }
         } catch(_) {}
@@ -4643,17 +5770,13 @@ async function boot() {
 
 async function loadUserProfile(user) {
   try {
-    // public.users — your actual users table (maybeSingle = no error if missing)
-    const { data: profile } = await sb.from('users')
-      .select('full_name, phone, avatar_url, email_verified')
-      .eq('id', user.id).maybeSingle();
-
-    // business_members — get role for this user
-    const { data: member } = await sb.from('business_members')
-      .select('role, branch, business_id, is_active')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .limit(1).maybeSingle();
+    // Fire both queries in parallel instead of sequentially — saves one full round-trip (~400ms)
+    const [profileRes, memberRes] = await Promise.all([
+      sb.from('users').select('full_name, phone, avatar_url, email_verified').eq('id', user.id).maybeSingle(),
+      sb.from('business_members').select('role, branch, business_id, is_active').eq('user_id', user.id).eq('is_active', true).limit(1).maybeSingle(),
+    ]);
+    const profile = profileRes.data;
+    const member  = memberRes.data;
 
     currentUser = {
       ...user,
@@ -4731,7 +5854,7 @@ function showApp() {
       }
       if (sess.logoUrl) {
         const logoIcon = document.querySelector('.sidebar-logo-icon');
-        if (logoIcon) logoIcon.innerHTML = `<img src="${sess.logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'landmark\\' style=\\'width:17px;height:17px\\'></i>';if(window.lucide)lucide.createIcons()">`;
+        if (logoIcon) logoIcon.innerHTML = `<img src="${sess.logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'landmark\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`;
       }
     }
   } catch(_) {}
@@ -4742,6 +5865,8 @@ function showApp() {
   const startView = (hashView && validViews.includes(hashView)) ? hashView : 'dashboard';
   nav(startView);
   if (startView === 'dashboard') loadDashboard();
+  // Pre-warm loans in background after a short delay so dashboard loads first
+  else { loadDashboard(); setTimeout(() => { if (_currentView !== 'loans') loadLoans(); }, 1500); }
   startInactivityTimer();
   setTimeout(refreshLiveNotifications, 2000);
   // Silent one-time migration: add lender_sig_data column if not yet present
@@ -4810,7 +5935,7 @@ function showLogin() {
       if (rememberEl) rememberEl.checked = true;
     }
   } catch(_) {}
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function hideWorkspacePage() {
@@ -4825,7 +5950,7 @@ function showRegister() {
   hideWorkspacePage();
   document.getElementById('register-page').classList.add('active');
   if (typeof initRegisterPage === 'function') initRegisterPage();
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function showBusiness() {
@@ -4838,7 +5963,7 @@ function showBusiness() {
   document.getElementById('login-page').classList.remove('active');
   hideWorkspacePage();
   document.getElementById('business-page').classList.add('active');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // === REGISTER (First-time admin setup) ===
@@ -4851,8 +5976,8 @@ async function doRegister() {
 
   errEl.classList.remove('show');
 
-  if (!email) { errTx.textContent = 'Please enter your email address.'; errEl.classList.add('show'); if(window.lucide)lucide.createIcons(); return; }
-  if (!pass || pass.length < 8) { errTx.textContent = 'Password must be at least 8 characters.'; errEl.classList.add('show'); if(window.lucide)lucide.createIcons(); return; }
+  if (!email) { errTx.textContent = 'Please enter your email address.'; errEl.classList.add('show'); _lucide(); return; }
+  if (!pass || pass.length < 8) { errTx.textContent = 'Password must be at least 8 characters.'; errEl.classList.add('show'); _lucide(); return; }
 
   btn.disabled = true; btn.textContent = 'Creating account…';
 
@@ -4878,7 +6003,7 @@ async function doRegister() {
   } catch(e) {
     errTx.textContent = e.message || 'Registration failed. Please try again.';
     errEl.classList.add('show');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   } finally {
     btn.disabled = false; btn.textContent = 'Register';
   }
@@ -4927,14 +6052,14 @@ async function doBusinessSetup() {
 
   try {
     provisionStep('Connecting to database…', 10);
-    await new Promise(r => setTimeout(r, 300));
+    // removed artificial delay
 
     // Verify session
     const { data: { session } } = await sb.auth.getSession();
     if (!session) throw new Error('Session expired. Please sign in again.');
 
     provisionStep('Checking database tables…', 25);
-    await new Promise(r => setTimeout(r, 200));
+    // removed artificial delay
 
     // Test that core tables exist (they should — pre-created via schema.sql)
     const { error: tableCheckErr } = await sb.from('businesses').select('id').limit(1);
@@ -4947,7 +6072,7 @@ async function doBusinessSetup() {
     }
 
     provisionStep('Creating your business workspace…', 40);
-    await new Promise(r => setTimeout(r, 200));
+    // removed artificial delay
 
     // Create or fetch the businesses record for this owner
     let bizId = null;
@@ -4975,7 +6100,7 @@ async function doBusinessSetup() {
     }
 
     provisionStep('Setting up default branch…', 60);
-    await new Promise(r => setTimeout(r, 200));
+    // removed artificial delay
 
     // Insert a fresh HQ branch scoped to this business — never upsert by name to avoid
     // cross-tenant collisions where two businesses share a similarly-named branch.
@@ -4997,7 +6122,7 @@ async function doBusinessSetup() {
     } catch(_) {}
 
     provisionStep('Seeding default loan products…', 72);
-    await new Promise(r => setTimeout(r, 200));
+    // removed artificial delay
 
     // Only seed products if this business has none yet — check must be scoped by bizId
     try {
@@ -5016,7 +6141,7 @@ async function doBusinessSetup() {
     } catch(e) { log('Product seed error (non-fatal):', e.message); }
 
     provisionStep('Saving business settings…', 75);
-    await new Promise(r => setTimeout(r, 200));
+    // removed artificial delay
 
     // Save business info (scoped by business_id where possible, fallback to id=1)
     try {
@@ -5030,7 +6155,7 @@ async function doBusinessSetup() {
     }
 
     provisionStep('Finalising your admin account…', 88);
-    await new Promise(r => setTimeout(r, 200));
+    // removed artificial delay
 
     // Ensure the registering user has a SUPER_ADMIN staff profile
     await sb.from('users').upsert({ id: session.user.id, full_name: registrationData?.fullName || session.user.user_metadata?.full_name || session.user.email.split('@')[0], email: session.user.email, phone: registrationData?.phone || null, email_verified: true }, { onConflict: 'id' });
@@ -5165,12 +6290,12 @@ async function submitForgotPassword() {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errTx.textContent = 'Please enter a valid email address.';
     errEl.classList.add('show');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     return;
   }
   btn.disabled = true;
   btn.innerHTML = '<i data-lucide="loader"></i> Sending…';
-  if (window.lucide) lucide.createIcons();
+  _lucide();
   try {
     const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.href
@@ -5185,11 +6310,11 @@ async function submitForgotPassword() {
   } catch(e) {
     errTx.textContent = e.message || 'Could not send reset email. Please try again.';
     errEl.classList.add('show');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i data-lucide="mail"></i> Send Reset Link';
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   }
 }
 
@@ -5210,7 +6335,7 @@ async function doLogin() {
   if (!email || !pass) {
     errText.textContent = 'Please enter your email and password.';
     errEl.classList.add('show');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     return;
   }
 
@@ -5332,7 +6457,7 @@ async function doLogin() {
   } catch(e) {
     errText.textContent = e.message || 'Login failed. Check your credentials.';
     errEl.classList.add('show');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   } finally {
     btn.disabled = false;
     if (btnText) btnText.textContent = 'Sign In';
@@ -5378,7 +6503,7 @@ function showWorkspaceSelector(user, businesses) {
 
   _selectedWorkspaceId = null;
   document.getElementById('workspace-continue-btn').disabled = true;
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function selectWorkspace(card, bizId) {
@@ -5524,7 +6649,7 @@ function toggleTheme() {
   localStorage.setItem('lms-theme', newTheme);
   const icon = document.getElementById('theme-icon');
   icon.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
   // Update charts colors if they exist
   Object.values(charts).forEach(c => { try { c.update(); } catch(_) {} });
 }
@@ -5540,7 +6665,7 @@ function setupOfflineDetection() {
   const banner = document.getElementById('offline-banner');
   const update = () => {
     banner.classList.toggle('show', !navigator.onLine);
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   };
   window.addEventListener('online', update);
   window.addEventListener('offline', update);
@@ -5623,10 +6748,17 @@ function setupAnimations() {
 
 function openModal(id) {
   document.getElementById(id).classList.add('open');
+  // Lock body scroll while modal is open (preserving scroll pos for iOS Safari)
+  if (!document.body.classList.contains('modal-open')) {
+    const scrollY = window.scrollY || window.pageYOffset;
+    document.body.dataset.scrollY = scrollY;
+    document.body.style.top = `-${scrollY}px`;
+    document.body.classList.add('modal-open');
+  }
   // Reset errors
   const err = document.querySelector(`#${id} .modal-error`);
   if (err) err.classList.remove('show');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
   if (id === 'new-loan-modal') initLoanModal();
   if (id === 'new-payment-modal') initPaymentModal();
   if (id === 'new-staff-modal') initStaffModal();
@@ -5634,6 +6766,14 @@ function openModal(id) {
 
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
+  // Only unlock body scroll if no other modals remain open
+  const anyOpen = document.querySelectorAll('.modal-backdrop.open').length > 0;
+  if (!anyOpen) {
+    const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, scrollY);
+  }
   const panel = document.getElementById('staff-setup-panel');
   if (panel) panel.classList.remove('show');
   if (id === 'new-loan-modal') { loanInlineSigStop(); _loanInlineSigBorrower = null; _loanInlineSigLender = null; _loanOriginClientId = null; }
@@ -5645,13 +6785,29 @@ function openDrawer(which) {
   document.getElementById(which + '-drawer-bg').classList.add('open');
   document.getElementById(which + '-drawer').classList.add('open');
   document.body.classList.add(which + '-drawer-open');
-  if (window.lucide) lucide.createIcons();
+  // Lock background scroll
+  if (!document.body.classList.contains('modal-open')) {
+    const scrollY = window.scrollY || window.pageYOffset;
+    document.body.dataset.scrollY = scrollY;
+    document.body.style.top = `-${scrollY}px`;
+    document.body.classList.add('modal-open');
+  }
+  _lucide();
 }
 
 function closeDrawer(which) {
   document.getElementById(which + '-drawer-bg').classList.remove('open');
   document.getElementById(which + '-drawer').classList.remove('open');
   document.body.classList.remove(which + '-drawer-open');
+  // Unlock scroll if no modals or drawers remain open
+  const anyModalOpen = document.querySelectorAll('.modal-backdrop.open').length > 0;
+  const anyDrawerOpen = document.querySelectorAll('.drawer.open').length > 0;
+  if (!anyModalOpen && !anyDrawerOpen) {
+    const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, scrollY);
+  }
 }
 
 function switchTab(btn, containerId, panelId) {
@@ -5660,7 +6816,7 @@ function switchTab(btn, containerId, panelId) {
   if (p) p.classList.add('active');
   btn.closest('.tabs').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // === TOAST ===
@@ -5671,7 +6827,7 @@ function showToast(msg, type = 'success') {
   toast.className = `toast ${type}`;
   toast.innerHTML = `<i data-lucide="${icons[type] || 'info'}"></i><span class="toast-msg">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()"><i data-lucide="x"></i></button>`;
   container.appendChild(toast);
-  if (window.lucide) lucide.createIcons();
+  _lucide();
   setTimeout(() => toast.remove(), 4000);
 }
 
@@ -5698,7 +6854,7 @@ function showModalError(errorElId, textElId, msg) {
   const el = document.getElementById(errorElId);
   const textEl = document.getElementById(textElId);
   if (el && textEl) { textEl.textContent = msg; el.classList.add('show'); }
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // === FORMAT HELPERS ===
@@ -5814,7 +6970,7 @@ function renderPagination(containerId, page, total, onPage) {
       ${pages}
       <button class="page-btn btn-icon" onclick="${onPage}(${page + 1})" ${page >= totalPages ? 'disabled' : ''}><i data-lucide="chevron-right" style="width:12px;height:12px"></i></button>
     </div>`;
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // === DASHBOARD ===
@@ -5876,7 +7032,7 @@ async function loadDashboard() {
       ['kpi-active','kpi-overdue','kpi-collected'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '—'; });
       document.getElementById('kpi-portfolio').textContent = '—';
       document.getElementById('recent-loans-tbody').innerHTML = errorStateRow(parseSupabaseError(e), 'loadDashboard');
-      if (window.lucide) lucide.createIcons();
+      _lucide();
     }
   }
 }
@@ -6000,7 +7156,7 @@ async function loadDashboardDueToday() {
         </div>`;
     }).join('');
 
-    if (window.lucide) lucide.createIcons();
+    _lucide();
 
   } catch(e) {
     log('Due today error:', e);
@@ -6040,7 +7196,7 @@ function _renderDashboardData({ loans, recent, prodMap }) {
     const loanCount = loans.filter(l => Number(l.amount_paid || 0) > 0).length;
     collectedSubEl.innerHTML = `<i data-lucide="bar-chart-2" style="width:12px;height:12px;color:var(--purple)"></i> Across ${loanCount} loan${loanCount !== 1 ? 's' : ''}`;
   }
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 
   const badge = document.getElementById('nav-overdue-badge');
   if (badge) { badge.textContent = overdue; badge.style.display = overdue > 0 ? '' : 'none'; }
@@ -6374,19 +7530,26 @@ function renderRecentLoans(loans) {
   const tbody = document.getElementById('recent-loans-tbody');
   if (!loans.length) {
     tbody.innerHTML = emptyState('file-text', 'No loans yet', 'Create your first loan to get started.');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     return;
+  }
+  // Format amount without "UGX" prefix — just the formatted number with comma separators
+  function fmtAmt(n) {
+    const num = Number(n) || 0;
+    if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1_000) return num.toLocaleString('en-UG');
+    return num.toString();
   }
   tbody.innerHTML = loans.map(l => `
     <tr style="cursor:pointer" onclick="openLoanDrawer('${l.id}')">
       <td class="td-mono">${l.loan_reference || '—'}</td>
       <td><strong>${l.borrower_name || '—'}</strong></td>
-      <td>${formatUGX(l.principal_amount)}</td>
+      <td style="font-weight:600">${fmtAmt(l.principal_amount)}</td>
       <td><span class="td-muted">${l.product_name || '—'}</span></td>
       <td>${loanStatusPill(l.status)}</td>
       <td class="td-muted">${formatDate(l.created_at)}</td>
     </tr>`).join('');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // === LOANS ===
@@ -6460,7 +7623,7 @@ async function _fetchLoans(cacheKey, tbody) {
   } catch(e) {
     const tb = tbody || document.getElementById('loans-tbody'); // FIX: always resolve tbody so background errors are shown
     if (tb) tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadLoans');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   }
 }
 
@@ -6470,9 +7633,17 @@ function renderLoansTable(loans, total) {
     tbody.innerHTML = emptyState('file-text', 'No loans found', 'Adjust your filters or create a new loan.',
       `<button class="btn btn-primary btn-sm" onclick="openModal('new-loan-modal')"><i data-lucide="plus"></i> New Loan</button>`);
     renderPagination('loans-pagination', loanPage, 0, 'goLoanPage');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     return;
   }
+  // On mobile, show compact numbers without "UGX" to save horizontal space
+  const isMobile = window.innerWidth <= 768;
+  const fmtAmt = isMobile
+    ? n => ugxRound(n).toLocaleString('en-UG', { maximumFractionDigits: 0 })
+    : formatUGX;
+  const fmtDate = isMobile
+    ? d => { if (!d) return '—'; const dt = new Date(d); if (isNaN(dt.getTime())) return '—'; return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`; }
+    : formatDate;
   tbody.innerHTML = loans.map(l => {
     const totalRepayable = Number(l.total_repayable || l.principal_amount || 0);
     const remaining = Number(l.outstanding_principal || 0) + Number(l.outstanding_interest || 0);
@@ -6483,10 +7654,10 @@ function renderLoansTable(loans, total) {
     const displayStatus = isClosed ? 'closed' : (l.status === 'active' && l.maturity_date && new Date(l.maturity_date) < new Date() ? 'overdue' : l.status);
     const remainingDisplay = isClosed
       ? `<span style="color:var(--accent);font-weight:600;font-size:0.8rem">✓ Fully Paid</span>`
-      : `<div style="min-width:120px">
+      : `<div style="min-width:${isMobile?'0':'120px'}">
            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-             <span style="font-weight:600;font-size:0.82rem;color:var(--warning)">${formatUGX(remaining)}</span>
-             <span style="font-size:0.7rem;color:var(--text-muted);margin-left:6px">${pct}%</span>
+             <span style="font-weight:600;font-size:${isMobile?'0.7rem':'0.82rem'};color:var(--warning)">${fmtAmt(remaining)}</span>
+             <span style="font-size:0.68rem;color:var(--text-muted);margin-left:4px">${pct}%</span>
            </div>
            <div style="height:4px;background:var(--surface-3);border-radius:4px;overflow:hidden">
              <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-hover));border-radius:4px;transition:width 0.4s ease"></div>
@@ -6495,15 +7666,15 @@ function renderLoansTable(loans, total) {
     return `
     <tr style="cursor:pointer" ondblclick="openLoanDrawer('${l.id}')" title="Double-click to view details">
       <td><strong>${l.borrower_name || '—'}</strong></td>
-      <td>${formatUGX(l.principal_amount)}</td>
-      <td><strong>${formatUGX(totalRepayable)}</strong></td>
+      <td>${fmtAmt(l.principal_amount)}</td>
+      <td><strong>${fmtAmt(totalRepayable)}</strong></td>
       <td>${remainingDisplay}</td>
       <td>${loanStatusPill(displayStatus)}</td>
-      <td class="td-muted no-wrap">${formatDate(l.maturity_date)}</td>
+      <td class="td-muted no-wrap">${fmtDate(l.maturity_date)}</td>
     </tr>`;
   }).join('');
   renderPagination('loans-pagination', loanPage, total, 'goLoanPage');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function goLoanPage(p) {
@@ -6659,15 +7830,45 @@ function loanGoToSignStep() {
     + '&sigtype=both';
 
   const img = document.getElementById('loan-sig-qr-img');
-  const qrOpts = { width: 200, margin: 2, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#ffffff' } };
-  if (window.QRCode && typeof QRCode.toDataURL === 'function') {
-    QRCode.toDataURL(sigUrl, qrOpts, (err, dataUrl) => {
-      img.src = err ? 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=M&data=' + encodeURIComponent(sigUrl) : dataUrl;
-      img.alt = '';
-    });
+  if (isMobileDevice()) {
+    // ── Mobile: hide QR, inject a direct-sign button ─────────────────
+    const qrDesc = document.querySelector('#loan-sig-step > div:first-child > div[style*="font-size:0.78rem"]');
+    const qrBox  = document.querySelector('#loan-sig-step > div:first-child > div[style*="background:#fff"]');
+    if (qrDesc) qrDesc.textContent = 'Tap the button below to sign on this device. The borrower signs first, then the lender.';
+    if (qrBox)  qrBox.style.display = 'none';
+    // Inject Sign Now button if not already present
+    if (!document.getElementById('loan-sig-mobile-btn')) {
+      const container = document.querySelector('#loan-sig-step > div:first-child');
+      if (container) {
+        const mobileBtn = document.createElement('div');
+        mobileBtn.id = 'loan-sig-mobile-btn-wrap';
+        mobileBtn.style.cssText = 'text-align:center;margin-bottom:0.75rem';
+        mobileBtn.innerHTML = `
+          <button id="loan-sig-mobile-btn" onclick="window.location.href='${sigUrl}'"
+            style="padding:0.8rem 1.5rem;background:var(--accent);border:none;border-radius:var(--radius);color:#0f1117;font-weight:700;font-size:0.9rem;cursor:pointer;display:inline-flex;align-items:center;gap:8px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            Sign Now →
+          </button>
+          <p style="font-size:0.72rem;color:var(--text-subtle);margin-top:0.5rem">After signing, use your browser's back button to return here.</p>
+        `;
+        // Insert before the status rows (first child is the QR block, second is status rows)
+        const sigRows = container.querySelector('div[style*="flex-direction:column"]');
+        if (sigRows) container.insertBefore(mobileBtn, sigRows);
+        else container.appendChild(mobileBtn);
+      }
+    }
   } else {
-    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=M&data=' + encodeURIComponent(sigUrl);
-    img.alt = '';
+    // ── Desktop: generate QR as normal ───────────────────────────────
+    const qrOpts = { width: 200, margin: 2, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#ffffff' } };
+    if (window.QRCode && typeof QRCode.toDataURL === 'function') {
+      QRCode.toDataURL(sigUrl, qrOpts, (err, dataUrl) => {
+        img.src = err ? 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=M&data=' + encodeURIComponent(sigUrl) : dataUrl;
+        img.alt = '';
+      });
+    } else {
+      img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=M&data=' + encodeURIComponent(sigUrl);
+      img.alt = '';
+    }
   }
 
   loanInlineSigStart();
@@ -6790,7 +7991,7 @@ function addCollateralRow(val) {
       <i data-lucide="x" style="width:14px;height:14px"></i>
     </button>`;
   list.appendChild(div);
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function getCollateralItems() {
@@ -6827,7 +8028,7 @@ function addGuarantorRow(g) {
       </div>
     </div>`;
   list.appendChild(div);
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function getGuarantors() {
@@ -7013,7 +8214,7 @@ async function submitNewLoan() {
 
   const btn = document.getElementById('loan-submit-btn');
   btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Creating…';
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 
   try {
     // Round rate to nearest whole number to avoid floating-point drift (e.g. 20.001% instead of 20%)
@@ -7181,7 +8382,7 @@ async function submitNewLoan() {
   } finally {
     _loanSubmitInProgress = false;
     btn.disabled = false; btn.innerHTML = '<i data-lucide="plus"></i> Create Loan';
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   }
 }
 
@@ -7561,7 +8762,7 @@ async function openLoanDrawer(loanId) {
   } catch(e) {
     document.getElementById('lt-overview').innerHTML = `<div class="error-state"><i data-lucide="x-circle"></i><div class="error-state-text"><div class="error-state-title">Failed to load loan</div><div class="error-state-msg">${parseSupabaseError(e)}</div></div></div>`;
   }
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // === SCHEDULE HELPERS ===
@@ -7886,7 +9087,7 @@ async function buildAgreementTab(loan, client, product) {
       </button>
     </div>
     ${agreementHtml}`;
-  setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 200);
+  setTimeout(() => { _lucide(); }, 200);
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -7935,6 +9136,8 @@ function openSigningModal(opts) {
   overlay.id = 'sig-modal-overlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9000;display:flex;align-items:center;justify-content:center;padding:1rem';
 
+  const onMobile = isMobileDevice();
+
   overlay.innerHTML = `
     <div style="background:var(--surface);border:1px solid var(--border-2);border-radius:var(--radius-lg);padding:1.75rem 1.5rem;max-width:460px;width:100%;box-shadow:var(--shadow-lg)">
 
@@ -7944,16 +9147,30 @@ function openSigningModal(opts) {
           style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;line-height:1">&#x2715;</button>
       </div>
       <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.25rem;line-height:1.5">
-        Ask both parties to scan the QR code with one phone. The borrower signs first, then the lender.<br>
+        ${onMobile
+          ? 'Both parties will sign on this device. The borrower signs first, then the lender.'
+          : 'Ask both parties to scan the QR code with one phone. The borrower signs first, then the lender.'
+        }<br>
         <span style="font-size:0.75rem;color:var(--text-subtle)">Ref: ${loanRef || '—'}</span>
       </p>
 
+      ${onMobile ? `
+      <div style="text-align:center;margin-bottom:1.25rem">
+        <button onclick="window.location.href='${sigUrl}'"
+          style="width:100%;padding:0.85rem 1.25rem;background:var(--accent);border:none;border-radius:var(--radius);color:#0f1117;font-weight:700;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+          Start Signing →
+        </button>
+        <p style="font-size:0.75rem;color:var(--text-subtle);margin-top:0.6rem">You will be taken to the signing page. Use your browser's back button to return after both parties have signed.</p>
+      </div>
+      ` : `
       <div style="text-align:center;margin-bottom:1.25rem">
         <div style="background:#fff;border-radius:16px;padding:18px;box-shadow:var(--shadow);display:inline-block">
           <img id="sig-qr-img" src="" alt="Generating QR…"
             style="width:190px;height:190px;display:block;border-radius:6px;background:#f5f5f5" onload="this.style.background='transparent'">
         </div>
       </div>
+      `}
 
       <!-- Progress rows -->
       <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.25rem">
@@ -7980,8 +9197,6 @@ function openSigningModal(opts) {
       </div>
 
       <div style="display:flex;gap:0.65rem;justify-content:flex-end">
-        <button onclick="sigStopPolling();document.getElementById('sig-modal-overlay').remove()"
-          class="btn btn-ghost btn-sm">Cancel</button>
         <button id="sig-save-btn" onclick="sigSaveReceived('${loanRef}')"
           class="btn btn-primary btn-sm" disabled>Save Both Signatures</button>
       </div>
@@ -7989,19 +9204,21 @@ function openSigningModal(opts) {
   `;
 
   document.body.appendChild(overlay);
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 
-  // Generate QR
-  const img = document.getElementById('sig-qr-img');
-  const qrOpts = { width: 220, margin: 2, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#ffffff' } };
-  if (window.QRCode && typeof QRCode.toDataURL === 'function') {
-    QRCode.toDataURL(sigUrl, qrOpts, (err, dataUrl) => {
-      img.src = err ? 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=M&data=' + encodeURIComponent(sigUrl) : dataUrl;
+  // Generate QR — desktop only (mobile uses the Start Signing button instead)
+  if (!onMobile) {
+    const img = document.getElementById('sig-qr-img');
+    const qrOpts = { width: 220, margin: 2, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#ffffff' } };
+    if (window.QRCode && typeof QRCode.toDataURL === 'function') {
+      QRCode.toDataURL(sigUrl, qrOpts, (err, dataUrl) => {
+        img.src = err ? 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=M&data=' + encodeURIComponent(sigUrl) : dataUrl;
+        img.alt = '';
+      });
+    } else {
+      img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=M&data=' + encodeURIComponent(sigUrl);
       img.alt = '';
-    });
-  } else {
-    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=M&data=' + encodeURIComponent(sigUrl);
-    img.alt = '';
+    }
   }
 
   sigStartPolling();
@@ -8139,7 +9356,7 @@ function sigSaveReceived(loanRef) {
         document.querySelectorAll('#loan-drawer .tab-btn').forEach(b => {
           b.classList.toggle('active', b.getAttribute('onclick')?.includes('lt-agreement'));
         });
-        if (window.lucide) lucide.createIcons();
+        _lucide();
       } catch(_) {}
     }, 300);
   }
@@ -8325,6 +9542,19 @@ async function sigCapHandleSubmit(key, borrowerName, lenderName, dualMode) {
       if (doneMsg) doneMsg.innerHTML = dualMode
         ? 'Both signatures have been sent.<br>You can close this page.'
         : 'Your signature has been sent.<br>You can close this page.';
+      // On mobile the user navigated here from the app — give them a clear way back
+      if (isMobileDevice() && !doneEl.querySelector('#sig-back-btn')) {
+        const backBtn = document.createElement('button');
+        backBtn.id = 'sig-back-btn';
+        backBtn.onclick = () => window.history.back();
+        backBtn.style.cssText = 'margin-top:1.25rem;width:100%;padding:0.8rem;background:#3fb950;border:none;border-radius:8px;color:#0f1117;font-weight:700;font-size:0.95rem;cursor:pointer';
+        backBtn.textContent = '← Back to LendWise';
+        const noteEl = document.createElement('p');
+        noteEl.style.cssText = 'font-size:0.78rem;color:#7d8590;margin-top:0.5rem;line-height:1.5';
+        noteEl.textContent = 'Signatures saved. Return to the loan to confirm and finalise.';
+        doneEl.appendChild(backBtn);
+        doneEl.appendChild(noteEl);
+      }
     }
     if (doneEl) doneEl.style.display = 'block';
     lwClosePage();
@@ -8479,7 +9709,7 @@ async function _fetchBorrowers(cacheKey, tbody) {
     renderBorrowersTable(allBorrowers, count || 0);
   } catch(e) {
     const tb = tbody || document.getElementById('borrowers-tbody'); // FIX: always resolve tbody so background errors are shown
-    if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadBorrowers'); if (window.lucide) lucide.createIcons(); }
+    if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadBorrowers'); _lucide(); }
   }
 }
 
@@ -8489,10 +9719,15 @@ function renderBorrowersTable(borrowers, total) {
     tbody.innerHTML = emptyState('users', 'No clients yet', 'Register your first client to get started.',
       `<button class="btn btn-primary btn-sm" onclick="openClientWizard()"><i data-lucide="plus"></i> Add Client</button>`);
     renderPagination('borrowers-pagination', borrowerPage, 0, 'goBorrowerPage');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     return;
   }
-  tbody.innerHTML = borrowers.map(b => `
+  tbody.innerHTML = borrowers.map(b => {
+    const isMob = window.innerWidth <= 768;
+    const dStr = isMob
+      ? (b.created_at ? (() => { const dt=new Date(b.created_at); return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`; })() : '—')
+      : formatDate(b.created_at);
+    return `
     <tr style="cursor:pointer" ondblclick="openBorrowerDrawer('${b.id}')" title="Double-click to view details">
       <td>
         <div style="display:flex;align-items:center;gap:0.6rem">
@@ -8509,10 +9744,10 @@ function renderBorrowersTable(borrowers, total) {
           : `<span class="td-muted" style="font-size:0.8rem">None</span>`}
       </td>
       <td>${b._total_repayable > 0 ? `<strong style="color:var(--info)">${formatUGX(b._total_repayable)}</strong>` : '<span class="td-muted">—</span>'}</td>
-      <td class="td-muted">${formatDate(b.created_at)}</td>
-    </tr>`).join('');
+      <td class="td-muted">${dStr}</td>
+    </tr>`}).join('');
   renderPagination('borrowers-pagination', borrowerPage, total, 'goBorrowerPage');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function goBorrowerPage(p) {
@@ -8564,7 +9799,7 @@ async function submitNewBorrower() {
 
   const btn = document.getElementById('borrower-submit-btn');
   btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Registering…';
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 
   try {
     // FIX: guard against null business_id — if missing, the client would be saved
@@ -8573,7 +9808,7 @@ async function submitNewBorrower() {
     if (!borrowerBizId) {
       showModalError('borrower-modal-error','borrower-modal-error-text','No active business session. Please refresh the page and try again.');
       btn.disabled = false; btn.innerHTML = '<i data-lucide="user-plus"></i> Register';
-      if (window.lucide) lucide.createIcons();
+      _lucide();
       return;
     }
     const statusMap = { VERIFIED:'active', PENDING:'inactive', REJECTED:'blacklisted' };
@@ -8612,7 +9847,7 @@ async function submitNewBorrower() {
     showModalError('borrower-modal-error','borrower-modal-error-text', parseSupabaseError(e));
   } finally {
     btn.disabled = false; btn.innerHTML = '<i data-lucide="user-plus"></i> Register';
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   }
 }
 
@@ -8782,7 +10017,7 @@ async function openBorrowerDrawer(clientId) {
   } catch(e) {
     document.getElementById('bt-overview').innerHTML = `<div class="error-state"><i data-lucide="x-circle"></i><div class="error-state-text"><div class="error-state-title">Failed to load</div><div class="error-state-msg">${parseSupabaseError(e)}</div></div></div>`;
   }
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // Opens the New Loan modal pre-filled with the client currently shown in the borrower drawer
@@ -8882,7 +10117,7 @@ async function _fetchPayments(cacheKey, tbody) {
     renderPaymentsTable(allPayments, totalCount);
   } catch(e) {
     const tb = tbody || document.getElementById('payments-tbody'); // FIX: always resolve tbody so background errors are shown
-    if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadPayments'); if (window.lucide) lucide.createIcons(); }
+    if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadPayments'); _lucide(); }
   }
 }
 
@@ -8892,19 +10127,24 @@ function renderPaymentsTable(payments, total) {
     tbody.innerHTML = emptyState('credit-card', 'No payments recorded', 'Record your first payment.',
       `<button class="btn btn-primary btn-sm" onclick="openModal('new-payment-modal')"><i data-lucide="plus"></i> Record Payment</button>`);
     renderPagination('payments-pagination', paymentPage, 0, 'goPaymentPage');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     return;
   }
+  const isMobPay = window.innerWidth <= 768;
+  const fmtPayAmt = isMobPay ? n => ugxRound(n).toLocaleString('en-UG',{maximumFractionDigits:0}) : formatUGX;
+  const fmtPayDate = isMobPay
+    ? d => { if(!d) return '—'; const dt=new Date(d); if(isNaN(dt.getTime())) return '—'; return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`; }
+    : formatDate;
   tbody.innerHTML = payments.map(p => `
     <tr style="cursor:pointer" ondblclick="openPaymentDetail('${p.id}')" title="Double-click to view details">
       <td><strong>${p._borrower_name || '—'}</strong></td>
-      <td><strong>${formatUGX(p.amount_paid)}</strong></td>
+      <td><strong>${fmtPayAmt(p.amount_paid)}</strong></td>
       <td>${methodPill((p.payment_method||'').toUpperCase())}</td>
-      <td class="td-muted">${formatDate(p.payment_date)}</td>
+      <td class="td-muted">${fmtPayDate(p.payment_date)}</td>
       <td class="td-muted">${p._collected_by_name || (p.collected_by ? p.collected_by.toString().substring(0, 8) + '…' : '—')}</td>
     </tr>`).join('');
   renderPagination('payments-pagination', paymentPage, total, 'goPaymentPage');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function goPaymentPage(p) {
@@ -8941,8 +10181,14 @@ async function openPaymentDetail(paymentId) {
   modal.className = 'modal-backdrop';
   modal.id = 'payment-detail-modal';
 
-  const closeModal = () => modal.remove();
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  const closePmtDetailModal = () => {
+    modal.classList.remove('open');
+    // Release scroll lock if no other modals are open
+    const anyOpen = document.querySelectorAll('.modal-backdrop.open').length > 0;
+    if (!anyOpen) document.body.classList.remove('modal-open');
+    modal.addEventListener('transitionend', () => modal.remove(), { once: true });
+  };
+  modal.addEventListener('click', e => { if (e.target === modal) closePmtDetailModal(); });
 
   modal.innerHTML = `
     <div class="modal" style="max-width:480px;width:100%;overflow:hidden">
@@ -8951,7 +10197,7 @@ async function openPaymentDetail(paymentId) {
           <i data-lucide="receipt" style="width:16px;height:16px;color:var(--accent)"></i>
           Payment Receipt
         </div>
-        <button class="modal-close" onclick="document.getElementById('payment-detail-modal').remove()"><i data-lucide="x"></i></button>
+        <button class="modal-close" id="pmt-detail-close-btn"><i data-lucide="x"></i></button>
       </div>
 
       <div class="modal-body" style="padding:1.25rem 1.25rem 1.25rem;display:flex;flex-direction:column;gap:0.9rem">
@@ -9004,13 +10250,16 @@ async function openPaymentDetail(paymentId) {
         </div>` : ''}
 
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="document.getElementById('payment-detail-modal').remove()">Close</button>
-      </div>
     </div>`;
   document.body.appendChild(modal);
-  modal.style.display = 'flex';
-  if (window.lucide) lucide.createIcons();
+  // Lock body scroll (same as openModal())
+  if (!document.body.classList.contains('modal-open')) {
+    document.body.style.top = `-${window.scrollY}px`;
+    document.body.classList.add('modal-open');
+  }
+  requestAnimationFrame(() => modal.classList.add('open'));
+  document.getElementById('pmt-detail-close-btn').addEventListener('click', closePmtDetailModal);
+  _lucide();
 }
 
 function filterPayments(query) {
@@ -9213,7 +10462,7 @@ async function submitNewPayment() {
 
   const btn = document.getElementById('payment-submit-btn'); // FIX: hoisted so overpayment guard below can reset it on early return
   btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Verifying…';
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 
   // FIX: overpayment guard — fetch outstanding before inserting so we never accept more than is owed
   try {
@@ -9227,7 +10476,7 @@ async function submitNewPayment() {
       if (loanCheck.status === 'completed' || loanCheck.status === 'closed') {
         showModalError('payment-modal-error', 'payment-modal-error-text', 'This loan is already fully paid.');
         btn.disabled = false; btn.innerHTML = '<i data-lucide="credit-card"></i> Record Payment';
-        if (window.lucide) lucide.createIcons();
+        _lucide();
         return;
       }
       // Only block genuine overpayments (more than 500 UGX over outstanding) — never block exact payoffs
@@ -9235,19 +10484,19 @@ async function submitNewPayment() {
         showModalError('payment-modal-error', 'payment-modal-error-text',
           `Payment amount (${formatUGX(amount)}) exceeds outstanding balance (${formatUGX(totalOutstanding)}). Please enter the correct amount.`);
         btn.disabled = false; btn.innerHTML = '<i data-lucide="credit-card"></i> Record Payment';
-        if (window.lucide) lucide.createIcons();
+        _lucide();
         return;
       }
     }
   } catch(e) {
     showModalError('payment-modal-error', 'payment-modal-error-text', 'Could not verify loan balance: ' + parseSupabaseError(e));
     btn.disabled = false; btn.innerHTML = '<i data-lucide="credit-card"></i> Record Payment';
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     return;
   }
 
   btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Recording…';
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 
   try {
     const { error } = await tbl('repayments').insert({
@@ -9315,7 +10564,7 @@ async function submitNewPayment() {
     showModalError('payment-modal-error', 'payment-modal-error-text', parseSupabaseError(e));
   } finally {
     btn.disabled = false; btn.innerHTML = '<i data-lucide="credit-card"></i> Record Payment';
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   }
 }
 
@@ -9404,7 +10653,7 @@ function _renderPortfolio({ loans, prodMap, labels, amounts }) {
       <td>${d.overdue > 0 ? `<span style="color:var(--danger)">${d.overdue}</span>` : '0'}</td>
     </tr>`).join('');
   } catch(e) { log('Product perf render error', e); }
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // === PAR ===
@@ -9434,7 +10683,7 @@ async function _fetchPAR(tbody) {
     _renderPAR(tbody, data);
   } catch(e) {
     tbody.innerHTML = errorStateRow(parseSupabaseError(e), 'loadPAR');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   }
 }
 
@@ -9455,7 +10704,7 @@ function _renderPAR(tbody, data) {
       </tr>`;
     }).join('');
   }
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // === AUDIT ===
@@ -9517,7 +10766,7 @@ async function _fetchAudit(cacheKey, tbody, actionFilter) {
     _renderAudit(tbody, rows, count || 0);
   } catch(e) {
     tbody.innerHTML = errorStateRow(parseSupabaseError(e), 'loadAudit');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   }
 }
 
@@ -9535,7 +10784,7 @@ function _renderAudit(tbody, data, count) {
     </tr>`).join('');
     renderPagination('audit-pagination', auditPage, count, 'goAuditPage');
   }
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 function goAuditPage(p) {
   auditPage = p;
@@ -9578,7 +10827,7 @@ async function _fetchStaff(tbody) {
     renderStaffTable(allStaff);
   } catch(e) {
     const tb = tbody || document.getElementById('staff-tbody'); // FIX: always resolve tbody so background errors are shown
-    if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadStaff'); if (window.lucide) lucide.createIcons(); }
+    if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadStaff'); _lucide(); }
   }
 }
 
@@ -9586,7 +10835,7 @@ function renderStaffTable(staff) {
   const tbody = document.getElementById('staff-tbody');
   if (!staff.length) {
     tbody.innerHTML = emptyState('user-cog', 'No staff profiles', 'Add staff members to get started.');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     return;
   }
   tbody.innerHTML = staff.map(s => `
@@ -9612,7 +10861,7 @@ function renderStaffTable(staff) {
         </button>
       </td>
     </tr>`).join('');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function filterStaff(query) {
@@ -9670,7 +10919,7 @@ async function submitNewStaff() {
 
   const btn = document.getElementById('staff-submit-btn');
   btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Creating…';
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 
   try {
     let resolvedBizId = window.currentBusiness?.id || (() => {
@@ -9748,7 +10997,7 @@ async function submitNewStaff() {
     showModalError('staff-modal-error', 'staff-modal-error-text', friendly);
   } finally {
     btn.disabled = false; btn.innerHTML = '<i data-lucide="user-plus"></i> Create Account';
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   }
 }
 
@@ -9776,7 +11025,7 @@ async function _fetchProducts(tbody) {
     renderProductsTable(allProducts);
   } catch(e) {
     const tb = tbody || document.getElementById('products-tbody');
-    if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadProducts'); if (window.lucide) lucide.createIcons(); }
+    if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadProducts'); _lucide(); }
   }
 }
 
@@ -9784,7 +11033,7 @@ function renderProductsTable(products) {
   const tbody = document.getElementById('products-tbody');
   if (!products.length) {
     tbody.innerHTML = emptyState('package', 'No products', 'Create a loan product to get started.');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     return;
   }
   tbody.innerHTML = products.map(p => `
@@ -9804,7 +11053,7 @@ function renderProductsTable(products) {
         </div>
       </td>
     </tr>`).join('');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // ================================================================
@@ -9913,7 +11162,7 @@ function prOnTypeChange() {
   document.getElementById('pr-term-hint').textContent  = cfg.termHint;
   document.getElementById('pr-method').value = cfg.method;
   document.getElementById('pr-freq').value   = cfg.freq;
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function prFmtUGX(n) { return 'UGX ' + ugxRound(n).toLocaleString(); }
@@ -10057,7 +11306,7 @@ async function _fetchBranches(tbody) {
   } catch(e) {
     const t = tbody || document.getElementById('branches-tbody');
     if (t) t.innerHTML = errorStateRow(parseSupabaseError(e), 'loadBranches');
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   }
 }
 
@@ -10078,7 +11327,7 @@ function _renderBranches(tbody, data) {
       </td>
     </tr>`).join('');
   }
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function openBranchModal() {
@@ -10089,7 +11338,7 @@ function openBranchModal() {
   document.getElementById('branch-submit-btn').disabled = false;
   document.getElementById('branch-submit-btn').innerHTML = '<i data-lucide="save"></i> Save Branch';
   openModal('branch-modal');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 async function submitBranch() {
@@ -10107,7 +11356,7 @@ async function submitBranch() {
   }
   btn.disabled = true;
   btn.innerHTML = '<i data-lucide="loader"></i> Saving…';
-  if (window.lucide) lucide.createIcons();
+  _lucide();
   try {
     const { error } = await tbl('branches').insert({
       name,
@@ -10125,7 +11374,7 @@ async function submitBranch() {
     errEl.style.display = 'flex';
     btn.disabled = false;
     btn.innerHTML = '<i data-lucide="save"></i> Save Branch';
-    if (window.lucide) lucide.createIcons();
+    _lucide();
   }
 }
 
@@ -10229,7 +11478,7 @@ function toggleNotifications(e) {
   const isOpen = dd.classList.contains('open');
   document.querySelectorAll('.notif-dropdown').forEach(d => d.classList.remove('open'));
   if (!isOpen) { renderNotifications(); dd.classList.add('open'); }
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function renderNotifications(filter) {
@@ -10259,7 +11508,7 @@ function renderNotifications(filter) {
       <div class="notif-empty-title">${title}</div>
       <div class="notif-empty-sub">${sub}</div>
     </div>`;
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     return;
   }
   list.innerHTML = filtered.map(n => {
@@ -10275,7 +11524,7 @@ function renderNotifications(filter) {
       <button class="notif-dismiss" onclick="event.stopPropagation();dismissNotification(${n.id})" title="Dismiss">\u00d7</button>
     </div>`;
   }).join('');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function readNotification(id) {
@@ -10385,7 +11634,7 @@ function openProfileDrawer() {
   document.querySelectorAll('#profile-drawer .tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
 
   openDrawer('profile');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function handlePhotoUpload(event) {
@@ -10428,14 +11677,14 @@ async function saveProfileDetails() {
   const okEl  = document.getElementById('profile-details-success');
   errEl.classList.remove('show'); okEl.classList.remove('show');
 
-  if (!name) { errTx.textContent = 'Full name cannot be empty.'; errEl.classList.add('show'); if(window.lucide)lucide.createIcons(); return; }
+  if (!name) { errTx.textContent = 'Full name cannot be empty.'; errEl.classList.add('show'); _lucide(); return; }
   if (document.getElementById('profile-bizname-group')?.style.display !== 'none' && bizName && bizName.length < 2) {
-    errTx.textContent = 'Business name must be at least 2 characters.'; errEl.classList.add('show'); if(window.lucide)lucide.createIcons(); return;
+    errTx.textContent = 'Business name must be at least 2 characters.'; errEl.classList.add('show'); _lucide(); return;
   }
 
   const btn = document.getElementById('profile-save-btn');
   btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Saving…';
-  if (window.lucide) lucide.createIcons();
+  _lucide();
   try {
     const { error } = await sb.from('users').update({ full_name: name, phone: phone||null }).eq('id', currentUser.id);
     if (error) throw error;
@@ -10472,12 +11721,12 @@ async function saveProfileDetails() {
       if (window.currentBusiness) window.currentBusiness.name = bizName;
     }
 
-    okEl.classList.add('show'); if(window.lucide)lucide.createIcons();
+    okEl.classList.add('show'); _lucide();
     setTimeout(() => okEl.classList.remove('show'), 3000);
   } catch(e) {
-    errTx.textContent = parseSupabaseError(e); errEl.classList.add('show'); if(window.lucide)lucide.createIcons();
+    errTx.textContent = parseSupabaseError(e); errEl.classList.add('show'); _lucide();
   } finally {
-    btn.disabled = false; btn.innerHTML = '<i data-lucide="save"></i> Save Changes'; if(window.lucide)lucide.createIcons();
+    btn.disabled = false; btn.innerHTML = '<i data-lucide="save"></i> Save Changes'; _lucide();
   }
 }
 
@@ -10489,24 +11738,24 @@ async function saveNewPassword() {
   const okEl  = document.getElementById('profile-pass-success');
   errEl.classList.remove('show'); okEl.classList.remove('show');
 
-  if (!newPass || newPass.length < 8) { errTx.textContent = 'Password must be at least 8 characters.'; errEl.classList.add('show'); if(window.lucide)lucide.createIcons(); return; }
-  if (newPass !== confirmPass)         { errTx.textContent = 'Passwords do not match.'; errEl.classList.add('show'); if(window.lucide)lucide.createIcons(); return; }
+  if (!newPass || newPass.length < 8) { errTx.textContent = 'Password must be at least 8 characters.'; errEl.classList.add('show'); _lucide(); return; }
+  if (newPass !== confirmPass)         { errTx.textContent = 'Passwords do not match.'; errEl.classList.add('show'); _lucide(); return; }
 
   const btn = document.getElementById('profile-pass-btn');
   btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Updating…';
-  if (window.lucide) lucide.createIcons();
+  _lucide();
   try {
     const { error } = await sb.auth.updateUser({ password: newPass });
     if (error) throw error;
     document.getElementById('profile-new-pass').value = '';
     document.getElementById('profile-confirm-pass').value = '';
-    okEl.classList.add('show'); if(window.lucide)lucide.createIcons();
+    okEl.classList.add('show'); _lucide();
     setTimeout(() => okEl.classList.remove('show'), 4000);
     showToast('Password updated successfully', 'success');
   } catch(e) {
-    errTx.textContent = parseSupabaseError(e); errEl.classList.add('show'); if(window.lucide)lucide.createIcons();
+    errTx.textContent = parseSupabaseError(e); errEl.classList.add('show'); _lucide();
   } finally {
-    btn.disabled = false; btn.innerHTML = '<i data-lucide="lock"></i> Update Password'; if(window.lucide)lucide.createIcons();
+    btn.disabled = false; btn.innerHTML = '<i data-lucide="lock"></i> Update Password'; _lucide();
   }
 }
 
@@ -10518,7 +11767,7 @@ function toggleExportMenu(e) {
   const menu = document.getElementById('export-menu');
   const isOpen = menu.style.display === 'block';
   menu.style.display = isOpen ? 'none' : 'block';
-  if (!isOpen && window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 document.addEventListener('click', e => {
@@ -11116,7 +12365,7 @@ function initRegisterPage() {
     });
   }
 
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 </script>
 
@@ -11476,13 +12725,29 @@ let _cwSavedClientId = null;
 function openClientWizard() {
   cwResetWizard();
   document.getElementById('client-wizard-backdrop').classList.add('open');
-  if (window.lucide) lucide.createIcons();
+  // Lock background scroll
+  if (!document.body.classList.contains('modal-open')) {
+    const scrollY = window.scrollY || window.pageYOffset;
+    document.body.dataset.scrollY = scrollY;
+    document.body.style.top = `-${scrollY}px`;
+    document.body.classList.add('modal-open');
+  }
+  _lucide();
 }
 
 function closeClientWizard() {
   cwStopPolling();
   document.getElementById('client-wizard-backdrop').classList.remove('open');
   document.getElementById('cw-save-overlay').classList.remove('active');
+  // Unlock scroll if no modals or drawers remain open
+  const anyModalOpen = document.querySelectorAll('.modal-backdrop.open').length > 0;
+  const anyDrawerOpen = document.querySelectorAll('.drawer.open').length > 0;
+  if (!anyModalOpen && !anyDrawerOpen) {
+    const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, scrollY);
+  }
 }
 
 // ── Reset ────────────────────────────────────────────────────────
@@ -11530,7 +12795,7 @@ function cwResetWizard() {
   document.getElementById('cw-next-btn').innerHTML = 'Continue <i data-lucide="arrow-right"></i>';
   document.getElementById('cw-footer-err').style.display = 'none';
   document.getElementById('cw-save-overlay').classList.remove('active');
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 // ── Navigation ───────────────────────────────────────────────────
@@ -11570,7 +12835,7 @@ function cwGoStep(s) {
 
   document.getElementById('cw-footer-err').style.display = 'none';
   document.querySelector('#cw-modal .cw-body').scrollTop = 0;
-  if (window.lucide) lucide.createIcons();
+  _lucide();
 }
 
 function cwUpdateProgress(step) {
@@ -11621,6 +12886,13 @@ function cwGenerateCaptureQR() {
   // Short unique session key — keep it small so the QR stays simple
   const shortKey = Math.random().toString(36).substring(2, 10);
   _cwQrSessionKey = 'lw-cap-' + shortKey;
+
+  // ── Mobile bypass: open the capture UI directly on this device ────
+  if (isMobileDevice() && window.location.protocol !== 'file:') {
+    cwOpenCaptureDirectly(_cwQrSessionKey);
+    cwStartPolling(); // polling still watches for the data we'll write directly
+    return;
+  }
 
   // Build the URL the phone will open — strip any existing query params
   const base = window.location.origin + window.location.pathname;
@@ -11786,6 +13058,134 @@ function cwStopPolling() {
   if (_cwQrRealtimeChannel) {
     try { const c = cwGetAnonClient(); c && c.removeChannel(_cwQrRealtimeChannel); } catch(_) {}
     _cwQrRealtimeChannel = null;
+  }
+}
+
+// ── Mobile-direct photo capture (no QR needed) ────────────────────
+// Called instead of QR generation when the logged-in user is on a phone.
+// Injects a camera/gallery UI into Step 3 and writes the result to
+// qr_capture_sessions exactly as the remote capture page would — so the
+// existing polling/realtime code picks it up and advances the wizard.
+function cwOpenCaptureDirectly(sessionKey) {
+  const step3 = document.getElementById('cw-step3');
+  if (!step3) return;
+
+  // Update the step heading
+  const heading = step3.querySelector('.cw-step-heading');
+  if (heading) heading.textContent = 'PASSPORT PHOTO';
+
+  // Replace inner content with inline camera panel
+  const inner = step3.querySelector('div[style]');
+  if (inner) inner.innerHTML = `
+    <p style="font-size:0.85rem;color:var(--text-muted);text-align:center;max-width:400px;line-height:1.6">
+      Take a clear passport-style photo of the client or choose one from your gallery.
+    </p>
+
+    <div id="cwdc-preview-box" style="width:220px;height:220px;border-radius:var(--radius-md);overflow:hidden;background:var(--surface-2);border:2px dashed var(--border-2);display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;margin:0 auto" onclick="document.getElementById('cwdc-input-camera').click()">
+      <img id="cwdc-preview-img" src="" style="display:none;width:100%;height:100%;object-fit:cover">
+      <div id="cwdc-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-muted);padding:1rem;text-align:center">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span style="font-size:0.8rem">Tap to open camera</span>
+      </div>
+    </div>
+
+    <input type="file" id="cwdc-input-camera" accept="image/*" capture="user" style="display:none" onchange="cwdcLoadPhoto(this,'${sessionKey}')">
+    <input type="file" id="cwdc-input-gallery" accept="image/*" style="display:none" onchange="cwdcLoadPhoto(this,'${sessionKey}')">
+
+    <div style="display:flex;flex-direction:column;gap:0.65rem;width:100%;max-width:320px;margin:0 auto">
+      <button onclick="document.getElementById('cwdc-input-camera').click()" style="width:100%;padding:0.75rem;background:var(--accent);border:none;border-radius:var(--radius);color:#0f1117;font-weight:700;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Take Photo
+      </button>
+      <button onclick="document.getElementById('cwdc-input-gallery').click()" style="width:100%;padding:0.75rem;background:var(--surface-3);border:1px solid var(--border-2);border-radius:var(--radius);color:var(--text);font-weight:600;font-size:0.9rem;cursor:pointer">
+        Choose from Gallery
+      </button>
+      <button id="cwdc-confirm-btn" onclick="cwdcSubmitPhoto('${sessionKey}')" style="display:none;width:100%;padding:0.75rem;background:var(--accent);border:none;border-radius:var(--radius);color:#0f1117;font-weight:700;font-size:0.9rem;cursor:pointer">
+        Use This Photo →
+      </button>
+    </div>
+
+    <p style="font-size:0.75rem;color:var(--text-subtle);text-align:center;max-width:360px">
+      Optional — tap <strong>Save Client</strong> to continue without a photo.
+    </p>
+
+    <input type="hidden" id="cw-captured-photo-data">
+  `;
+}
+
+let _cwdcPhotoDataUrl = null;
+
+function cwdcLoadPhoto(input, sessionKey) {
+  const f = input.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const srcImg = new Image();
+    srcImg.onload = () => {
+      const MAX = 800;
+      let w = srcImg.width, h = srcImg.height;
+      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(srcImg, 0, 0, w, h);
+      _cwdcPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+
+      const previewImg = document.getElementById('cwdc-preview-img');
+      const placeholder = document.getElementById('cwdc-placeholder');
+      const confirmBtn = document.getElementById('cwdc-confirm-btn');
+      if (previewImg) { previewImg.src = _cwdcPhotoDataUrl; previewImg.style.display = 'block'; }
+      if (placeholder) placeholder.style.display = 'none';
+      if (confirmBtn) confirmBtn.style.display = 'block';
+    };
+    srcImg.src = e.target.result;
+  };
+  r.readAsDataURL(f);
+}
+
+async function cwdcSubmitPhoto(sessionKey) {
+  if (!_cwdcPhotoDataUrl) { showToast('Please take or choose a photo first.', 'warning'); return; }
+  const btn = document.getElementById('cwdc-confirm-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  const sbUrl = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : null) || window._lwSbUrl;
+  const sbKey = (typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : null) || window._lwSbKey;
+
+  let ok = false;
+  if (sbUrl && sbKey) {
+    try {
+      const resp = await fetch(sbUrl + '/rest/v1/qr_capture_sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': sbKey,
+          'Authorization': 'Bearer ' + sbKey,
+          'Prefer': 'resolution=merge-duplicates,return=minimal',
+        },
+        body: JSON.stringify({
+          session_key:  sessionKey,
+          photo_data:   _cwdcPhotoDataUrl,
+          submitted_at: new Date().toISOString(),
+        }),
+      });
+      if (resp.ok || resp.status === 201 || resp.status === 204) ok = true;
+      else console.warn('[LW cwdc] write failed:', resp.status, await resp.text());
+    } catch(e) { console.warn('[LW cwdc] fetch error:', e); }
+  }
+
+  // Same-device fallback — polling checks localStorage too
+  try {
+    localStorage.setItem(sessionKey, JSON.stringify({ photoData: _cwdcPhotoDataUrl, ts: Date.now() }));
+    ok = true;
+  } catch(_) {}
+
+  if (ok) {
+    // cwApplyCaptureData will fire via polling/realtime, but also call directly
+    // for instant feedback since we're on the same device
+    cwApplyCaptureData(_cwdcPhotoDataUrl);
+    showToast('Photo saved ✓', 'success');
+  } else {
+    if (btn) { btn.disabled = false; btn.textContent = 'Use This Photo →'; }
+    showToast('Could not save photo — check your connection and try again.', 'error');
   }
 }
 
@@ -12245,7 +13645,7 @@ async function cwSubmitForm() {
     overlay.classList.remove('active');
     document.getElementById('cw-next-btn').disabled = false;
     document.getElementById('cw-next-btn').innerHTML = 'Retry <i data-lucide="refresh-cw"></i>';
-    if (window.lucide) lucide.createIcons();
+    _lucide();
     cwShowFooterErr(e.message || 'Registration failed. Please try again.');
     showToast(e.message || 'Client registration failed', 'error');
   }
@@ -12289,7 +13689,7 @@ async function saveSettings() {
   if (okEl)  okEl.classList.remove('show');
   if (!bizName || bizName.length < 2) {
     if (errTx) errTx.textContent = 'Business name is required.';
-    if (errEl) { errEl.classList.add('show'); if (window.lucide) lucide.createIcons(); }
+    if (errEl) { errEl.classList.add('show'); _lucide(); }
     return;
   }
   try {
@@ -12309,11 +13709,11 @@ async function saveSettings() {
     } catch(_) {}
     const logoText = document.querySelector('.sidebar-logo-text');
     if (logoText) logoText.innerHTML = bizName + '<span></span>';
-    if (okEl) { okEl.classList.add('show'); if (window.lucide) lucide.createIcons(); }
+    if (okEl) { okEl.classList.add('show'); _lucide(); }
     showToast('Settings saved', 'success');
   } catch(e) {
     if (errTx) errTx.textContent = e.message || 'Save failed';
-    if (errEl) { errEl.classList.add('show'); if (window.lucide) lucide.createIcons(); }
+    if (errEl) { errEl.classList.add('show'); _lucide(); }
   }
 }
 
