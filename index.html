@@ -47,40 +47,105 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --sidebar-w: 240px;
+  --sidebar-collapsed-w: 64px;
   --header-h: 60px;
   --font: 'Inter', sans-serif;
   --mono: 'JetBrains Mono', monospace;
 }
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #f6f8fa;
+  /* Backgrounds — warm off-white like the Donezo reference */
+  --bg: #f0f2f0;
   --surface: #ffffff;
-  --surface-2: #f0f2f5;
-  --surface-3: #e8ebef;
-  --border: rgba(0,0,0,0.08);
-  --border-2: rgba(0,0,0,0.14);
-  --text: #1f2328;
-  --text-muted: #656d76;
-  --text-subtle: #9aa2ac;
-  --accent: #1a7f37;
-  --accent-hover: #2da44e;
-  --accent-subtle: rgba(26,127,55,0.1);
-  --accent-border: rgba(26,127,55,0.3);
-  --danger: #cf222e;
-  --danger-subtle: rgba(207,34,46,0.1);
-  --danger-border: rgba(207,34,46,0.3);
-  --warning: #9a6700;
-  --warning-subtle: rgba(154,103,0,0.1);
-  --warning-border: rgba(154,103,0,0.3);
-  --info: #0969da;
-  --info-subtle: rgba(9,105,218,0.1);
-  --info-border: rgba(9,105,218,0.3);
-  --purple: #8250df;
-  --purple-subtle: rgba(130,80,223,0.1);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow: 0 4px 16px rgba(0,0,0,0.12);
-  --shadow-lg: 0 16px 48px rgba(0,0,0,0.2);
+  --surface-2: #f7f8f7;
+  --surface-3: #eef0ee;
+  /* Borders — very soft, almost invisible */
+  --border: rgba(0,0,0,0.06);
+  --border-2: rgba(0,0,0,0.1);
+  /* Typography — rich near-black for headings, warm grays for supporting text */
+  --text: #14181a;
+  --text-muted: #5a6370;
+  --text-subtle: #9ba5ae;
+  /* Accent — deep forest green matching Donezo's brand */
+  --accent: #1b6b3a;
+  --accent-hover: #22883f;
+  --accent-subtle: rgba(27,107,58,0.09);
+  --accent-border: rgba(27,107,58,0.25);
+  /* Semantic colours */
+  --danger: #c8272e;
+  --danger-subtle: rgba(200,39,46,0.08);
+  --danger-border: rgba(200,39,46,0.25);
+  --warning: #9a6200;
+  --warning-subtle: rgba(154,98,0,0.09);
+  --warning-border: rgba(154,98,0,0.25);
+  --info: #0860c8;
+  --info-subtle: rgba(8,96,200,0.09);
+  --info-border: rgba(8,96,200,0.25);
+  --purple: #7340cc;
+  --purple-subtle: rgba(115,64,204,0.09);
+  /* Shadows — clean and airy, not heavy */
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+  --shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
 }
+
+/* ── Light mode structural refinements ── */
+[data-theme="light"] .sidebar-logo {
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+[data-theme="light"] .nav-item {
+  color: #4a5568;
+  border-radius: 10px;
+}
+[data-theme="light"] .nav-item:hover {
+  background: rgba(27,107,58,0.07);
+  color: #1b6b3a;
+}
+[data-theme="light"] .nav-item.active {
+  background: rgba(27,107,58,0.13);
+  color: #1b6b3a;
+  font-weight: 700;
+  box-shadow: none;
+}
+[data-theme="light"] .nav-item.active i,
+[data-theme="light"] .nav-item.active svg { color: #1b6b3a; }
+[data-theme="light"] .sidebar-section-label { color: #9ba5ae; letter-spacing: 0.08em; }
+[data-theme="light"] .topbar {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+}
+[data-theme="light"] .table-card,
+[data-theme="light"] .kpi-card,
+[data-theme="light"] .card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.07);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  border-radius: 14px;
+}
+[data-theme="light"] .kpi-card:hover {
+  box-shadow: 0 6px 24px rgba(0,0,0,0.09);
+  transform: translateY(-1px);
+}
+[data-theme="light"] table thead tr { background: #f7f9f7; }
+[data-theme="light"] table thead th { color: #5a6370; border-bottom: 1px solid rgba(0,0,0,0.07); }
+[data-theme="light"] table tbody tr:hover { background: rgba(27,107,58,0.04); }
+[data-theme="light"] .table-filter,
+[data-theme="light"] .form-input,
+[data-theme="light"] select { background: #f7f9f7; border-color: rgba(0,0,0,0.1); color: #14181a; }
+[data-theme="light"] .table-filter:focus,
+[data-theme="light"] .form-input:focus { border-color: #1b6b3a; box-shadow: 0 0 0 3px rgba(27,107,58,0.12); background: #ffffff; }
+[data-theme="light"] .btn-primary { background: #1b6b3a; box-shadow: 0 2px 10px rgba(27,107,58,0.3); }
+[data-theme="light"] .btn-primary:hover { background: #22883f; box-shadow: 0 4px 16px rgba(27,107,58,0.38); }
+[data-theme="light"] .drawer { background: #ffffff; border-left: 1px solid rgba(0,0,0,0.07); box-shadow: -4px 0 32px rgba(0,0,0,0.1); }
+[data-theme="light"] .modal-backdrop { background: rgba(20,24,26,0.45); }
+[data-theme="light"] .modal { background: #ffffff; border: 1px solid rgba(0,0,0,0.07); box-shadow: 0 24px 64px rgba(0,0,0,0.15); border-radius: 16px; }
+[data-theme="light"] .tab-btn { color: #5a6370; }
+[data-theme="light"] .tab-btn.active { color: #1b6b3a; border-bottom-color: #1b6b3a; }
+[data-theme="light"] .pill-green  { background: rgba(27,107,58,0.1);  color: #1b6b3a; }
+[data-theme="light"] .pill-red    { background: rgba(200,39,46,0.09); color: #c8272e; }
+[data-theme="light"] .pill-yellow { background: rgba(154,98,0,0.09);  color: #9a6200; }
+[data-theme="light"] .pill-blue   { background: rgba(8,96,200,0.09);  color: #0860c8; }
 
 /* === RESET === */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -232,7 +297,11 @@ svg { display: block; }
 
 /* ── Nav items ── */
 .nav-item {
-  transition: background 0.15s, color 0.15s, transform 0.15s !important;
+  transition: background 0.15s, color 0.15s, transform 0.15s,
+              padding var(--dur-sidebar) var(--ease-sidebar),
+              height var(--dur-sidebar) var(--ease-sidebar),
+              gap var(--dur-sidebar) var(--ease-sidebar),
+              justify-content var(--dur-sidebar) var(--ease-sidebar);
 }
 .nav-item:hover {
   transform: translateX(2px);
@@ -1659,53 +1728,363 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
 #app { display: none; min-height: 100vh; }
 #app.active { display: flex; }
 
-/* === SIDEBAR === */
+/* ============================================================
+   SIDEBAR — polished collapsible (icon-rail ↔ full)
+   ============================================================ */
+
+/* ============================================================
+   SIDEBAR — smooth graceful collapse animation
+   ============================================================ */
+
+/* ── Easing curve — cinematic ease-in-out with spring overshoot feel ── */
+:root {
+  --ease-sidebar: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-sidebar-spring: cubic-bezier(0.34, 1.06, 0.64, 1);
+  --dur-sidebar: 0.36s;
+  --dur-sidebar-fast: 0.22s;
+  --dur-sidebar-slow: 0.44s;
+}
+
+/* ── Shell ── */
 .sidebar {
-  width: var(--sidebar-w); background: var(--surface);
+  width: var(--sidebar-w);
+  background: var(--surface);
   border-right: 1px solid var(--border);
   position: fixed; top: 0; left: 0; bottom: 0; z-index: 50;
   display: flex; flex-direction: column;
-  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  overflow: hidden;
+  transition: width 0.3s ease, margin 0.3s ease;
+}
+/* will-change only during animation — added/removed via JS */
+.sidebar.is-animating {
+  will-change: width;
+}
+.sidebar.collapsed { width: var(--sidebar-collapsed-w); }
+
+/* ── Claude-style collapse trigger ── */
+.sidebar-collapse-trigger { margin-bottom: 2px; }
+.sidebar-collapse-trigger .nav-item-label {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  transition: color 0.15s, opacity var(--dur-sidebar) var(--ease-sidebar),
+              max-width var(--dur-sidebar) var(--ease-sidebar);
+}
+.sidebar-collapse-trigger:hover .nav-item-label { color: var(--text-muted); }
+.sidebar-collapse-chevron {
+  transition: transform var(--dur-sidebar) var(--ease-sidebar-spring), color 0.15s;
+  color: var(--text-subtle);
+  flex-shrink: 0;
+}
+.sidebar.collapsed .sidebar-collapse-chevron { transform: rotate(180deg); }
+.sidebar-collapse-trigger:hover .sidebar-collapse-chevron { color: var(--text); }
+.sidebar.collapsed .sidebar-collapse-trigger .nav-item-icon { background: transparent; }
+.sidebar.collapsed .sidebar-collapse-trigger:hover .nav-item-icon { background: var(--surface-2); }
+
+/* ── Logo row ── */
+.sidebar-logo {
+  height: var(--header-h);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 1.1rem;
+  gap: 10px;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  transition: padding var(--dur-sidebar) var(--ease-sidebar);
+}
+.sidebar.collapsed .sidebar-logo { padding: 0; justify-content: center; }
+
+.sidebar-logo-icon {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; flex-shrink: 0;
+  box-shadow: 0 0 14px rgba(63,185,80,0.25);
+  transition: transform 0.2s var(--ease-sidebar);
+}
+.sidebar.collapsed .sidebar-logo-icon { transform: scale(1.04); }
+
+.sidebar-logo-text {
+  font-size: 0.95rem; font-weight: 800; letter-spacing: -0.3px;
+  white-space: nowrap;
+  opacity: 1;
+  max-width: 160px;
+  transition: opacity var(--dur-sidebar-fast) ease,
+              max-width var(--dur-sidebar) var(--ease-sidebar);
   overflow: hidden;
 }
-.sidebar-logo {
-  height: var(--header-h); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px; padding: 0 1.2rem; flex-shrink: 0;
-}
-.sidebar-logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; box-shadow: 0 0 14px rgba(63,185,80,0.25); }
-.sidebar-logo-text { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.3px; }
 .sidebar-logo-text span { color: var(--accent); }
-.sidebar-nav { flex: 1; overflow-y: auto; padding: 0.6rem 0; }
-.nav-group-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-subtle); padding: 0.7rem 1.2rem 0.3rem; }
+.sidebar.collapsed .sidebar-logo-text {
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-sidebar-fast) ease,
+              max-width var(--dur-sidebar) var(--ease-sidebar);
+}
+
+/* ── Nav scroll area ── */
+.sidebar-nav {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 0.5rem 0;
+  scrollbar-width: none;
+}
+.sidebar-nav::-webkit-scrollbar { display: none; }
+
+/* ── Section labels — fade + shrink height ── */
+.nav-group-label {
+  font-size: 0.63rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-subtle);
+  padding: 0.75rem 1.1rem 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  max-height: 2.5rem;
+  transition: opacity var(--dur-sidebar-fast) ease,
+              max-height var(--dur-sidebar) var(--ease-sidebar),
+              padding var(--dur-sidebar) var(--ease-sidebar);
+}
+.sidebar.collapsed .nav-group-label {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  pointer-events: none;
+}
+
+/* ── Nav items ── */
 .nav-item {
-  display: flex; align-items: center; gap: 0.65rem;
-  padding: 0.5rem 1.2rem; color: var(--text-muted);
-  font-size: 0.85rem; font-weight: 500; cursor: pointer;
-  transition: all 0.12s; position: relative; border: none;
-  background: none; width: 100%; text-align: left; border-radius: 0;
+  position: relative;
+  display: flex; align-items: center;
+  gap: 0.7rem;
+  padding: 0 1.1rem;
+  height: 38px;
+  color: var(--text-muted);
+  font-size: 0.845rem; font-weight: 500;
+  cursor: pointer; border: none;
+  background: none; width: 100%; text-align: left;
+  white-space: nowrap;
+  border-radius: 0;
+  transition: background 0.14s, color 0.14s,
+              padding var(--dur-sidebar) var(--ease-sidebar),
+              height var(--dur-sidebar) var(--ease-sidebar),
+              gap var(--dur-sidebar) var(--ease-sidebar),
+              justify-content var(--dur-sidebar) var(--ease-sidebar);
 }
 .nav-item:hover { color: var(--text); background: var(--surface-2); }
 .nav-item.active { color: var(--accent); background: var(--accent-subtle); }
 .nav-item.active::before {
   content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
   width: 3px; background: var(--accent); border-radius: 0 2px 2px 0;
+  transition: opacity var(--dur-sidebar) var(--ease-sidebar),
+              transform var(--dur-sidebar) var(--ease-sidebar);
 }
-.nav-item-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); flex-shrink: 0; }
-.nav-item svg { width: 15px; height: 15px; }
-.nav-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: 0.6rem; font-weight: 800; padding: 1px 6px; border-radius: 100px; }
-.nav-badge.warn { background: var(--warning); color: #fff; }
 
-.sidebar-footer { border-top: 1px solid var(--border); padding: 1rem 1.2rem; flex-shrink: 0; }
-.user-card { display: flex; align-items: center; gap: 0.7rem; }
-.user-avatar { width: 34px; height: 34px; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--accent), var(--accent-hover)); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0; }
-.user-name { font-size: 0.82rem; font-weight: 600; line-height: 1.2; }
-.user-role { font-size: 0.7rem; color: var(--text-muted); }
-.logout-btn { margin-left: auto; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-muted); transition: all 0.15s; }
+/* Collapsed nav items */
+.sidebar.collapsed .nav-item {
+  padding: 0 8px;
+  justify-content: center;
+  height: 44px;
+  gap: 0;
+}
+
+/* ── Icon wrapper ── */
+.nav-item-icon {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: width var(--dur-sidebar) var(--ease-sidebar-spring),
+              height var(--dur-sidebar) var(--ease-sidebar-spring),
+              border-radius 0.2s ease,
+              background 0.14s;
+}
+.nav-item svg { width: 16px; height: 16px; }
+.sidebar.collapsed .nav-item-icon {
+  width: 34px; height: 34px;
+  border-radius: var(--radius);
+}
+.sidebar.collapsed .nav-item:hover .nav-item-icon { background: var(--surface-2); }
+.sidebar.collapsed .nav-item.active .nav-item-icon { background: var(--accent-subtle); }
+
+/* ── Labels + badges — fade with slight delay on expand ── */
+.nav-item-label {
+  flex: 1;
+  opacity: 1;
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: opacity var(--dur-sidebar) var(--ease-sidebar),
+              max-width var(--dur-sidebar) var(--ease-sidebar);
+}
+.nav-badge {
+  background: var(--danger); color: #fff;
+  font-size: 0.58rem; font-weight: 800;
+  padding: 1px 6px; border-radius: 100px;
+  flex-shrink: 0;
+  opacity: 1;
+  transition: opacity var(--dur-sidebar-fast) ease;
+}
+.nav-badge.warn { background: var(--warning); }
+
+/* Collapsed — fade out labels/badges fast, before width shrinks */
+.sidebar.collapsed .nav-item-label {
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-sidebar-fast) ease,
+              max-width var(--dur-sidebar) var(--ease-sidebar);
+}
+.sidebar.collapsed .nav-badge {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+
+/* ── Tooltips (collapsed only) ── */
+.nav-item::after {
+  content: attr(data-label);
+  position: absolute;
+  left: calc(var(--sidebar-collapsed-w) + 6px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 0.78rem; font-weight: 600;
+  padding: 0.28rem 0.7rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-2);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: var(--shadow);
+  z-index: 200;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+/* Only show tooltips when actually collapsed */
+.sidebar:not(.collapsed) .nav-item::after { display: none; }
+.sidebar.collapsed .nav-item:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ── Footer ── */
+.sidebar-footer {
+  border-top: 1px solid var(--border);
+  padding: 0.85rem 1.1rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: padding var(--dur-sidebar) var(--ease-sidebar);
+}
+.sidebar.collapsed .sidebar-footer { padding: 0.85rem 0; }
+
+.user-card {
+  display: flex; align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  border-radius: var(--radius);
+  padding: 0.25rem 0.35rem;
+  min-width: 0;
+  position: relative;
+  transition: background 0.14s,
+              padding var(--dur-sidebar) var(--ease-sidebar),
+              gap var(--dur-sidebar) var(--ease-sidebar);
+}
+.user-card:hover { background: var(--surface-2); }
+.sidebar.collapsed .user-card { padding: 0; gap: 0; justify-content: center; }
+.sidebar.collapsed .user-card:hover { background: transparent; }
+
+.user-avatar {
+  width: 34px; height: 34px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.user-info {
+  flex: 1; min-width: 0;
+  overflow: hidden;
+  opacity: 1;
+  max-width: 160px;
+  white-space: nowrap;
+  transition: opacity 0.18s ease,
+              max-width var(--dur-sidebar) var(--ease-sidebar);
+}
+.user-name { font-size: 0.82rem; font-weight: 600; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 0.68rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; }
+
+.logout-btn {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 1;
+  transition: border-color 0.15s, color 0.15s, background 0.15s,
+              opacity 0.18s ease, max-width var(--dur-sidebar) var(--ease-sidebar);
+  overflow: hidden;
+  max-width: 28px;
+}
 .logout-btn:hover { border-color: var(--danger-border); color: var(--danger); background: var(--danger-subtle); }
-.logout-btn svg { width: 14px; height: 14px; }
+.logout-btn svg { width: 13px; height: 13px; }
+
+.sidebar.collapsed .user-info {
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-sidebar-fast) ease,
+              max-width var(--dur-sidebar) var(--ease-sidebar);
+}
+.sidebar.collapsed .logout-btn {
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease,
+              max-width var(--dur-sidebar) var(--ease-sidebar);
+}
+
+/* User card tooltip when collapsed */
+.sidebar.collapsed .user-card::after {
+  content: 'Profile';
+  position: absolute;
+  left: calc(var(--sidebar-collapsed-w) + 6px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 0.78rem; font-weight: 600;
+  padding: 0.28rem 0.7rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-2);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: var(--shadow);
+  z-index: 200;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.sidebar.collapsed .user-card:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ── Light mode overrides ── */
+[data-theme="light"] .sidebar { background: #ffffff; border-right: 1px solid rgba(0,0,0,0.07); box-shadow: 2px 0 12px rgba(0,0,0,0.04); }
+[data-theme="light"] .sidebar-logo { border-bottom: 1px solid rgba(0,0,0,0.06); }
+[data-theme="light"] .nav-item { color: #4a5568; }
+[data-theme="light"] .nav-item:hover { background: rgba(27,107,58,0.07); color: #1b6b3a; }
+[data-theme="light"] .nav-item.active { background: rgba(27,107,58,0.13); color: #1b6b3a; }
 
 /* === MAIN AREA === */
-.main-wrap { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.main-wrap {
+  margin-left: var(--sidebar-w);
+  flex: 1; display: flex; flex-direction: column; min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+.main-wrap.sidebar-collapsed { margin-left: var(--sidebar-collapsed-w); }
 
 /* === TOPBAR === */
 .topbar {
@@ -1766,7 +2145,7 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
   pointer-events: none;
 }
 .kpi-card:hover { border-color: color-mix(in srgb, var(--kpi-color, var(--accent)) 40%, transparent); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.35), 0 0 0 1px color-mix(in srgb, var(--kpi-color, var(--accent)) 20%, transparent); }
-.kpi-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--kpi-color, var(--accent)), color-mix(in srgb, var(--kpi-color, var(--accent)) 30%, transparent)); border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.kpi-card::after { display: none; }
 .kpi-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
 .kpi-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); padding-top: 2px; }
 .kpi-icon-wrap {
@@ -1938,10 +2317,11 @@ body.modal-open {
 .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
 /* Light theme modal header adjustments */
 [data-theme="light"] .modal-header {
-  background: linear-gradient(to bottom, #f0f2f5 0%, #f6f8fa 100%);
+  background: linear-gradient(to bottom, #f7f9f7 0%, #ffffff 100%);
+  border-bottom: 1px solid rgba(0,0,0,0.07);
 }
 [data-theme="light"] .modal-header::before {
-  background: linear-gradient(90deg, var(--accent) 0%, rgba(26,127,55,0.35) 50%, transparent 100%);
+  background: linear-gradient(90deg, #1b6b3a 0%, rgba(27,107,58,0.3) 50%, transparent 100%);
 }
 
 /* === DRAWER === */
@@ -2247,21 +2627,27 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
 @media (max-width: 768px) {
   html { font-size: 14px; }
 
-  /* Sidebar: slide off-screen, show on hamburger open */
+  /* Sidebar: slide in from left */
   .sidebar {
     transform: translateX(-100%);
     width: 80vw; max-width: 280px;
     z-index: 300;
-    box-shadow: var(--shadow-lg);
+    box-shadow: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
-  .sidebar.open { transform: none; }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 6px 0 32px rgba(0,0,0,0.5);
+  }
 
-  /* Sidebar backdrop overlay */
+  /* Sidebar overlay */
   .sidebar-overlay {
-    display: none; position: fixed; inset: 0; z-index: 299;
-    background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+    display: block !important; position: fixed; inset: 0; z-index: 299;
+    background: rgba(0,0,0,0.5);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
   }
-  .sidebar-overlay.open { display: block; }
+  .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
 
   /* Main wrap takes full width */
   .main-wrap { margin-left: 0; }
@@ -2387,8 +2773,13 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
 /* Desktop: hide mobile-only elements */
 @media (min-width: 769px) {
   .hamburger-btn { display: none; }
-  .sidebar-overlay { display: none !important; }
+  .sidebar-overlay { opacity: 0 !important; pointer-events: none !important; }
   .mobile-bottom-nav { display: none; }
+}
+
+/* Mobile: collapse is not used on mobile */
+@media (max-width: 768px) {
+  .main-wrap.sidebar-collapsed { margin-left: 0; }
 }
 
 /* ================================================================
@@ -2444,18 +2835,27 @@ input, select, textarea {
     transform: translateX(-100%);
     width: min(80vw, 280px);
     z-index: 300;
-    box-shadow: var(--shadow-lg);
+    box-shadow: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
-  .sidebar.open { transform: translateX(0); }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 6px 0 32px rgba(0,0,0,0.5);
+  }
 
   /* Sidebar overlay */
   .sidebar-overlay {
-    display: none;
+    display: block !important;
     position: fixed; inset: 0; z-index: 299;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(2px);
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
   }
-  .sidebar-overlay.open { display: block; }
+  .sidebar-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
   /* ── Main wrap — full width when sidebar hidden ── */
   .main-wrap { margin-left: 0; min-width: 0; }
@@ -2911,7 +3311,7 @@ input, select, textarea {
 /* Desktop: hide mobile-only elements */
 @media (min-width: 769px) {
   .hamburger-btn { display: none !important; }
-  .sidebar-overlay { display: none !important; }
+  .sidebar-overlay { opacity: 0 !important; pointer-events: none !important; }
   .mobile-bottom-nav { display: none !important; }
 }
 
@@ -4235,48 +4635,55 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
       <div class="sidebar-logo-text">Lend<span>Wise</span></div>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav">
-      <div class="nav-group-label">Main</div>
-      <button class="nav-item active" onclick="nav('dashboard')" data-view="dashboard">
-        <span class="nav-item-icon"><i data-lucide="layout-dashboard"></i></span> Dashboard
+      <!-- Sidebar collapse trigger — Claude-style -->
+      <button class="nav-item sidebar-collapse-trigger" onclick="toggleSidebarCollapse()" data-label="Collapse sidebar" title="Toggle sidebar">
+        <span class="nav-item-icon sidebar-collapse-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-collapse-chevron"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
+        <span class="nav-item-label">Collapse sidebar</span>
       </button>
-      <button class="nav-item" onclick="nav('loans')" data-view="loans">
-        <span class="nav-item-icon"><i data-lucide="file-text"></i></span> Loans
+      <div class="nav-group-label">Main</div>
+      <button class="nav-item active" onclick="nav('dashboard')" data-view="dashboard" data-label="Dashboard">
+        <span class="nav-item-icon"><i data-lucide="layout-dashboard"></i></span><span class="nav-item-label">Dashboard</span>
+      </button>
+      <button class="nav-item" onclick="nav('loans')" data-view="loans" data-label="Loans">
+        <span class="nav-item-icon"><i data-lucide="file-text"></i></span><span class="nav-item-label">Loans</span>
         <span class="nav-badge warn" id="nav-overdue-badge" style="display:none">0</span>
       </button>
-      <button class="nav-item" onclick="nav('borrowers')" data-view="borrowers">
-        <span class="nav-item-icon"><i data-lucide="users"></i></span> Clients
+      <button class="nav-item" onclick="nav('borrowers')" data-view="borrowers" data-label="Clients">
+        <span class="nav-item-icon"><i data-lucide="users"></i></span><span class="nav-item-label">Clients</span>
       </button>
-      <button class="nav-item" onclick="nav('payments')" data-view="payments">
-        <span class="nav-item-icon"><i data-lucide="credit-card"></i></span> Payments
+      <button class="nav-item" onclick="nav('payments')" data-view="payments" data-label="Payments">
+        <span class="nav-item-icon"><i data-lucide="credit-card"></i></span><span class="nav-item-label">Payments</span>
       </button>
       <div class="nav-group-label">Reports</div>
-      <button class="nav-item" onclick="nav('portfolio')" data-view="portfolio">
-        <span class="nav-item-icon"><i data-lucide="bar-chart-2"></i></span> Portfolio
+      <button class="nav-item" onclick="nav('portfolio')" data-view="portfolio" data-label="Portfolio">
+        <span class="nav-item-icon"><i data-lucide="bar-chart-2"></i></span><span class="nav-item-label">Portfolio</span>
       </button>
-      <button class="nav-item" onclick="nav('par')" data-view="par">
-        <span class="nav-item-icon"><i data-lucide="trending-down"></i></span> PAR Report
+      <button class="nav-item" onclick="nav('par')" data-view="par" data-label="PAR Report">
+        <span class="nav-item-icon"><i data-lucide="trending-down"></i></span><span class="nav-item-label">PAR Report</span>
       </button>
-      <button class="nav-item" onclick="nav('audit')" data-view="audit">
-        <span class="nav-item-icon"><i data-lucide="shield-check"></i></span> Audit Trail
+      <button class="nav-item" onclick="nav('audit')" data-view="audit" data-label="Audit Trail">
+        <span class="nav-item-icon"><i data-lucide="shield-check"></i></span><span class="nav-item-label">Audit Trail</span>
       </button>
       <div class="nav-group-label nav-admin-group" id="nav-admin-label">Admin</div>
-      <button class="nav-item nav-admin-group" onclick="nav('staff')" data-view="staff">
-        <span class="nav-item-icon"><i data-lucide="user-cog"></i></span> Staff
+      <button class="nav-item nav-admin-group" onclick="nav('staff')" data-view="staff" data-label="Staff">
+        <span class="nav-item-icon"><i data-lucide="user-cog"></i></span><span class="nav-item-label">Staff</span>
       </button>
-      <button class="nav-item nav-admin-group" onclick="nav('products')" data-view="products">
-        <span class="nav-item-icon"><i data-lucide="package"></i></span> Loan Products
+      <button class="nav-item nav-admin-group" onclick="nav('products')" data-view="products" data-label="Loan Products">
+        <span class="nav-item-icon"><i data-lucide="package"></i></span><span class="nav-item-label">Loan Products</span>
       </button>
-      <button class="nav-item nav-admin-group" onclick="nav('branches')" data-view="branches">
-        <span class="nav-item-icon"><i data-lucide="building-2"></i></span> Branches
+      <button class="nav-item nav-admin-group" onclick="nav('branches')" data-view="branches" data-label="Branches">
+        <span class="nav-item-icon"><i data-lucide="building-2"></i></span><span class="nav-item-label">Branches</span>
       </button>
-      <button class="nav-item nav-admin-group" onclick="nav('settings')" data-view="settings">
-        <span class="nav-item-icon"><i data-lucide="settings"></i></span> Settings
+      <button class="nav-item nav-admin-group" onclick="nav('settings')" data-view="settings" data-label="Settings">
+        <span class="nav-item-icon"><i data-lucide="settings"></i></span><span class="nav-item-label">Settings</span>
       </button>
     </nav>
     <div class="sidebar-footer">
       <div class="user-card">
         <div class="user-avatar" id="sidebar-avatar">--</div>
-        <div>
+        <div class="user-info">
           <div class="user-name" id="sidebar-name">Loading…</div>
           <div class="user-role" id="sidebar-role"></div>
         </div>
@@ -4656,9 +5063,10 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
           <div class="table-toolbar">
             <select class="table-filter" id="audit-action-filter" onchange="loadAudit(true)"><!-- FIX: pass true so auditPage resets to 1 on filter change -->
               <option value="">All Actions</option>
-              <option value="INSERT">Insert</option>
-              <option value="UPDATE">Update</option>
-              <option value="DELETE">Delete</option>
+              <option value="CREATE_LOAN">Create Loan</option>
+              <option value="UPDATE_LOAN">Update Loan</option>
+              <option value="CREATE_CLIENT">Create Client</option>
+              <option value="RECORD_PAYMENT">Record Payment</option>
               <option value="LOGIN">Login</option>
             </select>
           </div>
@@ -5869,8 +6277,182 @@ function showApp() {
   else { loadDashboard(); setTimeout(() => { if (_currentView !== 'loans') loadLoans(); }, 1500); }
   startInactivityTimer();
   setTimeout(refreshLiveNotifications, 2000);
+  // Start real-time cross-user sync after a short delay so the initial load completes first
+  setTimeout(initRealtimeSync, 2500);
   // Silent one-time migration: add lender_sig_data column if not yet present
   setTimeout(ensureLenderSigColumn, 3000);
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// REAL-TIME CROSS-USER SYNC
+// Uses Supabase postgres_changes to detect when any other user on
+// the same business adds/edits loans, clients, repayments or staff.
+// Automatically refreshes the relevant view + dashboard KPIs.
+// ══════════════════════════════════════════════════════════════════
+let _rtChannels = [];
+let _rtDebounceTimers = {};
+
+function initRealtimeSync() {
+  // Clean up any old channels first (e.g. after re-login)
+  destroyRealtimeSync();
+
+  const bizId = window.currentBusiness?.id;
+  if (!bizId) return; // no business context yet
+
+  // Map: table → which views need a reload + which load function to call
+  const tableMap = {
+    loans:           { views: ['loans', 'dashboard', 'portfolio', 'par'], loaders: ['loans', 'dashboard'] },
+    clients:         { views: ['borrowers', 'dashboard'],                 loaders: ['borrowers', 'dashboard'] },
+    repayments:      { views: ['payments', 'loans', 'dashboard', 'par'],  loaders: ['payments', 'loans', 'dashboard'] },
+    business_members:{ views: ['staff', 'dashboard'],                     loaders: ['staff'] },
+    users:           { views: ['staff'],                                   loaders: ['staff'] },
+  };
+
+  const loaderFns = {
+    loans:      () => { if (typeof loadLoans      === 'function') loadLoans(); },
+    borrowers:  () => { if (typeof loadBorrowers  === 'function') loadBorrowers(); },
+    payments:   () => { if (typeof loadPayments   === 'function') loadPayments(); },
+    staff:      () => { if (typeof loadStaff      === 'function') loadStaff(); },
+    dashboard:  () => { if (typeof loadDashboard  === 'function') loadDashboard(); },
+  };
+
+  function onRemoteChange(table, payload) {
+    // Ignore events triggered by the current user's own actions
+    // (Supabase doesn't filter by sender, so we debounce instead)
+    if (_rtDebounceTimers[table]) clearTimeout(_rtDebounceTimers[table]);
+    _rtDebounceTimers[table] = setTimeout(() => {
+      delete _rtDebounceTimers[table];
+
+      const map = tableMap[table];
+      if (!map) return;
+
+      // Only refresh if the affected view is currently visible, OR it's dashboard (always refresh)
+      const needsRefresh = map.views.some(v => v === _currentView || v === 'dashboard');
+      if (!needsRefresh) {
+        // Invalidate cache so next navigation fetches fresh data
+        const cacheKeys = map.loaders.map(l => {
+          if (l === 'loans')     return ['loans_p1','loans_p2','loans_p3'];
+          if (l === 'borrowers') return ['borrowers_p1','borrowers_p2'];
+          if (l === 'payments')  return ['payments_p1','payments_p2'];
+          if (l === 'staff')     return ['staff'];
+          if (l === 'dashboard') return ['dashboard','par','portfolio'];
+          return [];
+        }).flat();
+        if (typeof cacheInvalidate === 'function') cacheInvalidate(...cacheKeys);
+        return;
+      }
+
+      // Show a subtle sync indicator (non-intrusive, auto-dismisses)
+      _rtShowSyncBadge(table);
+
+      // Reload only what's needed
+      const toRun = new Set();
+      map.loaders.forEach(l => {
+        if (l === 'dashboard' || map.views.includes(_currentView)) toRun.add(l);
+      });
+
+      // Always reload dashboard KPIs silently
+      toRun.add('dashboard');
+
+      toRun.forEach(l => {
+        if (loaderFns[l]) loaderFns[l]();
+      });
+    }, 800); // 800ms debounce — collapses rapid-fire inserts into one refresh
+  }
+
+  // Subscribe to each table scoped to this business
+  Object.keys(tableMap).forEach(table => {
+    const filter = table === 'users' ? undefined : `business_id=eq.${bizId}`;
+    const channelName = `lw-rt-${table}-${bizId}`;
+
+    try {
+      const ch = sb.channel(channelName)
+        .on('postgres_changes', {
+          event:  '*',
+          schema: 'public',
+          table,
+          ...(filter ? { filter } : {}),
+        }, (payload) => {
+          onRemoteChange(table, payload);
+        })
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.warn('[LendWise RT] Channel error for', table, '— will retry in 30s');
+            setTimeout(() => initRealtimeSync(), 30000);
+          }
+        });
+
+      _rtChannels.push(ch);
+    } catch(e) {
+      console.warn('[LendWise RT] Could not subscribe to', table, e);
+    }
+  });
+
+  console.info('[LendWise RT] Real-time sync active for business', bizId);
+}
+
+function destroyRealtimeSync() {
+  _rtChannels.forEach(ch => {
+    try { sb.removeChannel(ch); } catch(_) {}
+  });
+  _rtChannels = [];
+  Object.values(_rtDebounceTimers).forEach(t => clearTimeout(t));
+  _rtDebounceTimers = {};
+}
+
+// Subtle sync badge — appears top-right, auto-dismisses in 3s
+let _rtBadgeTimer = null;
+function _rtShowSyncBadge(table) {
+  const labels = {
+    loans:            'Loan data updated',
+    clients:          'Client data updated',
+    repayments:       'Payment recorded',
+    business_members: 'Staff list updated',
+    users:            'Staff list updated',
+  };
+  const label = labels[table] || 'Data updated';
+
+  let badge = document.getElementById('rt-sync-badge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'rt-sync-badge';
+    badge.style.cssText = [
+      'position:fixed',
+      'top:70px',
+      'right:1rem',
+      'z-index:9999',
+      'background:var(--surface-2)',
+      'border:1px solid var(--accent-border)',
+      'border-radius:8px',
+      'padding:0.45rem 0.85rem',
+      'font-size:0.75rem',
+      'color:var(--accent)',
+      'font-weight:600',
+      'display:flex',
+      'align-items:center',
+      'gap:0.4rem',
+      'box-shadow:var(--shadow)',
+      'opacity:0',
+      'transition:opacity 0.25s',
+      'pointer-events:none',
+    ].join(';');
+    document.body.appendChild(badge);
+  }
+
+  badge.innerHTML = `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);animation:rt-pulse 1s infinite"></span> ${label}`;
+
+  // Ensure pulse animation exists
+  if (!document.getElementById('rt-pulse-style')) {
+    const s = document.createElement('style');
+    s.id = 'rt-pulse-style';
+    s.textContent = '@keyframes rt-pulse{0%,100%{opacity:1}50%{opacity:0.3}}';
+    document.head.appendChild(s);
+  }
+
+  if (_rtBadgeTimer) clearTimeout(_rtBadgeTimer);
+  badge.style.opacity = '1';
+  _rtBadgeTimer = setTimeout(() => { badge.style.opacity = '0'; }, 3000);
 }
 
 async function ensureLenderSigColumn() {
@@ -6201,15 +6783,54 @@ async function doBusinessSetup() {
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('open');
-  document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+  const opening = !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', opening);
+  overlay.classList.toggle('open', opening);
+  document.body.style.overflow = opening ? 'hidden' : '';
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebar-overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
+
+function toggleSidebarCollapse() {
+  const sidebar = document.getElementById('sidebar');
+  const mainWrap = document.querySelector('.main-wrap');
+  const isCollapsed = sidebar.classList.toggle('collapsed');
+  mainWrap.classList.toggle('sidebar-collapsed', isCollapsed);
+  try { localStorage.setItem('sidebar-collapsed', isCollapsed ? '1' : '0'); } catch(e) {}
+}
+
+function collapseSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const mainWrap = document.querySelector('.main-wrap');
+  sidebar.classList.add('collapsed');
+  mainWrap.classList.add('sidebar-collapsed');
+  try { localStorage.setItem('sidebar-collapsed', '1'); } catch(e) {}
+}
+
+function expandSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const mainWrap = document.querySelector('.main-wrap');
+  sidebar.classList.remove('collapsed');
+  mainWrap.classList.remove('sidebar-collapsed');
+  try { localStorage.setItem('sidebar-collapsed', '0'); } catch(e) {}
+}
+
+// Restore sidebar state on load
+(function() {
+  try {
+    if (localStorage.getItem('sidebar-collapsed') === '1') {
+      document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainWrap = document.querySelector('.main-wrap');
+        if (sidebar) sidebar.classList.add('collapsed');
+        if (mainWrap) mainWrap.classList.add('sidebar-collapsed');
+      });
+    }
+  } catch(e) {}
+})();
 
 // === MOBILE BOTTOM NAV ===
 function mobileNavActive(el) {
@@ -7664,7 +8285,7 @@ function renderLoansTable(loans, total) {
            </div>
          </div>`;
     return `
-    <tr style="cursor:pointer" ondblclick="openLoanDrawer('${l.id}')" title="Double-click to view details">
+    <tr style="cursor:pointer" onclick="openLoanDrawer('${l.id}')" title="Click to view details">
       <td><strong>${l.borrower_name || '—'}</strong></td>
       <td>${fmtAmt(l.principal_amount)}</td>
       <td><strong>${fmtAmt(totalRepayable)}</strong></td>
@@ -8312,7 +8933,7 @@ async function submitNewLoan() {
       throw new Error('This client already has an active loan (' + el.loan_reference + '). Please settle it before creating a new one.');
     }
 
-    const { error } = await tbl('loans').insert({
+    const { data: newLoanData, error } = await tbl('loans').insert({
       loan_reference:        loanRef,
       client_id:             clientId,
       product_id:            productId,
@@ -8337,8 +8958,9 @@ async function submitNewLoan() {
       loan_purpose:          notes || null,
       created_by:            currentUser?.id,
       business_id:           window.currentBusiness?.id || null,
-    });
+    }).select('id').single();
     if (error) throw error;
+    const newLoanId = newLoanData?.id || null;
 
     // Audit log
     try {
@@ -8353,17 +8975,26 @@ async function submitNewLoan() {
       });
     } catch(_) {}
 
-    // Save inline signatures (collected during step 2) to localStorage so agreement tab shows them immediately
+    // Save inline signatures — persist to Supabase (visible to all users/devices) AND localStorage (local fallback)
     if (_loanInlineSigBorrower || _loanInlineSigLender) {
       const now = new Date().toISOString();
       try {
+        const sigUpdates = { updated_at: now };
         if (_loanInlineSigBorrower) {
           const bp = JSON.stringify({ dataUrl: _loanInlineSigBorrower, signedAt: now });
           localStorage.setItem('lw-sig-' + loanRef, bp);
           if (clientId) localStorage.setItem('lw-client-sig-' + clientId, bp);
+          sigUpdates.borrower_sig    = _loanInlineSigBorrower;
+          sigUpdates.borrower_sig_at = now;
         }
         if (_loanInlineSigLender) {
           localStorage.setItem('lw-lender-sig-' + loanRef, JSON.stringify({ dataUrl: _loanInlineSigLender, signedAt: now }));
+          sigUpdates.lender_sig      = _loanInlineSigLender;
+          sigUpdates.lender_sig_at   = now;
+        }
+        // Push to Supabase so any user/device on the same business sees signatures
+        if (newLoanId) {
+          try { await tbl('loans').update(sigUpdates).eq('id', newLoanId); } catch(_) {}
         }
       } catch(_) {}
       _loanInlineSigBorrower = null;
@@ -8805,11 +9436,17 @@ function generateLoanSchedule(loan) {
   startDate.setHours(0, 0, 0, 0);
   const today = new Date(); today.setHours(0, 0, 0, 0);
 
-  // Build a mutable pool of real payments (oldest first) to allocate installment by installment
+  // Build a mutable pool of real payments sorted oldest-first so allocation
+  // always flows chronologically (fixes multi-overdue tracking bug).
   const paymentPool = (loan.repayments || []).map(p => ({
     date: p.payment_date ? p.payment_date.slice(0, 10) : null,
     remaining: Number(p.amount_paid || 0),
-  })).filter(p => p.date && p.remaining > 0);
+  })).filter(p => p.date && p.remaining > 0)
+     .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+
+  // Terminal statuses — these loans should never gain new MISSED rows
+  const terminalStatuses = new Set(['pending', 'completed', 'closed', 'rejected', 'cancelled']);
+  const isTerminal = terminalStatuses.has((loan.status || '').toLowerCase());
 
   const rows = [];
   for (let i = 1; i <= numInstallments; i++) {
@@ -8819,11 +9456,13 @@ function generateLoanSchedule(loan) {
     const isLast     = i === numInstallments;
     const thisTotal  = isLast ? lastInstallment : stdInstallment;
 
-    // Allocate payments whose payment_date <= this installment due date
+    // Allocate payments whose payment_date <= this installment's due date.
+    // paymentPool is sorted oldest-first so earlier payments fill earlier
+    // installments first, correctly marking ALL skipped installments as MISSED.
     let allocated = 0;
     for (const pmt of paymentPool) {
       if (pmt.remaining <= 0) continue;
-      if (pmt.date > dueDateStr) continue;
+      if (pmt.date > dueDateStr) continue;          // future payments don't count yet
       const take = Math.min(pmt.remaining, thisTotal - allocated);
       allocated += take;
       pmt.remaining -= take;
@@ -8831,7 +9470,9 @@ function generateLoanSchedule(loan) {
     }
 
     const paid_amount = ugxRound(Math.min(allocated, thisTotal));
-    const isPastDue   = dueDate < today && loan.status !== 'pending' && loan.status !== 'completed';
+    // An installment is past-due if its due date is today or earlier and the loan is still live.
+    // Use <= (not <) so today's unpaid installments are also correctly marked MISSED.
+    const isPastDue = dueDate <= today && !isTerminal;
 
     let status;
     if (paid_amount >= thisTotal - 0.5)  status = 'PAID';
@@ -8899,34 +9540,48 @@ async function buildAgreementTab(loan, client, product) {
   const isOverdue = loan.maturity_date && new Date(loan.maturity_date) < new Date() && loan.status === 'active';
   const displayStatus = isOverdue ? 'OVERDUE' : (loan.status || '').toUpperCase();
 
-  // ── Load borrower signature (client-level first, then loan-specific) ──
+  // ── Load borrower signature ──
+  // Priority: Supabase loan columns (shared across all users/devices) → localStorage (legacy fallback)
   let savedBorrowerSigHtml = '';
   try {
-    const clientSigRaw = client?.id ? localStorage.getItem('lw-client-sig-' + client.id) : null;
-    if (clientSigRaw) {
-      const sig = JSON.parse(clientSigRaw);
-      const sigDate = sig.signedAt ? new Date(sig.signedAt).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
-      savedBorrowerSigHtml = `<img src="${sig.dataUrl}" style="max-width:200px;max-height:80px;border:1px solid #ccc;border-radius:4px;display:block;margin-bottom:4px"><div style="font-size:9px;color:#888">Signed digitally at registration \u00b7 ${sigDate}</div>`;
+    if (loan.borrower_sig) {
+      const sigDate = loan.borrower_sig_at ? new Date(loan.borrower_sig_at).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+      savedBorrowerSigHtml = `<img src="${loan.borrower_sig}" style="max-width:200px;max-height:80px;border:1px solid #ccc;border-radius:4px;display:block;margin-bottom:4px"><div style="font-size:9px;color:#888">Signed digitally · ${sigDate}</div>`;
     } else {
-      const loanSigRaw = localStorage.getItem('lw-sig-' + loan.loan_reference);
-      if (loanSigRaw) {
-        const sig = JSON.parse(loanSigRaw);
+      // Fallback to localStorage for loans signed before this update
+      const clientSigRaw = client?.id ? localStorage.getItem('lw-client-sig-' + client.id) : null;
+      const loanSigRaw   = !clientSigRaw ? localStorage.getItem('lw-sig-' + loan.loan_reference) : null;
+      const raw = clientSigRaw || loanSigRaw;
+      if (raw) {
+        const sig = JSON.parse(raw);
         const sigDate = sig.signedAt ? new Date(sig.signedAt).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
-        savedBorrowerSigHtml = `<img src="${sig.dataUrl}" style="max-width:200px;max-height:80px;border:1px solid #ccc;border-radius:4px;display:block;margin-bottom:4px"><div style="font-size:9px;color:#888">Signed digitally \u00b7 ${sigDate}</div>`;
+        savedBorrowerSigHtml = `<img src="${sig.dataUrl}" style="max-width:200px;max-height:80px;border:1px solid #ccc;border-radius:4px;display:block;margin-bottom:4px"><div style="font-size:9px;color:#888">Signed digitally · ${sigDate}</div>`;
+        // Silently migrate this localStorage sig up to Supabase
+        try { tbl('loans').update({ borrower_sig: sig.dataUrl, borrower_sig_at: sig.signedAt || new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', loan.id).then(()=>{}).catch(()=>{}); } catch(_) {}
       }
     }
   } catch(_) {}
 
   // ── Load lender signature ──
+  // Priority: Supabase loan columns → localStorage fallback
   let savedLenderSigHtml = '';
   try {
-    const lenderSigRaw = localStorage.getItem('lw-lender-sig-' + loan.loan_reference);
-    if (lenderSigRaw) {
-      const sig = JSON.parse(lenderSigRaw);
-      const sigDate = sig.signedAt ? new Date(sig.signedAt).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
-      savedLenderSigHtml = `<img src="${sig.dataUrl}" style="max-width:200px;max-height:80px;border:1px solid #ccc;border-radius:4px;display:block;margin-bottom:4px"><div style="font-size:9px;color:#888">Signed digitally \u00b7 ${sigDate}</div>`;
+    if (loan.lender_sig) {
+      const sigDate = loan.lender_sig_at ? new Date(loan.lender_sig_at).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+      savedLenderSigHtml = `<img src="${loan.lender_sig}" style="max-width:200px;max-height:80px;border:1px solid #ccc;border-radius:4px;display:block;margin-bottom:4px"><div style="font-size:9px;color:#888">Signed digitally · ${sigDate}</div>`;
+    } else {
+      // Fallback to localStorage for loans signed before this update
+      const lenderSigRaw = localStorage.getItem('lw-lender-sig-' + loan.loan_reference);
+      if (lenderSigRaw) {
+        const sig = JSON.parse(lenderSigRaw);
+        const sigDate = sig.signedAt ? new Date(sig.signedAt).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+        savedLenderSigHtml = `<img src="${sig.dataUrl}" style="max-width:200px;max-height:80px;border:1px solid #ccc;border-radius:4px;display:block;margin-bottom:4px"><div style="font-size:9px;color:#888">Signed digitally · ${sigDate}</div>`;
+        // Silently migrate this localStorage sig up to Supabase
+        try { tbl('loans').update({ lender_sig: sig.dataUrl, lender_sig_at: sig.signedAt || new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', loan.id).then(()=>{}).catch(()=>{}); } catch(_) {}
+      }
     }
   } catch(_) {}
+
 
   const bothSigned     = !!(savedBorrowerSigHtml && savedLenderSigHtml);
   const signatureLine  = savedBorrowerSigHtml ||
@@ -9330,6 +9985,16 @@ function sigSaveReceived(loanRef) {
     // Lender — saved per-loan
     const lenderPayload = JSON.stringify({ dataUrl: _sigReceivedLender, signedAt: now });
     localStorage.setItem('lw-lender-sig-' + loanRef, lenderPayload);
+    // Push BOTH sigs to Supabase so all users/devices can see them
+    if (_sigLoanId) {
+      tbl('loans').update({
+        borrower_sig:    _sigReceivedBorrower,
+        borrower_sig_at: now,
+        lender_sig:      _sigReceivedLender,
+        lender_sig_at:   now,
+        updated_at:      now,
+      }).eq('id', _sigLoanId).then(() => {}).catch(() => {});
+    }
   } catch(_) {}
 
   sigStopPolling();
@@ -9728,7 +10393,7 @@ function renderBorrowersTable(borrowers, total) {
       ? (b.created_at ? (() => { const dt=new Date(b.created_at); return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`; })() : '—')
       : formatDate(b.created_at);
     return `
-    <tr style="cursor:pointer" ondblclick="openBorrowerDrawer('${b.id}')" title="Double-click to view details">
+    <tr style="cursor:pointer" onclick="openBorrowerDrawer('${b.id}')" title="Click to view details">
       <td>
         <div style="display:flex;align-items:center;gap:0.6rem">
           ${b.photo_url
@@ -10136,7 +10801,7 @@ function renderPaymentsTable(payments, total) {
     ? d => { if(!d) return '—'; const dt=new Date(d); if(isNaN(dt.getTime())) return '—'; return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`; }
     : formatDate;
   tbody.innerHTML = payments.map(p => `
-    <tr style="cursor:pointer" ondblclick="openPaymentDetail('${p.id}')" title="Double-click to view details">
+    <tr style="cursor:pointer" onclick="openPaymentDetail('${p.id}')" title="Click to view details">
       <td><strong>${p._borrower_name || '—'}</strong></td>
       <td><strong>${fmtPayAmt(p.amount_paid)}</strong></td>
       <td>${methodPill((p.payment_method||'').toUpperCase())}</td>
