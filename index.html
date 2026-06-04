@@ -48,7 +48,7 @@
   --radius-lg: 16px;
   --sidebar-w: 240px;
   --sidebar-collapsed-w: 64px;
-  --header-h: 60px;
+  --header-h: 0px;
   --font: 'Inter', sans-serif;
   --mono: 'JetBrains Mono', monospace;
 }
@@ -1979,30 +1979,35 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
 #app.active { display: flex; }
 
 /* ============================================================
-   SIDEBAR — GPU-only animation, zero layout shifts
+   SIDEBAR — Hover-to-expand overlay, zero layout shifts
    ============================================================ */
 
 :root {
-  --sb-w:        240px;
-  --sb-w-col:     64px;
-  --sb-dur:      0.25s;
-  --sb-ease:     cubic-bezier(0.4, 0, 0.2, 1);
-  --sb-text-out: 0.10s;
-  --sb-text-in:  0.15s;
-  --sb-text-delay: 0.18s;
+  --sb-w:          240px;
+  --sb-w-col:       64px;
+  --sb-dur:         0.28s;
+  --sb-ease:        cubic-bezier(0.4, 0, 0.2, 1);
+  --sb-text-out:    0.08s;
+  --sb-text-in:     0.18s;
+  --sb-text-delay:  0.16s;
 }
 
-/* ── Shell — only width transitions ── */
+/* ── Shell — collapsed by default, hover to expand (overlay) ── */
 .sidebar {
-  width: var(--sb-w);
+  width: var(--sb-w-col);
   background: var(--surface);
   border-right: 1px solid var(--border);
   position: fixed; top: 0; left: 0; bottom: 0; z-index: 50;
   display: flex; flex-direction: column;
   overflow: hidden;
-  transition: width var(--sb-dur) var(--sb-ease);
+  transition: width var(--sb-dur) var(--sb-ease),
+              box-shadow var(--sb-dur) var(--sb-ease);
 }
-.sidebar.collapsed { width: var(--sb-w-col); }
+.sidebar:hover {
+  width: var(--sb-w);
+  box-shadow: 6px 0 32px rgba(0,0,0,0.40);
+}
+.sidebar.collapsed { width: var(--sb-w-col) !important; box-shadow: none !important; }
 
 /* ── Logo row — fixed height, never moves ── */
 .sidebar-logo {
@@ -2027,11 +2032,11 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
   transition: opacity var(--sb-text-out) var(--sb-ease);
 }
 .sidebar-logo-text span { color: var(--accent); }
-.sidebar.collapsed .sidebar-logo-text {
+.sidebar:not(:hover) .sidebar-logo-text {
   opacity: 0; pointer-events: none;
   transition: opacity var(--sb-text-out) var(--sb-ease);
 }
-.sidebar:not(.collapsed) .sidebar-logo-text {
+.sidebar:hover .sidebar-logo-text {
   transition: opacity var(--sb-text-in) var(--sb-ease) var(--sb-text-delay);
 }
 
@@ -2053,10 +2058,10 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
   opacity: 1;
   transition: opacity var(--sb-text-out) var(--sb-ease);
 }
-.sidebar.collapsed .nav-group-label {
+.sidebar:not(:hover) .nav-group-label {
   opacity: 0; pointer-events: none;
 }
-.sidebar:not(.collapsed) .nav-group-label {
+.sidebar:hover .nav-group-label {
   transition: opacity var(--sb-text-in) var(--sb-ease) var(--sb-text-delay);
 }
 
@@ -2091,11 +2096,11 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
               background 0.14s ease;
 }
 .nav-item svg, .nav-item i { width: 16px; height: 16px; flex-shrink: 0; }
-.sidebar.collapsed .nav-item-icon {
+.sidebar:not(:hover) .nav-item-icon {
   width: 36px; height: 36px; border-radius: var(--radius);
 }
-.sidebar.collapsed .nav-item:hover  .nav-item-icon { background: var(--surface-2); }
-.sidebar.collapsed .nav-item.active .nav-item-icon { background: var(--accent-subtle); }
+.sidebar:not(:hover) .nav-item:hover  .nav-item-icon { background: var(--surface-2); }
+.sidebar:not(:hover) .nav-item.active .nav-item-icon { background: var(--accent-subtle); }
 
 /* ── Labels — opacity only ── */
 .nav-item-label {
@@ -2103,10 +2108,10 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
   opacity: 1;
   transition: opacity var(--sb-text-out) var(--sb-ease);
 }
-.sidebar.collapsed .nav-item-label {
+.sidebar:not(:hover) .nav-item-label {
   opacity: 0; pointer-events: none;
 }
-.sidebar:not(.collapsed) .nav-item-label {
+.sidebar:hover .nav-item-label {
   transition: opacity var(--sb-text-in) var(--sb-ease) var(--sb-text-delay);
 }
 
@@ -2119,7 +2124,7 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
   transition: opacity var(--sb-text-out) var(--sb-ease);
 }
 .nav-badge.warn { background: var(--warning); }
-.sidebar.collapsed .nav-badge { opacity: 0; pointer-events: none; }
+.sidebar:not(:hover) .nav-badge { opacity: 0; pointer-events: none; }
 
 /* ── Collapse trigger ── */
 .sidebar-collapse-trigger { margin-bottom: 2px; }
@@ -2148,8 +2153,8 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
   opacity: 0; box-shadow: var(--shadow); z-index: 200;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
-.sidebar:not(.collapsed) .nav-item::after { display: none; }
-.sidebar.collapsed .nav-item:hover::after {
+.sidebar:hover .nav-item::after { display: none; }
+.sidebar:not(:hover) .nav-item:hover::after {
   opacity: 1; transform: translateY(-50%) translateX(0);
 }
 
@@ -2181,8 +2186,8 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
   opacity: 1;
   transition: opacity var(--sb-text-out) var(--sb-ease);
 }
-.sidebar.collapsed .user-info { opacity: 0; pointer-events: none; }
-.sidebar:not(.collapsed) .user-info {
+.sidebar:not(:hover) .user-info { opacity: 0; pointer-events: none; }
+.sidebar:hover .user-info {
   transition: opacity var(--sb-text-in) var(--sb-ease) var(--sb-text-delay);
 }
 .user-name { font-size: 0.82rem; font-weight: 600; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
@@ -2214,18 +2219,18 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
   opacity: 1;
   transition: opacity var(--sb-text-out) var(--sb-ease);
 }
-.sidebar.collapsed .logout-btn {
+.sidebar:not(:hover) .logout-btn {
   justify-content: center;
   padding: 0.52rem;
   width: 36px; margin: 0.6rem auto 0;
 }
-.sidebar.collapsed .logout-btn .logout-label { display: none; }
-.sidebar:not(.collapsed) .logout-btn .logout-label {
+.sidebar:not(:hover) .logout-btn .logout-label { display: none; }
+.sidebar:hover .logout-btn .logout-label {
   transition: opacity var(--sb-text-in) var(--sb-ease) var(--sb-text-delay);
 }
 
 /* profile tooltip */
-.sidebar.collapsed .user-card::after {
+.sidebar:not(:hover) .user-card::after {
   content: 'Profile';
   position: absolute;
   left: calc(var(--sb-w-col) + 8px);
@@ -2238,7 +2243,7 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
   opacity: 0; box-shadow: var(--shadow); z-index: 200;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
-.sidebar.collapsed .user-card:hover::after {
+.sidebar:not(:hover) .user-card:hover::after {
   opacity: 1; transform: translateY(-50%) translateX(0);
 }
 
@@ -2255,19 +2260,13 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
 
 /* === MAIN AREA === */
 .main-wrap {
-  margin-left: var(--sidebar-w);
+  margin-left: var(--sb-w-col);   /* fixed — sidebar is now an overlay */
   flex: 1; display: flex; flex-direction: column; min-height: 100vh;
-  transition: margin-left var(--sb-duration) var(--sb-ease);
 }
-.main-wrap.sidebar-collapsed { margin-left: var(--sidebar-collapsed-w); }
+/* sidebar-collapsed class no longer used — sidebar is overlay */
 
-/* === TOPBAR === */
-.topbar {
-  height: var(--header-h); background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 0.75rem;
-  padding: 0 1.5rem; position: sticky; top: 0; z-index: 40; flex-shrink: 0;
-}
+/* === TOPBAR (removed) === */
+.topbar { display: none; }
 .topbar-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.2px; flex-shrink: 0; }
 .topbar-search {
   display: flex; align-items: center; gap: 0.5rem;
@@ -3952,7 +3951,7 @@ input, select, textarea {
 
 /* === NOTIFICATIONS DROPDOWN === */
 .notif-dropdown {
-  display:none; position:absolute; top:calc(var(--header-h) + 6px);
+  display:none; position:fixed; top:12px;
   right:1rem; width:380px; background:var(--surface);
   border:1px solid var(--border-2); border-radius:var(--radius-lg);
   box-shadow:0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
@@ -4845,13 +4844,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
       <div class="sidebar-logo-text">Lend<span>Wise</span></div>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav">
-      <!-- Sidebar collapse trigger — Claude-style -->
-      <button class="nav-item sidebar-collapse-trigger" onclick="toggleSidebarCollapse()" data-label="Collapse sidebar" title="Toggle sidebar">
-        <span class="nav-item-icon sidebar-collapse-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-collapse-chevron"><path d="m15 18-6-6 6-6"/></svg>
-        </span>
-        <span class="nav-item-label">Collapse sidebar</span>
-      </button>
+
       <div class="nav-group-label">Main</div>
       <button class="nav-item active" onclick="nav('dashboard')" data-view="dashboard" data-label="Dashboard">
         <span class="nav-item-icon"><i data-lucide="layout-dashboard"></i></span><span class="nav-item-label">Dashboard</span>
@@ -4890,19 +4883,6 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         <span class="nav-item-icon"><i data-lucide="settings"></i></span><span class="nav-item-label">Settings</span>
       </button>
     </nav>
-    <div class="sidebar-footer">
-      <div class="user-card">
-        <div class="user-avatar" id="sidebar-avatar">--</div>
-        <div class="user-info">
-          <div class="user-name" id="sidebar-name">Loading…</div>
-          <div class="user-role" id="sidebar-role"></div>
-        </div>
-      </div>
-      <button class="logout-btn" onclick="doLogout()" title="Sign out" aria-label="Sign out">
-        <i data-lucide="log-out"></i>
-        <span class="logout-label">Sign Out</span>
-      </button>
-    </div>
   </aside>
 
   <!-- SIDEBAR OVERLAY (mobile) -->
@@ -4914,44 +4894,6 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     <div id="offline-banner">
       <i data-lucide="wifi-off"></i> You appear to be offline. Reconnect to continue.
     </div>
-
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <!-- Mobile branding: app icon + business name (hidden on desktop) -->
-      <div class="topbar-mobile-brand">
-        <div class="topbar-mobile-icon">
-          <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
-            <rect width="32" height="32" rx="8" fill="#1b6b3a"/>
-            <g transform="translate(6,6)">
-              <line x1="0" y1="16" x2="20" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/>
-              <line x1="2" y1="16" x2="2" y2="7" stroke="white" stroke-width="2" stroke-linecap="round"/>
-              <line x1="18" y1="16" x2="18" y2="7" stroke="white" stroke-width="2" stroke-linecap="round"/>
-              <line x1="6" y1="16" x2="6" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/>
-              <line x1="10" y1="16" x2="10" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/>
-              <line x1="14" y1="16" x2="14" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/>
-              <path d="M0 7 L10 2 L20 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </g>
-          </svg>
-        </div>
-        <span class="topbar-mobile-name">Quick Loans</span>
-      </div>
-      <!-- Desktop: page title + search (hidden on mobile) -->
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
-      <div class="topbar-search">
-        <i data-lucide="search"></i>
-        <input type="text" placeholder="Search loans, borrowers…" id="global-search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="handleGlobalSearch(this.value)">
-      </div>
-      <div class="topbar-actions">
-        <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">
-          <i data-lucide="sun" id="theme-icon"></i>
-        </button>
-        <button class="icon-btn" onclick="toggleNotifications(event)" id="notif-btn" title="Notifications" style="position:relative">
-          <i data-lucide="bell"></i>
-          <span id="notif-dot" style="display:none;position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--danger);border-radius:50%;border:2px solid var(--surface)"></span>
-        </button>
-        <div class="topbar-avatar" id="topbar-avatar" title="My Profile" onclick="openProfileDrawer()" style="cursor:pointer">--</div>
-      </div>
-    </header>
 
     <!-- PAGE CONTENT -->
     <div class="page-content">
@@ -5405,6 +5347,21 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
             <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
               <button class="btn btn-primary" onclick="saveSettings()"><i data-lucide="save"></i> Save Changes</button>
             </div>
+          </div>
+
+          <!-- Account -->
+          <div class="table-card" style="padding:1.5rem">
+            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem">Account</div>
+            <div style="display:flex;align-items:center;gap:0.85rem;margin-bottom:1.25rem">
+              <div class="user-avatar" id="sidebar-avatar" style="width:42px;height:42px;font-size:0.9rem">--</div>
+              <div>
+                <div class="user-name" id="sidebar-name" style="font-size:0.9rem">Loading…</div>
+                <div class="user-role" id="sidebar-role" style="font-size:0.75rem;color:var(--text-muted)"></div>
+              </div>
+            </div>
+            <button class="btn btn-ghost" onclick="doLogout()" style="display:flex;align-items:center;gap:0.5rem;color:var(--danger);border-color:var(--danger-border)">
+              <i data-lucide="log-out" style="width:15px;height:15px"></i> Sign Out
+            </button>
           </div>
 
           <!-- Danger Zone -->
@@ -7096,42 +7053,25 @@ function closeSidebar() {
   document.body.style.overflow = '';
 }
 
-function toggleSidebarCollapse() {
-  const sidebar  = document.getElementById('sidebar');
-  const mainWrap = document.querySelector('.main-wrap');
-  const isCollapsed = sidebar.classList.toggle('collapsed');
-  mainWrap.classList.toggle('sidebar-collapsed', isCollapsed);
-  try { localStorage.setItem('sidebar-collapsed', isCollapsed ? '1' : '0'); } catch(e) {}
-}
+// === SIDEBAR HOVER-TO-EXPAND ===
+// Sidebar expands on mouseenter, collapses on mouseleave.
+// No button, no click, no localStorage state needed.
+function toggleSidebarCollapse() { /* no-op — hover controls sidebar now */ }
+function collapseSidebar() { /* no-op */ }
+function expandSidebar() { /* no-op */ }
 
-function collapseSidebar() {
-  const sidebar  = document.getElementById('sidebar');
-  const mainWrap = document.querySelector('.main-wrap');
-  sidebar.classList.add('collapsed');
-  mainWrap.classList.add('sidebar-collapsed');
-  try { localStorage.setItem('sidebar-collapsed', '1'); } catch(e) {}
-}
+(function initHoverSidebar() {
+  function setup() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) { document.addEventListener('DOMContentLoaded', setup); return; }
 
-function expandSidebar() {
-  const sidebar  = document.getElementById('sidebar');
-  const mainWrap = document.querySelector('.main-wrap');
-  sidebar.classList.remove('collapsed');
-  mainWrap.classList.remove('sidebar-collapsed');
-  try { localStorage.setItem('sidebar-collapsed', '0'); } catch(e) {}
-}
-
-// Restore sidebar state on load
-(function() {
-  try {
-    if (localStorage.getItem('sidebar-collapsed') === '1') {
-      document.addEventListener('DOMContentLoaded', function() {
-        const sidebar = document.getElementById('sidebar');
-        const mainWrap = document.querySelector('.main-wrap');
-        if (sidebar) sidebar.classList.add('collapsed');
-        if (mainWrap) mainWrap.classList.add('sidebar-collapsed');
-      });
-    }
-  } catch(e) {}
+    // Sidebar starts visually collapsed via CSS (width: var(--sb-w-col))
+    // :hover in CSS handles expansion — nothing extra needed in JS.
+    // We just make sure .collapsed is never on the sidebar at startup.
+    sidebar.classList.remove('collapsed');
+    document.querySelector('.main-wrap')?.classList.remove('sidebar-collapsed');
+  }
+  setup();
 })();
 
 // === MOBILE BOTTOM NAV ===
@@ -7148,8 +7088,8 @@ function updateUserUI() {
   document.getElementById('sidebar-name').textContent = name;
   document.getElementById('sidebar-role').textContent = formatRole(currentUser.role || '');
   document.getElementById('sidebar-avatar').textContent = initials;
-  document.getElementById('topbar-avatar').textContent = initials;
-  document.getElementById('topbar-avatar').title = name;
+  const _ta1 = document.getElementById('topbar-avatar'); if (_ta1) _ta1.textContent = initials;
+  const _ta2 = document.getElementById('topbar-avatar'); if (_ta2) _ta2.title = name;
 }
 
 function applyRBAC() {
@@ -7613,7 +7553,7 @@ function nav(view) {
     document.querySelectorAll('.mobile-nav-item').forEach(b => {
       b.classList.toggle('active', b.dataset.view === view);
     });
-    document.getElementById('topbar-title').textContent = viewTitles[view] || view;
+    const _ttEl = document.getElementById('topbar-title'); if (_ttEl) _ttEl.textContent = viewTitles[view] || view;
     _currentView = view;
     // Persist current view in URL hash so refresh restores the same page
     try { history.replaceState(null, '', '#' + view); } catch(_) {}
@@ -12822,7 +12762,7 @@ async function handlePhotoUpload(event) {
 }
 
 function updateAvatarsWithPhoto(url) {
-  const topbarAvatar  = document.getElementById('topbar-avatar');
+  const topbarAvatar  = document.getElementById('topbar-avatar'); // may be null
   const sidebarAvatar = document.getElementById('sidebar-avatar');
   const style = 'width:100%;height:100%;object-fit:cover;border-radius:var(--radius-sm)';
   if (topbarAvatar)  topbarAvatar.innerHTML  = `<img src="${url}" style="${style}">`;
@@ -12861,7 +12801,7 @@ async function saveProfileDetails() {
     document.getElementById('profile-name-display').textContent = name;
     const initials = getInitials(name);
     document.getElementById('sidebar-avatar').textContent = initials;
-    document.getElementById('topbar-avatar').textContent  = initials;
+    const _ta3 = document.getElementById('topbar-avatar'); if (_ta3) _ta3.textContent = initials;
     document.getElementById('profile-photo-initials').textContent = initials;
     loadSavedPhoto();
 
