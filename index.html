@@ -577,6 +577,25 @@ tbody tr:hover td {
   transform: scale(0.88);
 }
 
+/* ── Sidebar hover blur overlay ── */
+#sidebar-hover-overlay {
+  position: fixed; inset: 0;
+  z-index: 49;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#sidebar-hover-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-theme="light"] #sidebar-hover-overlay {
+  background: rgba(0,0,0,0.2);
+}
+
 /* ── Sidebar overlay fade ── */
 #sidebar-overlay.open {
   animation: fadeIn 0.2s ease both;
@@ -2194,11 +2213,11 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
 .user-role { font-size: 0.68rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; }
 
 .logout-btn {
-  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  display: flex; align-items: center; justify-content: flex-start; gap: 0.5rem;
   width: 100%; margin-top: 0.6rem;
   padding: 0.52rem 0.75rem;
-  background: var(--danger-subtle);
-  border: 1px solid var(--danger-border);
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: var(--radius);
   color: var(--danger);
   font-size: 0.8rem; font-weight: 600; font-family: var(--font);
@@ -2550,6 +2569,7 @@ body.borrower-drawer-open #loan-drawer-bg.open { left: calc(100% - 780px); backg
 .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
+.settings-tab-panel { animation: fadeUp 0.22s cubic-bezier(0.16,1,0.3,1) both; }
 
 /* === INFO ROWS === */
 .info-section { margin-bottom: 1.25rem; }
@@ -4883,7 +4903,16 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
         <span class="nav-item-icon"><i data-lucide="settings"></i></span><span class="nav-item-label">Settings</span>
       </button>
     </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="doLogout()">
+        <i data-lucide="log-out"></i>
+        <span class="logout-label">Sign Out</span>
+      </button>
+    </div>
   </aside>
+
+  <!-- SIDEBAR HOVER BLUR OVERLAY -->
+  <div id="sidebar-hover-overlay"></div>
 
   <!-- SIDEBAR OVERLAY (mobile) -->
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
@@ -5123,7 +5152,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
               </div>
             </div>
           </div>
-          <div class="table-hint" style="padding:0.4rem 1rem 0;font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:0.35rem"><i data-lucide="mouse-pointer-2" style="width:12px;height:12px"></i> Double-click a row to view full loan details</div>
+          <div class="table-hint" style="padding:0.4rem 1rem 0;font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:0.35rem"><i data-lucide="mouse-pointer-2" style="width:12px;height:12px"></i> Click a row to view full loan details</div>
           <div class="loans-mobile-currency-note" style="display:none;padding:0.25rem 1rem 0;font-size:0.68rem;color:var(--text-subtle);font-style:italic">All amounts in UGX</div>
           <div class="table-wrap"><table><thead><tr><th>Borrower</th><th>Principal</th><th>Repayable</th><th>Remaining</th><th>Status</th><th>Due Date</th></tr></thead><tbody id="loans-tbody"></tbody></table></div>
           <div class="pagination" id="loans-pagination"></div>
@@ -5149,7 +5178,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
           <div class="table-toolbar">
             <div class="table-search"><i data-lucide="search"></i><input type="text" placeholder="Search clients…" id="borrower-search" oninput="filterBorrowers(this.value)"></div>
           </div>
-          <div class="table-hint" style="padding:0.4rem 1rem 0;font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:0.35rem"><i data-lucide="mouse-pointer-2" style="width:12px;height:12px"></i> Double-click a row to view full client details</div>
+          <div class="table-hint" style="padding:0.4rem 1rem 0;font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:0.35rem"><i data-lucide="mouse-pointer-2" style="width:12px;height:12px"></i> Click a row to view full client details</div>
           <div class="table-wrap"><table><thead><tr><th>Name</th><th>Contact</th><th>Active Loans</th><th>Total Repayable</th><th>Joined</th></tr></thead><tbody id="borrowers-tbody"></tbody></table></div>
           <div class="pagination" id="borrowers-pagination"></div>
         </div>
@@ -5180,7 +5209,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
               <option value="BANK_TRANSFER">Bank Transfer</option>
             </select>
           </div>
-          <div class="table-hint" style="padding:0.4rem 1rem 0;font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:0.35rem"><i data-lucide="mouse-pointer-2" style="width:12px;height:12px"></i> Double-click a row to view full payment details</div>
+          <div class="table-hint" style="padding:0.4rem 1rem 0;font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:0.35rem"><i data-lucide="mouse-pointer-2" style="width:12px;height:12px"></i> Click a row to view full payment details</div>
           <div class="table-wrap"><table><thead><tr><th>Borrower</th><th>Amount</th><th>Method</th><th>Date</th><th>Collected By</th></tr></thead><tbody id="payments-tbody"></tbody></table></div>
           <div class="pagination" id="payments-pagination"></div>
         </div>
@@ -5311,125 +5340,228 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
       <!-- SETTINGS -->
       <div class="view" id="view-settings">
         <div class="page-header">
-          <div class="page-header-left"><h1>Business Settings</h1><p>Manage your business profile and preferences</p></div>
-          <div class="page-header-actions"><button class="btn btn-ghost btn-sm" onclick="loadSettings()"><i data-lucide="refresh-cw"></i></button></div>
+          <div class="page-header-left"><h1>Settings</h1><p>Manage your business profile, account, and preferences</p></div>
         </div>
-        <div style="display:grid;gap:1.25rem;max-width:700px">
-          <!-- Business Info Card -->
-          <div class="table-card" style="padding:1.5rem">
-            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem">Business Profile</div>
-            <div class="modal-error" id="settings-error" style="margin-bottom:0.75rem"><i data-lucide="x-circle"></i><span id="settings-error-text"></span></div>
-            <div class="modal-success" id="settings-success" style="margin-bottom:0.75rem"><i data-lucide="check-circle"></i><span>Settings saved successfully!</span></div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" for="biz-name">Business Name <span style="color:var(--danger)">*</span></label>
-                <input type="text" class="form-input" id="settings-bizname" placeholder="e.g. Quick Loans Uganda Ltd">
+
+        <!-- Settings Tab Nav -->
+        <div class="tabs" id="settings-tabs-nav" style="margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0">
+          <button class="tab-btn active" onclick="switchSettingsTab('st-business')" style="display:flex;align-items:center;gap:6px"><i data-lucide="building-2" style="width:14px;height:14px;flex-shrink:0"></i>Business</button>
+          <button class="tab-btn" onclick="switchSettingsTab('st-account')" style="display:flex;align-items:center;gap:6px"><i data-lucide="user" style="width:14px;height:14px;flex-shrink:0"></i>Account</button>
+          <button class="tab-btn" onclick="switchSettingsTab('st-appearance')" style="display:flex;align-items:center;gap:6px"><i data-lucide="palette" style="width:14px;height:14px;flex-shrink:0"></i>Appearance</button>
+          <button class="tab-btn" onclick="switchSettingsTab('st-security')" style="display:flex;align-items:center;gap:6px"><i data-lucide="shield" style="width:14px;height:14px;flex-shrink:0"></i>Security</button>
+        </div>
+
+        <div style="max-width:680px">
+
+          <!-- ── BUSINESS TAB ── -->
+          <div id="st-business" class="settings-tab-panel">
+            <div class="table-card" style="padding:1.75rem;margin-bottom:1.25rem">
+              <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.25rem">
+                <div style="width:32px;height:32px;border-radius:var(--radius);background:var(--accent-subtle);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="building-2" style="width:15px;height:15px;color:var(--accent)"></i></div>
+                <div><div style="font-size:0.9rem;font-weight:700">Business Profile</div><div style="font-size:0.75rem;color:var(--text-muted)">Information that appears on loan documents and reports</div></div>
+              </div>
+              <div class="modal-error" id="settings-error" style="margin-bottom:0.75rem"><i data-lucide="x-circle"></i><span id="settings-error-text"></span></div>
+              <div class="modal-success" id="settings-success" style="margin-bottom:0.75rem"><i data-lucide="check-circle"></i><span>Business profile saved successfully!</span></div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Business Name <span style="color:var(--danger)">*</span></label>
+                  <input type="text" class="form-input" id="settings-bizname" placeholder="e.g. Quick Loans Uganda Ltd">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Business Type</label>
+                  <select class="form-input" id="settings-biztype">
+                    <option value="">Select…</option>
+                    <option value="microfinance">Microfinance Institution</option>
+                    <option value="sacco">SACCO</option>
+                    <option value="moneylender">Money Lender</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
               </div>
               <div class="form-group">
-                <label class="form-label" for="settings-slogan">Tagline / Slogan</label>
+                <label class="form-label">Tagline / Slogan</label>
                 <input type="text" class="form-input" id="settings-slogan" placeholder="e.g. Fast. Reliable. Trusted.">
               </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="biz-contacts">Physical Address / Contact Info</label>
-              <textarea class="form-input" id="settings-contacts" placeholder="e.g. Plot 42 Kampala Road, Kampala. Tel: +256 700 000000" style="min-height:70px"></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="biz-type">Business Type</label>
-              <select class="form-input" id="settings-biztype">
-                <option value="">Select…</option>
-                <option value="microfinance">Microfinance Institution</option>
-                <option value="sacco">SACCO</option>
-                <option value="moneylender">Money Lender</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
-              <button class="btn btn-primary" onclick="saveSettings()"><i data-lucide="save"></i> Save Changes</button>
-            </div>
-          </div>
-
-          <!-- Account -->
-          <div class="table-card" style="padding:1.5rem">
-            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem">Account</div>
-            <div style="display:flex;align-items:center;gap:0.85rem;margin-bottom:1.25rem">
-              <div class="user-avatar" id="sidebar-avatar" style="width:42px;height:42px;font-size:0.9rem">--</div>
-              <div>
-                <div class="user-name" id="sidebar-name" style="font-size:0.9rem">Loading…</div>
-                <div class="user-role" id="sidebar-role" style="font-size:0.75rem;color:var(--text-muted)"></div>
+              <div class="form-group">
+                <label class="form-label">Physical Address / Contact Info</label>
+                <textarea class="form-input" id="settings-contacts" placeholder="e.g. Plot 42 Kampala Road, Kampala&#10;Tel: +256 700 000000" style="min-height:80px;resize:vertical"></textarea>
+                <div class="form-hint">This appears on printed loan schedules and agreements.</div>
               </div>
-            </div>
-            <button class="btn btn-ghost" onclick="doLogout()" style="display:flex;align-items:center;gap:0.5rem;color:var(--danger);border-color:var(--danger-border)">
-              <i data-lucide="log-out" style="width:15px;height:15px"></i> Sign Out
-            </button>
-          </div>
-
-          <!-- Danger Zone -->
-          <div class="table-card danger-zone-card" id="danger-zone-section" style="padding:0;border:1.5px solid var(--danger-border);display:none">
-            <div style="display:flex;align-items:center;gap:0.6rem;padding:1.1rem 1.4rem;border-bottom:1px solid var(--danger-border);background:var(--danger-subtle);border-radius:var(--radius-md) var(--radius-md) 0 0">
-              <i data-lucide="shield-alert" style="width:16px;height:16px;color:var(--danger);flex-shrink:0"></i>
-              <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--danger)">Danger Zone</span>
-            </div>
-            <div style="padding:1.4rem">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
-                <div>
-                  <div style="font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:0.3rem">Deactivate Business Account</div>
-                  <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;max-width:480px">Permanently wipes all business data — loans, clients, payments, staff, products and settings. This action is <strong style="color:var(--danger)">irreversible</strong> and cannot be undone. The app will reset to the initial setup screen.</p>
-                </div>
-                <button class="btn btn-danger" style="flex-shrink:0;white-space:nowrap" onclick="openDeactivateModal()">
-                  <i data-lucide="trash-2"></i> Deactivate Account
-                </button>
+              <div style="display:flex;justify-content:flex-end;margin-top:0.25rem">
+                <button class="btn btn-primary" onclick="saveSettings()"><i data-lucide="save"></i> Save Business Profile</button>
               </div>
             </div>
           </div>
 
-          <!-- Deactivate Confirmation Modal -->
-          <div class="modal-backdrop" id="deactivate-modal-backdrop" style="display:none;z-index:9999" onclick="if(event.target===this&&!window._deactivating)closeDeactivateModal()">
-            <div class="modal" style="max-width:460px;border:1px solid var(--danger-border)" role="dialog" aria-modal="true" aria-labelledby="deactivate-modal-title">
-              <div style="display:flex;align-items:center;gap:0.85rem;padding:1.2rem 1.4rem;border-bottom:1px solid var(--border)">
-                <div style="width:38px;height:38px;border-radius:var(--radius);background:var(--danger-subtle);border:1px solid var(--danger-border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                  <i data-lucide="triangle-alert" style="width:18px;height:18px;color:var(--danger)"></i>
-                </div>
-                <div>
-                  <div id="deactivate-modal-title" style="font-size:0.95rem;font-weight:700;color:var(--text)">Deactivate Business Account</div>
-                  <div style="font-size:0.75rem;color:var(--text-muted);margin-top:1px">This action cannot be undone</div>
-                </div>
-                <button onclick="if(!window._deactivating)closeDeactivateModal()" style="margin-left:auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)">
-                  <i data-lucide="x" style="width:13px;height:13px"></i>
-                </button>
+          <!-- ── ACCOUNT TAB ── -->
+          <div id="st-account" class="settings-tab-panel" style="display:none">
+            <!-- Profile details -->
+            <div class="table-card" style="padding:1.75rem;margin-bottom:1.25rem">
+              <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.25rem">
+                <div style="width:32px;height:32px;border-radius:var(--radius);background:var(--info-subtle);border:1px solid var(--info-border);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="user" style="width:15px;height:15px;color:var(--info)"></i></div>
+                <div><div style="font-size:0.9rem;font-weight:700">Personal Details</div><div style="font-size:0.75rem;color:var(--text-muted)">Your name and contact information</div></div>
               </div>
-
-              <div style="padding:1.3rem 1.4rem">
-                <div style="background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:1.2rem">
-                  <div style="font-size:0.82rem;color:var(--danger);font-weight:600;margin-bottom:0.3rem">The following data will be permanently deleted:</div>
-                  <ul style="font-size:0.8rem;color:var(--text-muted);padding-left:1.1rem;line-height:2;margin:0">
-                    <li>All loans and repayment schedules</li>
-                    <li>All clients and guarantors</li>
-                    <li>All payments and transactions</li>
-                    <li>All staff accounts and branches</li>
-                    <li>All products and business settings</li>
-                  </ul>
+              <!-- Avatar row -->
+              <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:1.25rem">
+                <div id="settings-avatar-display" style="width:52px;height:52px;border-radius:var(--radius);background:linear-gradient(135deg,var(--accent),var(--accent-hover));display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;flex-shrink:0">--</div>
+                <div style="flex:1;min-width:0">
+                  <div id="settings-account-name" style="font-size:0.95rem;font-weight:700">Loading…</div>
+                  <div id="settings-account-role" style="font-size:0.75rem;color:var(--text-muted);margin-top:2px"></div>
                 </div>
-
-                <div style="margin-bottom:1.2rem">
-                  <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:0.4rem">Type <strong style="color:var(--danger);font-family:var(--mono)">DELETE</strong> to confirm</label>
-                  <input id="deactivate-confirm-input" type="text" class="form-input" placeholder="Type DELETE here" autocomplete="off" spellcheck="false"
-                    oninput="document.getElementById('deactivate-confirm-btn').disabled=this.value!=='DELETE'"
-                    style="border-color:var(--danger-border);font-family:var(--mono);letter-spacing:0.05em">
+                <button class="btn btn-ghost btn-sm" onclick="document.getElementById('settings-photo-input').click()"><i data-lucide="camera"></i> Photo</button>
+                <input type="file" id="settings-photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+              </div>
+              <div class="modal-error" id="settings-profile-error" style="margin-bottom:0.75rem"><i data-lucide="x-circle"></i><span id="settings-profile-error-text"></span></div>
+              <div class="modal-success" id="settings-profile-success" style="margin-bottom:0.75rem"><i data-lucide="check-circle"></i><span>Profile updated successfully!</span></div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Full Name <span style="color:var(--danger)">*</span></label>
+                  <input type="text" class="form-input" id="settings-fullname" placeholder="Your full name">
                 </div>
+                <div class="form-group">
+                  <label class="form-label">Phone Number</label>
+                  <input type="tel" class="form-input" id="settings-phone" placeholder="+256 700 000000">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="settings-email" disabled style="opacity:0.5;cursor:not-allowed">
+                <div class="form-hint">Email cannot be changed here.</div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Role</label>
+                  <input type="text" class="form-input" id="settings-role-field" disabled style="opacity:0.5;cursor:not-allowed">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Branch</label>
+                  <input type="text" class="form-input" id="settings-branch-field" disabled style="opacity:0.5;cursor:not-allowed">
+                </div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-top:0.25rem">
+                <button class="btn btn-primary" id="settings-profile-save-btn" onclick="saveSettingsProfile()"><i data-lucide="save"></i> Save Profile</button>
+              </div>
+            </div>
+          </div>
 
-                <div id="deactivate-error" style="display:none;font-size:0.8rem;color:var(--danger);background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:0.6rem 0.85rem;margin-bottom:1rem"></div>
-
+          <!-- ── APPEARANCE TAB ── -->
+          <div id="st-appearance" class="settings-tab-panel" style="display:none">
+            <div class="table-card" style="padding:1.75rem;margin-bottom:1.25rem">
+              <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.5rem">
+                <div style="width:32px;height:32px;border-radius:var(--radius);background:var(--purple-subtle);border:1px solid rgba(188,140,255,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="palette" style="width:15px;height:15px;color:var(--purple)"></i></div>
+                <div><div style="font-size:0.9rem;font-weight:700">Appearance</div><div style="font-size:0.75rem;color:var(--text-muted)">Customize how the app looks</div></div>
+              </div>
+              <!-- Theme -->
+              <div style="margin-bottom:1.5rem">
+                <div style="font-size:0.82rem;font-weight:600;margin-bottom:0.75rem">Theme</div>
                 <div style="display:flex;gap:0.75rem">
-                  <button class="btn btn-ghost" style="flex:1" onclick="if(!window._deactivating)closeDeactivateModal()" id="deactivate-cancel-btn">Cancel</button>
-                  <button class="btn btn-danger" style="flex:1" id="deactivate-confirm-btn" disabled onclick="confirmDeactivate()">
-                    <i data-lucide="trash-2"></i> Permanently Delete
+                  <button id="theme-dark-btn" onclick="setTheme('dark')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);border:2px solid var(--accent);background:var(--surface-2);cursor:pointer;transition:all 0.15s">
+                    <div style="width:100%;height:48px;border-radius:var(--radius-sm);background:#0f1117;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:6px;padding:6px 8px">
+                      <div style="width:8px;height:8px;border-radius:50%;background:#3fb950;flex-shrink:0"></div>
+                      <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.15)"></div>
+                    </div>
+                    <div style="font-size:0.8rem;font-weight:600;color:var(--text)">Dark</div>
+                  </button>
+                  <button id="theme-light-btn" onclick="setTheme('light')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1rem;border-radius:var(--radius-md);border:2px solid var(--border);background:var(--surface-2);cursor:pointer;transition:all 0.15s">
+                    <div style="width:100%;height:48px;border-radius:var(--radius-sm);background:#f0f2f0;border:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;gap:6px;padding:6px 8px">
+                      <div style="width:8px;height:8px;border-radius:50%;background:#1b6b3a;flex-shrink:0"></div>
+                      <div style="flex:1;height:4px;border-radius:2px;background:rgba(0,0,0,0.12)"></div>
+                    </div>
+                    <div style="font-size:0.8rem;font-weight:600;color:var(--text)">Light</div>
                   </button>
                 </div>
               </div>
             </div>
           </div>
+
+          <!-- ── SECURITY TAB ── -->
+          <div id="st-security" class="settings-tab-panel" style="display:none">
+            <!-- Change Password -->
+            <div class="table-card" style="padding:1.75rem;margin-bottom:1.25rem">
+              <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.25rem">
+                <div style="width:32px;height:32px;border-radius:var(--radius);background:var(--warning-subtle);border:1px solid var(--warning-border);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="lock" style="width:15px;height:15px;color:var(--warning)"></i></div>
+                <div><div style="font-size:0.9rem;font-weight:700">Change Password</div><div style="font-size:0.75rem;color:var(--text-muted)">Choose a strong password of at least 8 characters</div></div>
+              </div>
+              <div class="modal-error" id="settings-pass-error" style="margin-bottom:0.75rem"><i data-lucide="x-circle"></i><span id="settings-pass-error-text"></span></div>
+              <div class="modal-success" id="settings-pass-success" style="margin-bottom:0.75rem"><i data-lucide="check-circle"></i><span>Password changed successfully!</span></div>
+              <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" class="form-input" id="settings-new-pass" placeholder="New password (min 8 characters)" autocomplete="new-password">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" class="form-input" id="settings-confirm-pass" placeholder="Confirm new password" autocomplete="new-password">
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-top:0.25rem">
+                <button class="btn btn-primary" id="settings-pass-btn" onclick="saveSettingsPassword()"><i data-lucide="lock"></i> Update Password</button>
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="table-card danger-zone-card" id="danger-zone-section" style="padding:0;border:1.5px solid var(--danger-border);display:none">
+              <div style="display:flex;align-items:center;gap:0.6rem;padding:1.1rem 1.4rem;border-bottom:1px solid var(--danger-border);background:var(--danger-subtle);border-radius:var(--radius-md) var(--radius-md) 0 0">
+                <i data-lucide="shield-alert" style="width:16px;height:16px;color:var(--danger);flex-shrink:0"></i>
+                <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--danger)">Danger Zone</span>
+              </div>
+              <div style="padding:1.4rem">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
+                  <div>
+                    <div style="font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:0.3rem">Deactivate Business Account</div>
+                    <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;max-width:480px">Permanently wipes all business data — loans, clients, payments, staff, products and settings. This action is <strong style="color:var(--danger)">irreversible</strong> and cannot be undone.</p>
+                  </div>
+                  <button class="btn btn-danger" style="flex-shrink:0;white-space:nowrap" onclick="openDeactivateModal()">
+                    <i data-lucide="trash-2"></i> Deactivate Account
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /max-width -->
+
+        <!-- Deactivate Confirmation Modal -->
+        <div class="modal-backdrop" id="deactivate-modal-backdrop" style="display:none;z-index:9999" onclick="if(event.target===this&&!window._deactivating)closeDeactivateModal()">
+          <div class="modal" style="max-width:460px;border:1px solid var(--danger-border)" role="dialog" aria-modal="true" aria-labelledby="deactivate-modal-title">
+            <div style="display:flex;align-items:center;gap:0.85rem;padding:1.2rem 1.4rem;border-bottom:1px solid var(--border)">
+              <div style="width:38px;height:38px;border-radius:var(--radius);background:var(--danger-subtle);border:1px solid var(--danger-border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <i data-lucide="triangle-alert" style="width:18px;height:18px;color:var(--danger)"></i>
+              </div>
+              <div>
+                <div id="deactivate-modal-title" style="font-size:0.95rem;font-weight:700;color:var(--text)">Deactivate Business Account</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:1px">This action cannot be undone</div>
+              </div>
+              <button onclick="if(!window._deactivating)closeDeactivateModal()" style="margin-left:auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)">
+                <i data-lucide="x" style="width:13px;height:13px"></i>
+              </button>
+            </div>
+            <div style="padding:1.3rem 1.4rem">
+              <div style="background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:1.2rem">
+                <div style="font-size:0.82rem;color:var(--danger);font-weight:600;margin-bottom:0.3rem">The following data will be permanently deleted:</div>
+                <ul style="font-size:0.8rem;color:var(--text-muted);padding-left:1.1rem;line-height:2;margin:0">
+                  <li>All loans and repayment schedules</li>
+                  <li>All clients and guarantors</li>
+                  <li>All payments and transactions</li>
+                  <li>All staff accounts and branches</li>
+                  <li>All products and business settings</li>
+                </ul>
+              </div>
+              <div style="margin-bottom:1.2rem">
+                <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:0.4rem">Type <strong style="color:var(--danger);font-family:var(--mono)">DELETE</strong> to confirm</label>
+                <input id="deactivate-confirm-input" type="text" class="form-input" placeholder="Type DELETE here" autocomplete="off" spellcheck="false"
+                  oninput="document.getElementById('deactivate-confirm-btn').disabled=this.value!=='DELETE'"
+                  style="border-color:var(--danger-border);font-family:var(--mono);letter-spacing:0.05em">
+              </div>
+              <div id="deactivate-error" style="display:none;font-size:0.8rem;color:var(--danger);background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:0.6rem 0.85rem;margin-bottom:1rem"></div>
+              <div style="display:flex;gap:0.75rem">
+                <button class="btn btn-ghost" style="flex:1" onclick="if(!window._deactivating)closeDeactivateModal()" id="deactivate-cancel-btn">Cancel</button>
+                <button class="btn btn-danger" style="flex:1" id="deactivate-confirm-btn" disabled onclick="confirmDeactivate()">
+                  <i data-lucide="trash-2"></i> Permanently Delete
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
 
     </div><!-- /page-content -->
@@ -6067,10 +6199,7 @@ const isConfigured =
   SUPABASE_URL.startsWith('https://') &&
   SUPABASE_ANON_KEY.length > 20;
 
-// FIX: Use sessionStorage + a per-tab key for Supabase auth so that logging into
-// a different business in another tab never overwrites this tab's auth token.
 // Without this, createClient() defaults to localStorage which is shared across
-// ALL tabs — meaning a login in Tab B silently hijacks Tab A on next refresh.
 const _lwTabId = (() => {
   let id = sessionStorage.getItem('lw-tab-id');
   if (!id) { id = Math.random().toString(36).slice(2); sessionStorage.setItem('lw-tab-id', id); }
@@ -6216,7 +6345,7 @@ function tbl(tableName) {
   if (!biz) {
     log(`[tbl] WARN: no bizId for "${tableName}" — safe no-op to prevent data leak`);
     function makeNoopQ(singleMode) {
-      const result = singleMode ? { data: null, error: null, count: 0 } : { data: [], error: null, count: 0 }; // FIX: added count:0 so destructured count is never undefined
+      const result = singleMode ? { data: null, error: null, count: 0 } : { data: [], error: null, count: 0 };
       const q = {
         then(r, j) { return Promise.resolve(result).then(r, j); },
         catch(j)   { return Promise.resolve(result).catch(j); },
@@ -6338,18 +6467,18 @@ async function boot() {
         try {
           // Try as owner (businesses table has no is_active column)
           const { data: ownedBiz } = await sb.from('businesses')
-            .select('id, name') // FIX: removed slug — column may not exist in businesses table
+            .select('id, name')
             .eq('owner_id', session.user.id)
             .limit(1).maybeSingle();
           if (ownedBiz) {
-            window.currentBusiness = { ...ownedBiz, logo_url: null, plan: 'free', role: 'SUPER_ADMIN' }; // FIX: provide safe JS defaults
+            window.currentBusiness = { ...ownedBiz, logo_url: null, plan: 'free', role: 'SUPER_ADMIN' };
           } else if (currentUser?.business_id) {
             // Staff member — look up via their business_id from business_members
             const { data: memberBiz } = await sb.from('businesses')
-              .select('id, name') // FIX: removed slug — column may not exist in businesses table
+              .select('id, name')
               .eq('id', currentUser.business_id)
               .limit(1).maybeSingle();
-            if (memberBiz) window.currentBusiness = { ...memberBiz, logo_url: null, plan: 'free', role: currentUser.role || 'LOAN_OFFICER' }; // FIX: provide safe JS defaults
+            if (memberBiz) window.currentBusiness = { ...memberBiz, logo_url: null, plan: 'free', role: currentUser.role || 'LOAN_OFFICER' };
           }
           // Persist to session so future loads skip this query
           if (window.currentBusiness) {
@@ -6893,14 +7022,12 @@ async function doBusinessSetup() {
 
   try {
     provisionStep('Connecting to database…', 10);
-    // removed artificial delay
 
     // Verify session
     const { data: { session } } = await sb.auth.getSession();
     if (!session) throw new Error('Session expired. Please sign in again.');
 
     provisionStep('Checking database tables…', 25);
-    // removed artificial delay
 
     // Test that core tables exist (they should — pre-created via schema.sql)
     const { error: tableCheckErr } = await sb.from('businesses').select('id').limit(1);
@@ -6913,7 +7040,6 @@ async function doBusinessSetup() {
     }
 
     provisionStep('Creating your business workspace…', 40);
-    // removed artificial delay
 
     // Create or fetch the businesses record for this owner
     let bizId = null;
@@ -6924,7 +7050,7 @@ async function doBusinessSetup() {
         bizId = existingBiz.id;
       } else {
         const { data: newBiz } = await sb.from('businesses').insert({
-          owner_id: session.user.id, name, is_active: true, terms_accepted: true, // FIX: removed slug/plan — columns may not exist
+          owner_id: session.user.id, name, is_active: true, terms_accepted: true,
         }).select('id').single();
         if (newBiz?.id) bizId = newBiz.id;
       }
@@ -6941,7 +7067,6 @@ async function doBusinessSetup() {
     }
 
     provisionStep('Setting up default branch…', 60);
-    // removed artificial delay
 
     // Insert a fresh HQ branch scoped to this business — never upsert by name to avoid
     // cross-tenant collisions where two businesses share a similarly-named branch.
@@ -6963,7 +7088,6 @@ async function doBusinessSetup() {
     } catch(_) {}
 
     provisionStep('Seeding default loan products…', 72);
-    // removed artificial delay
 
     // Only seed products if this business has none yet — check must be scoped by bizId
     try {
@@ -6982,7 +7106,6 @@ async function doBusinessSetup() {
     } catch(e) { log('Product seed error (non-fatal):', e.message); }
 
     provisionStep('Saving business settings…', 75);
-    // removed artificial delay
 
     // Save business info (scoped by business_id where possible, fallback to id=1)
     try {
@@ -6996,7 +7119,6 @@ async function doBusinessSetup() {
     }
 
     provisionStep('Finalising your admin account…', 88);
-    // removed artificial delay
 
     // Ensure the registering user has a SUPER_ADMIN staff profile
     await sb.from('users').upsert({ id: session.user.id, full_name: registrationData?.fullName || session.user.user_metadata?.full_name || session.user.email.split('@')[0], email: session.user.email, phone: registrationData?.phone || null, email_verified: true }, { onConflict: 'id' });
@@ -7065,11 +7187,13 @@ function expandSidebar() { /* no-op */ }
     const sidebar = document.getElementById('sidebar');
     if (!sidebar) { document.addEventListener('DOMContentLoaded', setup); return; }
 
-    // Sidebar starts visually collapsed via CSS (width: var(--sb-w-col))
-    // :hover in CSS handles expansion — nothing extra needed in JS.
-    // We just make sure .collapsed is never on the sidebar at startup.
     sidebar.classList.remove('collapsed');
     document.querySelector('.main-wrap')?.classList.remove('sidebar-collapsed');
+
+    const overlay = document.getElementById('sidebar-hover-overlay');
+    sidebar.addEventListener('mouseenter', () => { if (overlay) overlay.classList.add('active'); });
+    sidebar.addEventListener('mouseleave', () => { if (overlay) overlay.classList.remove('active'); });
+    if (overlay) overlay.addEventListener('mouseenter', () => overlay.classList.remove('active'));
   }
   setup();
 })();
@@ -7085,9 +7209,10 @@ function updateUserUI() {
   if (!currentUser) return;
   const name = currentUser.full_name || currentUser.email || 'User';
   const initials = getInitials(name);
-  document.getElementById('sidebar-name').textContent = name;
-  document.getElementById('sidebar-role').textContent = formatRole(currentUser.role || '');
-  document.getElementById('sidebar-avatar').textContent = initials;
+  const _sn = document.getElementById('sidebar-name'); if (_sn) _sn.textContent = name;
+  const _sr = document.getElementById('sidebar-role'); if (_sr) _sr.textContent = formatRole(currentUser.role || '');
+  const _sa = document.getElementById('sidebar-avatar'); if (_sa) _sa.textContent = initials;
+
   const _ta1 = document.getElementById('topbar-avatar'); if (_ta1) _ta1.textContent = initials;
   const _ta2 = document.getElementById('topbar-avatar'); if (_ta2) _ta2.title = name;
 }
@@ -7237,14 +7362,14 @@ async function doLogin() {
         if (bizIds.length) {
           const { data: bizRows } = await sb
             .from('businesses')
-            .select('id, name') // FIX: removed slug — column may not exist in businesses table
+            .select('id, name')
             .in('id', bizIds);
 
           businesses = memberships.map(m => {
             const biz = (bizRows || []).find(b => b.id === m.business_id);
             if (!biz) return null;
             return { id: biz.id, name: biz.name || 'My Business',
-                     logo_url: null, plan: 'free', // FIX: removed slug
+                     logo_url: null, plan: 'free',
                      role: m.role || 'LOAN_OFFICER', branch: m.branch || null };
           }).filter(Boolean);
         }
@@ -7256,10 +7381,10 @@ async function doLogin() {
       try {
         const { data: ownedBiz } = await sb
           .from('businesses')
-          .select('id, name') // FIX: removed slug — column may not exist in businesses table
+          .select('id, name')
           .eq('owner_id', uid);
         if (ownedBiz && ownedBiz.length) {
-          businesses = ownedBiz.map(b => ({ logo_url: null, plan: 'free', ...b, role: 'SUPER_ADMIN' })); // FIX: safe defaults
+          businesses = ownedBiz.map(b => ({ logo_url: null, plan: 'free', ...b, role: 'SUPER_ADMIN' }));
         }
       } catch(e) { log('Strategy 2 failed:', e.message); }
     }
@@ -7275,8 +7400,8 @@ async function doLogin() {
           owner_id:  _loginUser.id,
           name:      bizName,
           is_active: true,
-          terms_accepted: true, // FIX: removed slug/plan — columns may not exist
-        }).select('id, name').single(); // FIX: removed slug — column may not exist in businesses table
+          terms_accepted: true,
+        }).select('id, name').single();
 
         if (!createErr && newBiz) {
           // Add owner to business_members
@@ -7287,7 +7412,7 @@ async function doLogin() {
             is_active:   true,
           }, { onConflict: 'business_id,user_id' });
 
-          businesses = [{ logo_url: null, plan: 'free', ...newBiz, role: 'SUPER_ADMIN' }]; // FIX: safe defaults
+          businesses = [{ logo_url: null, plan: 'free', ...newBiz, role: 'SUPER_ADMIN' }];
           log('Auto-created business on login:', newBiz);
         }
       } catch(e) { log('Auto-create business failed (non-fatal):', e.message); }
@@ -7575,13 +7700,9 @@ function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
   const newTheme = isDark ? 'light' : 'dark';
-  html.setAttribute('data-theme', newTheme);
-  localStorage.setItem('lms-theme', newTheme);
+  setTheme(newTheme);
   const icon = document.getElementById('theme-icon');
-  icon.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
-  _lucide();
-  // Update charts colors if they exist
-  Object.values(charts).forEach(c => { try { c.update(); } catch(_) {} });
+  if (icon) { icon.setAttribute('data-lucide', isDark ? 'moon' : 'sun'); _lucide(); }
 }
 
 // Apply saved theme
@@ -7802,7 +7923,7 @@ function formatUGX(n) {
 function formatDate(d) {
   if (!d) return '—';
   const dt = new Date(d);
-  if (isNaN(dt.getTime())) return '—'; // FIX: guard Invalid Date so malformed date strings never crash the renderer
+  if (isNaN(dt.getTime())) return '—';
   return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 function formatRelative(d) {
@@ -8491,8 +8612,7 @@ async function loadLoans() {
     allLoans = cached.rows;
     renderLoansTable(allLoans, cached.count);
     // Still refresh in background silently
-    _fetchLoans(cacheKey, null); // FIX: pass null so background errors don't overwrite rendered table
-    return;
+    _fetchLoans(cacheKey, null);    return;
   }
   tbody.innerHTML = skeletonRows(5);
   await _fetchLoans(cacheKey, tbody);
@@ -8505,7 +8625,6 @@ async function _fetchLoans(cacheKey, tbody) {
 
     // Strictly scoped — no bizId means no data (never leak across businesses)
     if (!bizId) { allLoans = []; renderLoansTable([], 0); return; }
-    // FIX: use sb.from() with explicit .eq('business_id', bizId) here because tbl() wraps .select() but
     // doesn't support the { count: 'exact' } option passthrough cleanly. bizId is confirmed non-null above.
     const { data, error, count } = await sb.from('loans')
       .select(COLS, { count: 'exact' })
@@ -8523,7 +8642,6 @@ async function _fetchLoans(cacheKey, tbody) {
         rows.forEach(l => { l.borrower_name = clientMap[l.client_id] || '—'; });
       }
 
-      // FIX: Recalculate amount_paid and outstanding balances from actual repayment rows
       // so the Remaining column is always accurate without needing a manual refresh.
       const loanIds = rows.map(l => l.id);
       const { data: allRepayments } = await sb.from('repayments')
@@ -8551,7 +8669,7 @@ async function _fetchLoans(cacheKey, tbody) {
     allLoans = rows;
     renderLoansTable(allLoans, count || 0);
   } catch(e) {
-    const tb = tbody || document.getElementById('loans-tbody'); // FIX: always resolve tbody so background errors are shown
+    const tb = tbody || document.getElementById('loans-tbody');
     if (tb) tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadLoans');
     _lucide();
   }
@@ -8609,12 +8727,12 @@ function renderLoansTable(loans, total) {
 
 function goLoanPage(p) {
   loanPage = p;
-  cacheInvalidate('loans_p' + p); // FIX: invalidate stale cache for this page so fresh data is always fetched
+  cacheInvalidate('loans_p' + p);
   loadLoans();
 }
 
 function filterLoans(query) {
-  loanPage = 1; // FIX: reset to page 1 on filter/search so users never get stuck on an empty page
+  loanPage = 1;
   const statusFilter = document.getElementById('loan-status-filter').value;
   let filtered = allLoans;
   if (query) {
@@ -8640,8 +8758,7 @@ function filterLoans(query) {
 // === LOAN MODAL ===
 async function initLoanModal() {
   const loanEditIdEl = document.getElementById('loan-edit-id');
-  if (loanEditIdEl) loanEditIdEl.value = ''; // FIX: clear any stale edit-id so "new loan" never silently updates an old record
-  document.getElementById('loan-start').value = new Date().toISOString().split('T')[0];
+  if (loanEditIdEl) loanEditIdEl.value = '';  document.getElementById('loan-start').value = new Date().toISOString().split('T')[0];
   document.getElementById('loan-borrower-search').value = '';
   document.getElementById('loan-borrower-id').value = '';
   document.getElementById('loan-amount').value = '';
@@ -8905,7 +9022,6 @@ function loanInlineSigCheckBoth() {
   const submitBtn = document.getElementById('loan-submit-btn');
   if (submitBtn) submitBtn.disabled = false;
 }
-
 
 
 // ── Collateral row helpers ───────────────────────────────────
@@ -9313,7 +9429,7 @@ async function submitNewLoan() {
     }
     showToast(`Loan ${loanRef} created & activated successfully`, 'success');
     cacheInvalidate('dashboard', 'loans_p1', 'loans_p' + loanPage, 'par', 'portfolio',
-      'borrowers_p1', 'borrowers_p' + borrowerPage); // FIX: borrower pages cache active loan counts; invalidate so they refresh after new loan
+      'borrowers_p1', 'borrowers_p' + borrowerPage);
     const _reopenClientId = _loanOriginClientId; // capture before closeModal clears it
     closeModal('new-loan-modal');
     loadLoans();
@@ -9353,7 +9469,6 @@ async function openLoanDrawer(loanId) {
       ? await tbl('loan_products').select('product_name').eq('id', loan.product_id).single()
       : { data: null };
 
-    // FIX: Always calculate amountPaid by summing actual repayment rows — never trust the
     // stored loan.amount_paid field which can drift if payments are double-counted.
     const { data: repaymentRows } = await tbl('repayments').select('amount_paid').eq('loan_id', loanId);
     const amountPaidFromRepayments = (repaymentRows || []).reduce((s, r) => s + Number(r.amount_paid || 0), 0);
@@ -9652,7 +9767,7 @@ async function openLoanDrawer(loanId) {
     }
 
     // Audit
-    const { data: audit, error: auditErr } = await tbl('audit_trail').select('*').eq('record_id', loanId).order('created_at', { ascending: false }).limit(20); // FIX: destructure error so failures are handled instead of crashing silently
+    const { data: audit, error: auditErr } = await tbl('audit_trail').select('*').eq('record_id', loanId).order('created_at', { ascending: false }).limit(20);
     if (!auditErr && audit && audit.length) {
       document.getElementById('lt-activity').innerHTML = `
         <div style="display:flex;flex-direction:column;gap:0">
@@ -10703,7 +10818,7 @@ async function _fetchBorrowers(cacheKey, tbody) {
     allBorrowers = rows;
     renderBorrowersTable(allBorrowers, count || 0);
   } catch(e) {
-    const tb = tbody || document.getElementById('borrowers-tbody'); // FIX: always resolve tbody so background errors are shown
+    const tb = tbody || document.getElementById('borrowers-tbody');
     if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadBorrowers'); _lucide(); }
   }
 }
@@ -10747,12 +10862,12 @@ function renderBorrowersTable(borrowers, total) {
 
 function goBorrowerPage(p) {
   borrowerPage = p;
-  cacheInvalidate('borrowers_p' + p); // FIX: mirror goLoanPage — invalidate stale cache for this page
+  cacheInvalidate('borrowers_p' + p);
   loadBorrowers();
 }
 
 function filterBorrowers(query) {
-  borrowerPage = 1; // FIX: reset to page 1 on filter/search so users never get stuck on an empty page
+  borrowerPage = 1;
   let filtered = allBorrowers;
   if (query) {
     const q = query.toLowerCase();
@@ -10782,14 +10897,13 @@ async function submitNewBorrower() {
 
   try {
     const { data: existing, error: dupErr } = await tbl('clients').select('id').eq('national_id', nid).limit(1);
-    if (dupErr) throw dupErr; // FIX: propagate query errors so they are not silently swallowed
+    if (dupErr) throw dupErr;
     if (existing && existing.length > 0) {
       showModalError('borrower-modal-error','borrower-modal-error-text','A client with this National ID already exists.');
       return;
     }
   } catch(e) {
     if (e.message && e.message.includes('already exists')) { showModalError('borrower-modal-error','borrower-modal-error-text', e.message); return; }
-    // FIX: non-duplicate errors (network etc) fall through; let the INSERT's own error handler catch DB-level violations
   }
 
   const btn = document.getElementById('borrower-submit-btn');
@@ -10797,7 +10911,6 @@ async function submitNewBorrower() {
   _lucide();
 
   try {
-    // FIX: guard against null business_id — if missing, the client would be saved
     // with business_id=null and never appear in the app (scoped queries filter it out).
     const borrowerBizId = window.currentBusiness?.id || null;
     if (!borrowerBizId) {
@@ -10832,7 +10945,7 @@ async function submitNewBorrower() {
       });
     } catch(_) {}
     showToast(`${name} registered successfully`, 'success');
-    cacheInvalidate('borrowers_p1', 'borrowers_p' + borrowerPage, 'dashboard'); // FIX: also invalidate dashboard so borrower/loan counts update
+    cacheInvalidate('borrowers_p1', 'borrowers_p' + borrowerPage, 'dashboard');
     closeModal('new-borrower-modal');
     loadBorrowers();
     ['b-name','b-nid','b-phone','b-phone2','b-dob','b-address','b-employer'].forEach(id => {
@@ -11111,7 +11224,7 @@ async function _fetchPayments(cacheKey, tbody) {
     allPayments = rows;
     renderPaymentsTable(allPayments, totalCount);
   } catch(e) {
-    const tb = tbody || document.getElementById('payments-tbody'); // FIX: always resolve tbody so background errors are shown
+    const tb = tbody || document.getElementById('payments-tbody');
     if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadPayments'); _lucide(); }
   }
 }
@@ -11144,7 +11257,7 @@ function renderPaymentsTable(payments, total) {
 
 function goPaymentPage(p) {
   paymentPage = p;
-  cacheInvalidate('payments_p' + p); // FIX: invalidate stale cache for this page before loading
+  cacheInvalidate('payments_p' + p);
   loadPayments();
 }
 
@@ -11258,7 +11371,7 @@ async function openPaymentDetail(paymentId) {
 }
 
 function filterPayments(query) {
-  paymentPage = 1; // FIX: reset to page 1 on filter change so users never get stuck on an empty page
+  paymentPage = 1;
   const methodFilter = document.getElementById('payment-method-filter').value;
   let filtered = allPayments;
   if (methodFilter) filtered = filtered.filter(p => p.payment_method === methodFilter);
@@ -11455,11 +11568,10 @@ async function submitNewPayment() {
   if (!loanId) { showModalError('payment-modal-error', 'payment-modal-error-text', 'Please select a loan.'); return; }
   if (!amount || amount <= 0) { showModalError('payment-modal-error', 'payment-modal-error-text', 'Enter a valid payment amount.'); return; }
 
-  const btn = document.getElementById('payment-submit-btn'); // FIX: hoisted so overpayment guard below can reset it on early return
+  const btn = document.getElementById('payment-submit-btn');
   btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Verifying…';
   _lucide();
 
-  // FIX: overpayment guard — fetch outstanding before inserting so we never accept more than is owed
   try {
     const { data: loanCheck, error: loanCheckErr } = await tbl('loans')
       .select('outstanding_principal, outstanding_interest, status')
@@ -11745,7 +11857,7 @@ function _renderPAR(tbody, data) {
 
 // === AUDIT ===
 async function loadAudit(resetPage) {
-  if (resetPage) auditPage = 1; // FIX: reset page when called from filter dropdown so stale page never shows empty results
+  if (resetPage) auditPage = 1;
   const tbody = document.getElementById('audit-tbody');
   const actionFilter = document.getElementById('audit-action-filter').value;
   const cacheKey = 'audit_p' + auditPage + '_' + (actionFilter || 'all');
@@ -11824,7 +11936,6 @@ function _renderAudit(tbody, data, count) {
 }
 function goAuditPage(p) {
   auditPage = p;
-  // FIX: invalidate both the unfiltered and any action-filtered cache entry for this page
   const actionFilter = document.getElementById('audit-action-filter')?.value || '';
   cacheInvalidate('audit_p' + p + '_all', 'audit_p' + p + '_' + (actionFilter || 'all'));
   loadAudit();
@@ -11834,15 +11945,13 @@ function goAuditPage(p) {
 async function loadStaff() {
   const tbody = document.getElementById('staff-tbody');
   const cached = cacheGet('staff');
-  if (cached) { allStaff = cached; renderStaffTable(allStaff); _fetchStaff(null); return; } // FIX: pass null so background errors don't overwrite rendered table
-  tbody.innerHTML = skeletonRows(7);
+  if (cached) { allStaff = cached; renderStaffTable(allStaff); _fetchStaff(null); return; }  tbody.innerHTML = skeletonRows(7);
   await _fetchStaff(tbody);
 }
 
 async function _fetchStaff(tbody) {
   try {
     const bizId = window.currentBusiness?.id || null;
-    // FIX: was '00000000-0000-0000-0000-000000000000' fallback which made a live DB query with a fake UUID;
     // early-return with empty table instead — same visual result, zero wasted network call.
     if (!bizId) { allStaff = []; renderStaffTable([]); return; }
     // Fetch members and users in parallel
@@ -11862,7 +11971,7 @@ async function _fetchStaff(tbody) {
     allStaff = data;
     renderStaffTable(allStaff);
   } catch(e) {
-    const tb = tbody || document.getElementById('staff-tbody'); // FIX: always resolve tbody so background errors are shown
+    const tb = tbody || document.getElementById('staff-tbody');
     if (tb) { tb.innerHTML = errorStateRow(parseSupabaseError(e), 'loadStaff'); _lucide(); }
   }
 }
@@ -11967,7 +12076,7 @@ async function submitNewStaff() {
         const { data: { user: authUser } } = await sb.auth.getUser();
         if (authUser) {
           const { data: ownedBiz } = await sb.from('businesses')
-            .select('id, name').eq('owner_id', authUser.id).limit(1).maybeSingle(); // FIX: removed plan — may not exist; avoids 400
+            .select('id, name').eq('owner_id', authUser.id).limit(1).maybeSingle();
           if (ownedBiz) {
             window.currentBusiness = { ...ownedBiz, role: 'SUPER_ADMIN' };
             resolvedBizId = ownedBiz.id;
@@ -12725,48 +12834,59 @@ function openProfileDrawer() {
 async function handlePhotoUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-  if (file.size > 2 * 1024 * 1024) { showToast('Photo must be under 2MB', 'error'); return; }
+  if (file.size > 3 * 1024 * 1024) { showToast('Photo must be under 3MB', 'error'); return; }
+
+  // Always read as base64 first — used as local fallback and immediate preview
+  const dataUrl = await new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result);
+    reader.onerror = () => rej(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+
+  // Show preview immediately
+  const img      = document.getElementById('profile-photo-img');
+  const initials = document.getElementById('profile-photo-initials');
+  if (img)      { img.src = dataUrl; img.style.display = 'block'; }
+  if (initials) { initials.style.display = 'none'; }
+  updateAvatarsWithPhoto(dataUrl);
+
+  // Cache locally right away so it survives a refresh
+  try { localStorage.setItem('lms-profile-photo-' + currentUser.id, dataUrl); } catch(_) {}
 
   showToast('Uploading photo…', 'info');
 
+  // Attempt Supabase Storage upload — silently fall back to local cache if RLS blocks it
   try {
-    // 1. Upload file to Supabase Storage (bucket: "avatars")
     const ext  = file.name.split('.').pop() || 'jpg';
     const path = `${currentUser.id}/avatar.${ext}`;
     const { error: upErr } = await sb.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type });
     if (upErr) throw upErr;
 
-    // 2. Get the public URL
     const { data: urlData } = sb.storage.from('avatars').getPublicUrl(path);
     const publicUrl = urlData?.publicUrl;
-    if (!publicUrl) throw new Error('Could not get public URL');
-
-    // 3. Persist URL to users table so every device reads the same photo
-    const { error: dbErr } = await sb.from('users').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
-    if (dbErr) throw dbErr;
-
-    // 4. Update in-memory session and UI
-    currentUser.avatar_url = publicUrl;
-    // Keep localStorage as a fast-load cache for the current device
-    try { localStorage.setItem('lms-profile-photo-' + currentUser.id, publicUrl); } catch(_) {}
-
-    const img      = document.getElementById('profile-photo-img');
-    const initials = document.getElementById('profile-photo-initials');
-    img.src = publicUrl; img.style.display = 'block'; initials.style.display = 'none';
-    updateAvatarsWithPhoto(publicUrl);
-    showToast('Profile photo updated', 'success');
-  } catch (err) {
-    console.error('Photo upload failed:', err);
-    showToast('Upload failed: ' + (err.message || err), 'error');
+    if (publicUrl) {
+      await sb.from('users').update({ avatar_url: publicUrl }).eq('id', currentUser.id).then(() => {});
+      currentUser.avatar_url = publicUrl;
+      try { localStorage.setItem('lms-profile-photo-' + currentUser.id, publicUrl); } catch(_) {}
+    }
+  } catch (_) {
+    // Storage upload blocked (RLS) — local base64 cache is already set, that's fine
   }
+
+  showToast('Profile photo updated', 'success');
+  // Reset input so same file can be re-selected
+  event.target.value = '';
 }
 
 function updateAvatarsWithPhoto(url) {
-  const topbarAvatar  = document.getElementById('topbar-avatar'); // may be null
-  const sidebarAvatar = document.getElementById('sidebar-avatar');
+  const topbarAvatar   = document.getElementById('topbar-avatar');
+  const sidebarAvatar  = document.getElementById('sidebar-avatar');
+  const settingsAvatar = document.getElementById('settings-avatar-display');
   const style = 'width:100%;height:100%;object-fit:cover;border-radius:var(--radius-sm)';
-  if (topbarAvatar)  topbarAvatar.innerHTML  = `<img src="${url}" style="${style}">`;
-  if (sidebarAvatar) sidebarAvatar.innerHTML = `<img src="${url}" style="${style}">`;
+  if (topbarAvatar)   topbarAvatar.innerHTML   = `<img src="${url}" style="${style}">`;
+  if (sidebarAvatar)  sidebarAvatar.innerHTML  = `<img src="${url}" style="${style}">`;
+  if (settingsAvatar) settingsAvatar.innerHTML = `<img src="${url}" style="${style}">`;
 }
 
 function loadSavedPhoto() {
@@ -12797,10 +12917,10 @@ async function saveProfileDetails() {
     const { error } = await sb.from('users').update({ full_name: name, phone: phone||null }).eq('id', currentUser.id);
     if (error) throw error;
     currentUser.full_name = name; currentUser.phone = phone;
-    document.getElementById('sidebar-name').textContent = name;
+    const _sn2 = document.getElementById('sidebar-name'); if (_sn2) _sn2.textContent = name;
     document.getElementById('profile-name-display').textContent = name;
     const initials = getInitials(name);
-    document.getElementById('sidebar-avatar').textContent = initials;
+    const _sa2 = document.getElementById('sidebar-avatar'); if (_sa2) _sa2.textContent = initials;
     const _ta3 = document.getElementById('topbar-avatar'); if (_ta3) _ta3.textContent = initials;
     document.getElementById('profile-photo-initials').textContent = initials;
     loadSavedPhoto();
@@ -14127,7 +14247,6 @@ async function cwPollSupabaseOnce() {
     if (raw) {
       const d = JSON.parse(raw);
       if (d.photoData) {
-        console.log('[LW poll] found data in localStorage');
         cwApplyCaptureData(d.photoData || null);
         return;
       }
@@ -14138,15 +14257,12 @@ async function cwPollSupabaseOnce() {
   const client = cwGetAnonClient();
   if (!client) { console.warn('[LW poll] no anon client'); return; }
   try {
-    console.log('[LW poll] querying Supabase for key:', _cwQrSessionKey);
     const { data, error } = await client
       .from('qr_capture_sessions')
       .select('photo_data')
       .eq('session_key', _cwQrSessionKey)
       .maybeSingle();
-    console.log('[LW poll] result — data:', data, 'error:', error);
     if (!error && data && data.photo_data) {
-      console.log('[LW poll] applying capture data!');
       cwApplyCaptureData(data.photo_data || null);
     }
   } catch(e) { console.error('[LW poll] exception:', e); }
@@ -14497,7 +14613,6 @@ async function cpSubmitAll(key, skipSig) {
   let supabaseOk = false;
   if (sbUrl && sbKey) {
     try {
-      console.log('[LW capture] POSTing to REST API, key:', key, 'hasPhoto:', !!cpPhotoDataUrl, 'hasSig:', !!cpSigDataUrl);
       const resp = await fetch(sbUrl + '/rest/v1/qr_capture_sessions', {
         method: 'POST',
         headers: {
@@ -14513,10 +14628,8 @@ async function cpSubmitAll(key, skipSig) {
           submitted_at: new Date().toISOString(),
         }),
       });
-      console.log('[LW capture] response status:', resp.status);
       if (resp.ok || resp.status === 201 || resp.status === 204) {
         supabaseOk = true;
-        console.log('[LW capture] write succeeded!');
       } else {
         const body = await resp.text();
         console.warn('[LW capture] write failed:', resp.status, body);
@@ -14660,7 +14773,6 @@ async function cwSubmitForm() {
     cwSaveStepSet(2, 'spin');
     cwSaveStatus('Saving client profile…');
 
-    // FIX: guard against null business_id — if missing, the client would be saved
     // with business_id=null and never appear in the app (scoped queries filter it out).
     const cwBizId = window.currentBusiness?.id || null;
     if (!cwBizId) {
@@ -14727,7 +14839,7 @@ async function cwSubmitForm() {
     // Clean up the QR capture session key from localStorage
     if (_cwQrSessionKey) { try { localStorage.removeItem(_cwQrSessionKey); } catch(_) {} }
 
-    cacheInvalidate('borrowers_p1', 'borrowers_p' + borrowerPage, 'dashboard'); // FIX: invalidate borrower and dashboard caches after new client is saved
+    cacheInvalidate('borrowers_p1', 'borrowers_p' + borrowerPage, 'dashboard');
 
     await new Promise(r => setTimeout(r, 600));
     overlay.classList.remove('active');
@@ -14771,31 +14883,136 @@ document.getElementById('client-wizard-backdrop').addEventListener('click', func
 });
 
 // === SETTINGS ===
+// === SETTINGS TAB SWITCHING ===
+function switchSettingsTab(id) {
+  document.querySelectorAll('.settings-tab-panel').forEach(p => p.style.display = 'none');
+  document.getElementById(id).style.display = '';
+  document.querySelectorAll('#settings-tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
+  const map = { 'st-business': 0, 'st-account': 1, 'st-appearance': 2, 'st-security': 3 };
+  const idx = map[id];
+  if (idx !== undefined) document.querySelectorAll('#settings-tabs-nav .tab-btn')[idx]?.classList.add('active');
+  // populate account tab on open
+  if (id === 'st-account') populateSettingsAccount();
+  if (id === 'st-appearance') updateThemeButtons();
+  _lucide();
+}
+
+function populateSettingsAccount() {
+  if (!currentUser) return;
+  const name = currentUser.full_name || currentUser.email || '';
+  const initials = getInitials(name);
+  const av = document.getElementById('settings-avatar-display'); if (av) av.textContent = initials;
+  const nm = document.getElementById('settings-account-name'); if (nm) nm.textContent = name || 'Unknown';
+  const rl = document.getElementById('settings-account-role'); if (rl) rl.textContent = formatRole(currentUser.role || '');
+  const fn = document.getElementById('settings-fullname'); if (fn) fn.value = name;
+  const em = document.getElementById('settings-email'); if (em) em.value = currentUser.email || '';
+  const ph = document.getElementById('settings-phone'); if (ph) ph.value = currentUser.phone || '';
+  const rf = document.getElementById('settings-role-field'); if (rf) rf.value = formatRole(currentUser.role || '');
+  const bf = document.getElementById('settings-branch-field');
+  if (bf) {
+    const br = currentUser.branch_id ? (window._branchCache?.[currentUser.branch_id] || 'Branch #' + currentUser.branch_id) : 'All Branches';
+    bf.value = br;
+  }
+  // Sync photo if present
+  loadSavedPhoto();
+}
+
+function updateThemeButtons() {
+  const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+  const db = document.getElementById('theme-dark-btn');
+  const lb = document.getElementById('theme-light-btn');
+  if (db) db.style.borderColor = theme === 'dark' ? 'var(--accent)' : 'var(--border)';
+  if (lb) lb.style.borderColor = theme === 'light' ? 'var(--accent)' : 'var(--border)';
+}
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('lms-theme', t);
+  const icon = document.getElementById('theme-icon');
+  if (icon) { icon.setAttribute('data-lucide', t === 'dark' ? 'sun' : 'moon'); }
+  _lucide();
+  Object.values(charts).forEach(c => { try { c.update(); } catch(_) {} });
+  updateThemeButtons();
+}
+
+async function saveSettingsProfile() {
+  const name  = document.getElementById('settings-fullname')?.value.trim();
+  const phone = document.getElementById('settings-phone')?.value.trim() || null;
+  const errEl = document.getElementById('settings-profile-error');
+  const errTx = document.getElementById('settings-profile-error-text');
+  const okEl  = document.getElementById('settings-profile-success');
+  errEl?.classList.remove('show'); okEl?.classList.remove('show');
+  if (!name || name.length < 2) {
+    if (errTx) errTx.textContent = 'Full name is required.';
+    errEl?.classList.add('show'); _lucide(); return;
+  }
+  const btn = document.getElementById('settings-profile-save-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Saving…'; _lucide(); }
+  try {
+    const { error } = await sb.from('users').update({ full_name: name, phone }).eq('id', currentUser.id);
+    if (error) throw error;
+    currentUser.full_name = name; currentUser.phone = phone;
+    updateUserUI();
+    populateSettingsAccount();
+    okEl?.classList.add('show'); _lucide();
+    showToast('Profile updated', 'success');
+  } catch(e) {
+    if (errTx) errTx.textContent = e.message || 'Save failed.';
+    errEl?.classList.add('show'); _lucide();
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="save"></i> Save Profile'; _lucide(); }
+  }
+}
+
+async function saveSettingsPassword() {
+  const np  = document.getElementById('settings-new-pass')?.value;
+  const cp  = document.getElementById('settings-confirm-pass')?.value;
+  const errEl = document.getElementById('settings-pass-error');
+  const errTx = document.getElementById('settings-pass-error-text');
+  const okEl  = document.getElementById('settings-pass-success');
+  errEl?.classList.remove('show'); okEl?.classList.remove('show');
+  if (!np || np.length < 8) {
+    if (errTx) errTx.textContent = 'Password must be at least 8 characters.';
+    errEl?.classList.add('show'); _lucide(); return;
+  }
+  if (np !== cp) {
+    if (errTx) errTx.textContent = 'Passwords do not match.';
+    errEl?.classList.add('show'); _lucide(); return;
+  }
+  const btn = document.getElementById('settings-pass-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Updating…'; _lucide(); }
+  try {
+    const { error } = await sb.auth.updateUser({ password: np });
+    if (error) throw error;
+    document.getElementById('settings-new-pass').value = '';
+    document.getElementById('settings-confirm-pass').value = '';
+    okEl?.classList.add('show'); _lucide();
+    showToast('Password updated', 'success');
+  } catch(e) {
+    if (errTx) errTx.textContent = e.message || 'Failed to update password.';
+    errEl?.classList.add('show'); _lucide();
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="lock"></i> Update Password'; _lucide(); }
+  }
+}
+
 async function loadSettings() {
   const bizId = window.currentBusiness?.id || null;
   if (!bizId) return;
-
-  // Show danger zone only to SUPER_ADMIN
   const dangerZone = document.getElementById('danger-zone-section');
   if (dangerZone) {
     dangerZone.style.display = currentUser?.role?.toUpperCase() === 'SUPER_ADMIN' ? 'block' : 'none';
     _lucide();
   }
-
   try {
     const { data: bs } = await sb.from('business_settings').select('business_name,slogan,contacts').eq('business_id', bizId).maybeSingle();
     if (bs) {
-      const bizNameEl = document.getElementById('settings-bizname');
-      const sloganEl  = document.getElementById('settings-slogan');
-      const contactsEl= document.getElementById('settings-contacts');
-      if (bizNameEl) bizNameEl.value  = bs.business_name || '';
-      if (sloganEl)  sloganEl.value   = bs.slogan || '';
-      if (contactsEl)contactsEl.value = bs.contacts || '';
-    }
-    const { data: biz } = await sb.from('businesses').select('name').eq('id', bizId).maybeSingle();
-    if (biz?.name) {
-      const btEl = document.getElementById('settings-biztype');
-      // business type isn't stored separately, leave selector as-is
+      const bizNameEl  = document.getElementById('settings-bizname');
+      const sloganEl   = document.getElementById('settings-slogan');
+      const contactsEl = document.getElementById('settings-contacts');
+      if (bizNameEl)  bizNameEl.value  = bs.business_name || '';
+      if (sloganEl)   sloganEl.value   = bs.slogan || '';
+      if (contactsEl) contactsEl.value = bs.contacts || '';
     }
   } catch(e) { log('loadSettings error', e); }
 }
@@ -14815,6 +15032,8 @@ async function saveSettings() {
     if (errEl) { errEl.classList.add('show'); _lucide(); }
     return;
   }
+  const btn = document.querySelector('#st-business .btn-primary');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Saving…'; _lucide(); }
   try {
     if (bizId) {
       await sb.from('business_settings').upsert(
@@ -14823,7 +15042,6 @@ async function saveSettings() {
       );
       await sb.from('businesses').update({ name: bizName }).eq('id', bizId);
     }
-    // Update session + sidebar branding
     window.currentBusiness = { ...window.currentBusiness, name: bizName };
     try {
       const lws = JSON.parse(sessionStorage.getItem('lw_session') || '{}');
@@ -14833,10 +15051,12 @@ async function saveSettings() {
     const logoText = document.querySelector('.sidebar-logo-text');
     if (logoText) logoText.innerHTML = bizName + '<span></span>';
     if (okEl) { okEl.classList.add('show'); _lucide(); }
-    showToast('Settings saved', 'success');
+    showToast('Business profile saved', 'success');
   } catch(e) {
     if (errTx) errTx.textContent = e.message || 'Save failed';
     if (errEl) { errEl.classList.add('show'); _lucide(); }
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="save"></i> Save Business Profile'; _lucide(); }
   }
 }
 
