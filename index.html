@@ -5519,48 +5519,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 
         </div><!-- /max-width -->
 
-        <!-- Deactivate Confirmation Modal -->
-        <div class="modal-backdrop" id="deactivate-modal-backdrop" style="display:none;z-index:9999" onclick="if(event.target===this&&!window._deactivating)closeDeactivateModal()">
-          <div class="modal" style="max-width:460px;border:1px solid var(--danger-border)" role="dialog" aria-modal="true" aria-labelledby="deactivate-modal-title">
-            <div style="display:flex;align-items:center;gap:0.85rem;padding:1.2rem 1.4rem;border-bottom:1px solid var(--border)">
-              <div style="width:38px;height:38px;border-radius:var(--radius);background:var(--danger-subtle);border:1px solid var(--danger-border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                <i data-lucide="triangle-alert" style="width:18px;height:18px;color:var(--danger)"></i>
-              </div>
-              <div>
-                <div id="deactivate-modal-title" style="font-size:0.95rem;font-weight:700;color:var(--text)">Deactivate Business Account</div>
-                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:1px">This action cannot be undone</div>
-              </div>
-              <button onclick="if(!window._deactivating)closeDeactivateModal()" style="margin-left:auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)">
-                <i data-lucide="x" style="width:13px;height:13px"></i>
-              </button>
-            </div>
-            <div style="padding:1.3rem 1.4rem">
-              <div style="background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:1.2rem">
-                <div style="font-size:0.82rem;color:var(--danger);font-weight:600;margin-bottom:0.3rem">The following data will be permanently deleted:</div>
-                <ul style="font-size:0.8rem;color:var(--text-muted);padding-left:1.1rem;line-height:2;margin:0">
-                  <li>All loans and repayment schedules</li>
-                  <li>All clients and guarantors</li>
-                  <li>All payments and transactions</li>
-                  <li>All staff accounts and branches</li>
-                  <li>All products and business settings</li>
-                </ul>
-              </div>
-              <div style="margin-bottom:1.2rem">
-                <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:0.4rem">Type <strong style="color:var(--danger);font-family:var(--mono)">DELETE</strong> to confirm</label>
-                <input id="deactivate-confirm-input" type="text" class="form-input" placeholder="Type DELETE here" autocomplete="off" spellcheck="false"
-                  oninput="document.getElementById('deactivate-confirm-btn').disabled=this.value!=='DELETE'"
-                  style="border-color:var(--danger-border);font-family:var(--mono);letter-spacing:0.05em">
-              </div>
-              <div id="deactivate-error" style="display:none;font-size:0.8rem;color:var(--danger);background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:0.6rem 0.85rem;margin-bottom:1rem"></div>
-              <div style="display:flex;gap:0.75rem">
-                <button class="btn btn-ghost" style="flex:1" onclick="if(!window._deactivating)closeDeactivateModal()" id="deactivate-cancel-btn">Cancel</button>
-                <button class="btn btn-danger" style="flex:1" id="deactivate-confirm-btn" disabled onclick="confirmDeactivate()">
-                  <i data-lucide="trash-2"></i> Permanently Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Deactivate Confirmation Modal moved to top-level modals section -->
 
       </div>
 
@@ -5587,6 +5546,49 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
   </nav>
 
 </div><!-- /app -->
+
+<!-- DEACTIVATE ACCOUNT MODAL -->
+<div class="modal-backdrop" id="deactivate-modal-backdrop" onclick="if(event.target===this&&!window._deactivating)closeDeactivateModal()">
+  <div class="modal" style="max-width:460px;border:1px solid var(--danger-border)" role="dialog" aria-modal="true" aria-labelledby="deactivate-modal-title">
+    <div style="display:flex;align-items:center;gap:0.85rem;padding:1.2rem 1.4rem;border-bottom:1px solid var(--border)">
+      <div style="width:38px;height:38px;border-radius:var(--radius);background:var(--danger-subtle);border:1px solid var(--danger-border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i data-lucide="triangle-alert" style="width:18px;height:18px;color:var(--danger)"></i>
+      </div>
+      <div>
+        <div id="deactivate-modal-title" style="font-size:0.95rem;font-weight:700;color:var(--text)">Deactivate Business Account</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:1px">This action cannot be undone</div>
+      </div>
+      <button onclick="if(!window._deactivating)closeDeactivateModal()" style="margin-left:auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)">
+        <i data-lucide="x" style="width:13px;height:13px"></i>
+      </button>
+    </div>
+    <div style="padding:1.3rem 1.4rem">
+      <div style="background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:1.2rem">
+        <div style="font-size:0.82rem;color:var(--danger);font-weight:600;margin-bottom:0.3rem">The following data will be permanently deleted:</div>
+        <ul style="font-size:0.8rem;color:var(--text-muted);padding-left:1.1rem;line-height:2;margin:0">
+          <li>All loans and repayment schedules</li>
+          <li>All clients and guarantors</li>
+          <li>All payments and transactions</li>
+          <li>All staff accounts and branches</li>
+          <li>All products and business settings</li>
+        </ul>
+      </div>
+      <div style="margin-bottom:1.2rem">
+        <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:0.4rem">Type <strong style="color:var(--danger);font-family:var(--mono)">DELETE</strong> to confirm</label>
+        <input id="deactivate-confirm-input" type="text" class="form-input" placeholder="Type DELETE here" autocomplete="off" spellcheck="false"
+          oninput="document.getElementById('deactivate-confirm-btn').disabled=this.value!=='DELETE'"
+          style="border-color:var(--danger-border);font-family:var(--mono);letter-spacing:0.05em">
+      </div>
+      <div id="deactivate-error" style="display:none;font-size:0.8rem;color:var(--danger);background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:0.6rem 0.85rem;margin-bottom:1rem"></div>
+      <div style="display:flex;gap:0.75rem">
+        <button class="btn btn-ghost" style="flex:1" onclick="if(!window._deactivating)closeDeactivateModal()" id="deactivate-cancel-btn">Cancel</button>
+        <button class="btn btn-danger" style="flex:1" id="deactivate-confirm-btn" disabled onclick="confirmDeactivate()">
+          <i data-lucide="trash-2"></i> Permanently Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
@@ -7602,14 +7604,14 @@ function openDeactivateModal() {
   if (input)  input.value = '';
   if (btn)    btn.disabled = true;
   if (errEl)  errEl.style.display = 'none';
-  if (backdrop) { backdrop.style.display = 'flex'; requestAnimationFrame(() => backdrop.classList.add('open')); }
+  if (backdrop) { requestAnimationFrame(() => backdrop.classList.add('open')); }
   _lucide();
   setTimeout(() => document.getElementById('deactivate-confirm-input')?.focus(), 200);
 }
 
 function closeDeactivateModal() {
   const backdrop = document.getElementById('deactivate-modal-backdrop');
-  if (backdrop) { backdrop.classList.remove('open'); setTimeout(() => { backdrop.style.display = 'none'; }, 200); }
+  if (backdrop) { backdrop.classList.remove('open'); }
 }
 
 async function confirmDeactivate() {
