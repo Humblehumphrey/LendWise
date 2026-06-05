@@ -5497,29 +5497,11 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
               </div>
             </div>
 
-            <!-- Danger Zone -->
-            <div class="table-card danger-zone-card" id="danger-zone-section" style="padding:0;border:1.5px solid var(--danger-border);display:none">
-              <div style="display:flex;align-items:center;gap:0.6rem;padding:1.1rem 1.4rem;border-bottom:1px solid var(--danger-border);background:var(--danger-subtle);border-radius:var(--radius-md) var(--radius-md) 0 0">
-                <i data-lucide="shield-alert" style="width:16px;height:16px;color:var(--danger);flex-shrink:0"></i>
-                <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--danger)">Danger Zone</span>
-              </div>
-              <div style="padding:1.4rem">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
-                  <div>
-                    <div style="font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:0.3rem">Deactivate Business Account</div>
-                    <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;max-width:480px">Permanently wipes all business data — loans, clients, payments, staff, products and settings. This action is <strong style="color:var(--danger)">irreversible</strong> and cannot be undone.</p>
-                  </div>
-                  <button class="btn btn-danger" style="flex-shrink:0;white-space:nowrap" onclick="openDeactivateModal()">
-                    <i data-lucide="trash-2"></i> Deactivate Account
-                  </button>
-                </div>
-              </div>
-            </div>
+
           </div>
 
         </div><!-- /max-width -->
 
-        <!-- Deactivate Confirmation Modal moved to top-level modals section -->
 
       </div>
 
@@ -5547,48 +5529,6 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 
 </div><!-- /app -->
 
-<!-- DEACTIVATE ACCOUNT MODAL -->
-<div class="modal-backdrop" id="deactivate-modal-backdrop" onclick="if(event.target===this&&!window._deactivating)closeDeactivateModal()">
-  <div class="modal" style="max-width:460px;border:1px solid var(--danger-border)" role="dialog" aria-modal="true" aria-labelledby="deactivate-modal-title">
-    <div style="display:flex;align-items:center;gap:0.85rem;padding:1.2rem 1.4rem;border-bottom:1px solid var(--border)">
-      <div style="width:38px;height:38px;border-radius:var(--radius);background:var(--danger-subtle);border:1px solid var(--danger-border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <i data-lucide="triangle-alert" style="width:18px;height:18px;color:var(--danger)"></i>
-      </div>
-      <div>
-        <div id="deactivate-modal-title" style="font-size:0.95rem;font-weight:700;color:var(--text)">Deactivate Business Account</div>
-        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:1px">This action cannot be undone</div>
-      </div>
-      <button onclick="if(!window._deactivating)closeDeactivateModal()" style="margin-left:auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)">
-        <i data-lucide="x" style="width:13px;height:13px"></i>
-      </button>
-    </div>
-    <div style="padding:1.3rem 1.4rem">
-      <div style="background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:1.2rem">
-        <div style="font-size:0.82rem;color:var(--danger);font-weight:600;margin-bottom:0.3rem">The following data will be permanently deleted:</div>
-        <ul style="font-size:0.8rem;color:var(--text-muted);padding-left:1.1rem;line-height:2;margin:0">
-          <li>All loans and repayment schedules</li>
-          <li>All clients and guarantors</li>
-          <li>All payments and transactions</li>
-          <li>All staff accounts and branches</li>
-          <li>All products and business settings</li>
-        </ul>
-      </div>
-      <div style="margin-bottom:1.2rem">
-        <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:0.4rem">Type <strong style="color:var(--danger);font-family:var(--mono)">DELETE</strong> to confirm</label>
-        <input id="deactivate-confirm-input" type="text" class="form-input" placeholder="Type DELETE here" autocomplete="off" spellcheck="false"
-          oninput="document.getElementById('deactivate-confirm-btn').disabled=this.value!=='DELETE'"
-          style="border-color:var(--danger-border);font-family:var(--mono);letter-spacing:0.05em">
-      </div>
-      <div id="deactivate-error" style="display:none;font-size:0.8rem;color:var(--danger);background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:0.6rem 0.85rem;margin-bottom:1rem"></div>
-      <div style="display:flex;gap:0.75rem">
-        <button class="btn btn-ghost" style="flex:1" onclick="if(!window._deactivating)closeDeactivateModal()" id="deactivate-cancel-btn">Cancel</button>
-        <button class="btn btn-danger" style="flex:1" id="deactivate-confirm-btn" disabled onclick="confirmDeactivate()">
-          <i data-lucide="trash-2"></i> Permanently Delete
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
@@ -7594,72 +7534,7 @@ async function doLogout() {
   showLogin();
 }
 
-// === DEACTIVATE BUSINESS ACCOUNT ===
-function openDeactivateModal() {
-  if (currentUser?.role?.toUpperCase() !== 'SUPER_ADMIN') return;
-  const backdrop = document.getElementById('deactivate-modal-backdrop');
-  const input    = document.getElementById('deactivate-confirm-input');
-  const btn      = document.getElementById('deactivate-confirm-btn');
-  const errEl    = document.getElementById('deactivate-error');
-  if (input)  input.value = '';
-  if (btn)    btn.disabled = true;
-  if (errEl)  errEl.style.display = 'none';
-  if (backdrop) { requestAnimationFrame(() => backdrop.classList.add('open')); }
-  _lucide();
-  setTimeout(() => document.getElementById('deactivate-confirm-input')?.focus(), 200);
-}
 
-function closeDeactivateModal() {
-  const backdrop = document.getElementById('deactivate-modal-backdrop');
-  if (backdrop) { backdrop.classList.remove('open'); }
-}
-
-async function confirmDeactivate() {
-  const input = document.getElementById('deactivate-confirm-input');
-  if (!input || input.value !== 'DELETE') return;
-  if (currentUser?.role?.toUpperCase() !== 'SUPER_ADMIN') { showToast('Unauthorized', 'error'); return; }
-
-  const bizId = window.currentBusiness?.id;
-  if (!bizId) { showToast('No business found', 'error'); return; }
-
-  window._deactivating = true;
-  const btn       = document.getElementById('deactivate-confirm-btn');
-  const cancelBtn = document.getElementById('deactivate-cancel-btn');
-  const errEl     = document.getElementById('deactivate-error');
-  if (btn)       { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Deleting…'; _lucide(); }
-  if (cancelBtn)   cancelBtn.disabled = true;
-  if (errEl)       errEl.style.display = 'none';
-
-  // Tables wiped in child-first order to respect FK constraints
-  const tables = [
-    'repayment_schedules','repayments','payments','signatures','qr_capture_sessions',
-    'collateral','guarantors','loans','clients','borrowers',
-    'loan_products','branches','staff_profiles','business_members',
-    'business_settings'
-  ];
-
-  try {
-    for (const table of tables) {
-      try { await sb.from(table).delete().eq('business_id', bizId); } catch(_) {}
-    }
-    // Finally delete the business record itself
-    await sb.from('businesses').delete().eq('id', bizId);
-
-    // Clear local caches so app boots to setup screen
-    localStorage.removeItem('lms-has-registered');
-    localStorage.removeItem('lw_biz_cache');
-    sessionStorage.removeItem('lw_session');
-
-    showToast('Business account permanently deleted', 'error');
-    setTimeout(() => window.location.reload(), 1800);
-  } catch(e) {
-    console.error('Deactivate error:', e);
-    if (errEl) { errEl.textContent = 'Failed: ' + (e.message || 'Unknown error'); errEl.style.display = 'block'; }
-    if (btn)   { btn.disabled = false; btn.innerHTML = '<i data-lucide="trash-2"></i> Permanently Delete'; _lucide(); }
-    if (cancelBtn) cancelBtn.disabled = false;
-    window._deactivating = false;
-  }
-}
 
 // === NAVIGATION ===
 const viewTitles = {
@@ -15001,11 +14876,7 @@ async function saveSettingsPassword() {
 async function loadSettings() {
   const bizId = window.currentBusiness?.id || null;
   if (!bizId) return;
-  const dangerZone = document.getElementById('danger-zone-section');
-  if (dangerZone) {
-    dangerZone.style.display = currentUser?.role?.toUpperCase() === 'SUPER_ADMIN' ? 'block' : 'none';
-    _lucide();
-  }
+
   try {
     const { data: bs } = await sb.from('business_settings').select('business_name,slogan,contacts').eq('business_id', bizId).maybeSingle();
     if (bs) {
