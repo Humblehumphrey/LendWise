@@ -2408,6 +2408,7 @@ tbody tr:hover td { background: var(--surface-2); }
 .td-mono { font-family: var(--mono); font-size: 0.78rem; color: var(--accent); }
 .td-muted { color: var(--text-muted); }
 .td-actions { width: 80px; min-width: 80px; text-align: right; vertical-align: middle; white-space: nowrap; padding-right: 0.75rem !important; }
+#view-staff .td-staff-actions { width: 220px; min-width: 220px; vertical-align: middle; white-space: nowrap; }
 .td-actions-wrap { display: inline-flex; gap: 0.35rem; align-items: center; justify-content: flex-end; }
 
 /* === EMPTY / LOADING / ERROR STATES === */
@@ -3686,9 +3687,7 @@ input, select, textarea {
   #view-staff tbody td:nth-child(1) > div { gap: 0.35rem; }
   #view-staff tbody td:nth-child(1) > div > div:first-child { width: 24px !important; height: 24px !important; border-radius: 5px !important; font-size: 0.6rem !important; }
   /* Stack role dropdown + toggle button vertically */
-  #view-staff .td-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; }
-  #view-staff .td-actions select { width: 100%; max-width: 110px; height: 26px; font-size: 0.68rem; }
-  #view-staff .td-actions .btn { width: 100%; max-width: 110px; justify-content: center; padding: 0; height: 26px; font-size: 0.72rem; }
+  #view-staff .td-actions { display: table-cell; }
 
   /* ================================================================
      LOAN PRODUCTS PAGE
@@ -5305,7 +5304,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
           <div class="table-toolbar">
             <div class="table-search"><i data-lucide="search"></i><input type="text" placeholder="Search staff…" id="staff-search" oninput="filterStaff(this.value)"></div>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Branch</th><th>Phone</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="staff-tbody"></tbody></table></div>
+          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Phone</th><th>Status</th><th>Joined</th><th style="width:220px;min-width:220px">Actions</th></tr></thead><tbody id="staff-tbody"></tbody></table></div>
         </div>
       </div>
 
@@ -5536,6 +5535,38 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 <!-- ================================================================ -->
 <!-- MODALS -->
 <!-- ================================================================ -->
+
+<!-- DELETE STAFF CONFIRMATION MODAL -->
+<div class="modal-backdrop" id="delete-staff-modal">
+  <div class="modal" style="max-width:400px;width:100%">
+    <div class="modal-header" style="display:flex;align-items:center;gap:0.75rem;padding:1.1rem 1.4rem;border-bottom:1px solid var(--border)">
+      <div style="width:36px;height:36px;border-radius:var(--radius);background:var(--danger-subtle);border:1px solid var(--danger-border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </div>
+      <div>
+        <div style="font-size:0.95rem;font-weight:700;color:var(--text)">Delete Staff Member</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:1px">This action cannot be undone</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('delete-staff-modal')" style="margin-left:auto"><i data-lucide="x"></i></button>
+    </div>
+    <div style="padding:1.25rem 1.4rem">
+      <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;margin-bottom:0.5rem">
+        You are about to permanently delete <strong id="delete-staff-name" style="color:var(--text)"></strong> from your business.
+      </p>
+      <div style="background:var(--danger-subtle);border:1px solid var(--danger-border);border-radius:var(--radius-sm);padding:0.65rem 0.85rem;font-size:0.78rem;color:var(--danger);display:flex;align-items:center;gap:0.5rem">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Their login account will be permanently deleted
+      </div>
+    </div>
+    <div style="display:flex;gap:0.6rem;justify-content:flex-end;padding:0.9rem 1.4rem;border-top:1px solid var(--border)">
+      <button class="btn btn-ghost" onclick="closeModal('delete-staff-modal')">Cancel</button>
+      <button class="btn btn-danger" id="delete-staff-confirm-btn" onclick="executeDeleteStaff()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Delete Permanently
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- NEW LOAN MODAL -->
 <div class="modal-backdrop" id="new-loan-modal">
@@ -9339,15 +9370,30 @@ async function openLoanDrawer(loanId) {
     const { data: loan, error } = await tbl('loans').select('*').eq('id', loanId).single();
     if (error) throw error;
 
-    // Fetch client
-    const { data: client } = await tbl('clients').select('full_name, national_id, phone, status').eq('id', loan.client_id).single();
-    // Fetch product
-    const { data: product } = loan.product_id
-      ? await tbl('loan_products').select('product_name').eq('id', loan.product_id).single()
-      : { data: null };
-
-    // stored loan.amount_paid field which can drift if payments are double-counted.
-    const { data: repaymentRows } = await tbl('repayments').select('amount_paid').eq('loan_id', loanId);
+    // Fetch client, product, repayments, schedule repayments, payments, and audit in parallel
+    const [
+      { data: client },
+      productRes,
+      { data: repaymentRows },
+      { data: pmtsParallel },
+      { data: auditParallel, error: auditErrParallel },
+      bsParallel,
+    ] = await Promise.all([
+      tbl('clients').select('full_name, national_id, phone, status').eq('id', loan.client_id).single(),
+      loan.product_id
+        ? tbl('loan_products').select('product_name').eq('id', loan.product_id).single()
+        : Promise.resolve({ data: null }),
+      tbl('repayments').select('amount_paid, payment_date').eq('loan_id', loanId).order('payment_date', { ascending: true }),
+      tbl('repayments').select('*').eq('loan_id', loanId).order('payment_date', { ascending: false }),
+      tbl('audit_trail').select('*').eq('record_id', loanId).order('created_at', { ascending: false }).limit(20),
+      (() => {
+        const _bsId3 = window.currentBusiness?.id;
+        return _bsId3
+          ? sb.from('business_settings').select('business_name').eq('business_id', _bsId3).maybeSingle()
+          : sb.from('business_settings').select('business_name').eq('id', 1).maybeSingle();
+      })(),
+    ]);
+    const product = productRes?.data ?? null;
     const amountPaidFromRepayments = (repaymentRows || []).reduce((s, r) => s + Number(r.amount_paid || 0), 0);
 
     // Auto-heal: if the stored value has drifted, silently correct it so the DB stays accurate
@@ -9478,8 +9524,8 @@ async function openLoanDrawer(loanId) {
         ${['active'].includes(loan.status) && isOverdue ? `<button class="btn btn-danger btn-sm" onclick="updateLoanStatus('${loan.id}','defaulted')"><i data-lucide="alert-triangle"></i> Mark Defaulted</button>` : ''}
       </div>`;
 
-    // Schedule — fetch real repayments first so schedule can match payments to installment days
-    const { data: scheduleRepayments } = await tbl('repayments').select('payment_date, amount_paid').eq('loan_id', loanId).order('payment_date', { ascending: true });
+    // Schedule — use repaymentRows already fetched in parallel above
+    const scheduleRepayments = repaymentRows || [];
     const scheduleRows = generateLoanSchedule({
       ...loan,
       start_date: loan.disbursement_date,
@@ -9592,8 +9638,8 @@ async function openLoanDrawer(loanId) {
         </div>`;
     }
 
-    // Repayments
-    const { data: pmts } = await tbl('repayments').select('*').eq('loan_id', loanId).order('payment_date', { ascending: false });
+    // Repayments — use data already fetched in parallel above
+    const pmts = pmtsParallel;
     if (pmts && pmts.length) {
       const totalCollected = pmts.reduce((s, p) => s + Number(p.amount_paid || 0), 0);
       document.getElementById('lt-payments').innerHTML = `
@@ -9643,8 +9689,9 @@ async function openLoanDrawer(loanId) {
         </div>`;
     }
 
-    // Audit
-    const { data: audit, error: auditErr } = await tbl('audit_trail').select('*').eq('record_id', loanId).order('created_at', { ascending: false }).limit(20);
+    // Audit — use data already fetched in parallel above
+    const audit = auditParallel;
+    const auditErr = auditErrParallel;
     if (!auditErr && audit && audit.length) {
       document.getElementById('lt-activity').innerHTML = `
         <div style="display:flex;flex-direction:column;gap:0">
@@ -9844,10 +9891,7 @@ async function buildAgreementTab(loan, client, product) {
   // then fall back to the session value (which may be the raw auth display name).
   let bizName = (() => { try { return JSON.parse(sessionStorage.getItem('lw_session'))?.businessName || ''; } catch(_) { return ''; } })();
   try {
-    const _bsId3 = window.currentBusiness?.id;
-    const { data: bs } = await (_bsId3
-      ? sb.from('business_settings').select('business_name').eq('business_id', _bsId3).maybeSingle()
-      : sb.from('business_settings').select('business_name').eq('id', 1).maybeSingle());
+    const bs = bsParallel?.data;
     if (bs?.business_name) {
       bizName = bs.business_name;
       try {
@@ -10605,7 +10649,8 @@ function printLoanAgreement() {
     }
   </style>
 </head>
-<body>${content.innerHTML}</body>
+<body>${content.innerHTML}
+</body>
 </html>`);
   win.document.close();
   win.onload = () => { win.focus(); win.print(); };
@@ -11869,18 +11914,22 @@ function renderStaffTable(staff) {
         </div>
       </td>
       <td>${roleBadge(s.role)}</td>
-      <td class="td-muted">${s.branches?.name || '—'}</td>
       <td class="td-muted">${s.phone || '—'}</td>
       <td>${s.is_active ? '<span class="pill pill-green">Active</span>' : '<span class="pill pill-gray">Inactive</span>'}</td>
       <td class="td-muted">${formatDate(s.created_at)}</td>
-      <td class="td-actions">
-        <select class="table-filter" style="height:28px;font-size:0.75rem" onchange="changeStaffRole('${s.id}',this.value)">
-          ${['SUPER_ADMIN','BRANCH_MANAGER','LOAN_OFFICER','CASHIER','COLLECTOR','AUDITOR'].map(r =>
-            `<option value="${r}"${r===s.role?' selected':''}>${formatRole(r)}</option>`).join('')}
-        </select>
-        <button class="btn ${s.is_active ? 'btn-danger' : 'btn-primary'} btn-sm" onclick="toggleStaffActive('${s.id}',${!s.is_active})">
-          <i data-lucide="${s.is_active ? 'lock' : 'unlock'}"></i>
-        </button>
+      <td class="td-staff-actions">
+        <div style="display:flex;align-items:center;gap:6px;justify-content:flex-start">
+          <select class="table-filter" style="height:30px;font-size:0.75rem;width:130px;flex-shrink:0" onchange="changeStaffRole('${s.id}',this.value)">
+            ${['SUPER_ADMIN','BRANCH_MANAGER','LOAN_OFFICER','CASHIER','COLLECTOR','AUDITOR'].map(r =>
+              `<option value="${r}"${r===s.role?' selected':''}>${formatRole(r)}</option>`).join('')}
+          </select>
+          <button onclick="toggleStaffActive('${s.id}',${!s.is_active})" title="${s.is_active ? 'Deactivate' : 'Activate'}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;background:${s.is_active ? 'var(--danger-subtle)' : 'var(--accent-subtle)'};border:1px solid ${s.is_active ? 'var(--danger-border)' : 'var(--accent-border)'};color:${s.is_active ? 'var(--danger)' : 'var(--accent)'}" onmouseover="this.style.background='${s.is_active ? 'var(--danger)' : 'var(--accent)'}';this.style.color='#fff'" onmouseout="this.style.background='${s.is_active ? 'var(--danger-subtle)' : 'var(--accent-subtle)'}';this.style.color='${s.is_active ? 'var(--danger)' : 'var(--accent)'}'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${s.is_active ? '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>' : '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>'}</svg>
+          </button>
+          ${s.id !== currentUser?.id ? `<button onclick="confirmDeleteStaff('${s.id}','${s.full_name.replace(/'/g,"\'")}')" title="Delete staff member" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;background:var(--danger-subtle);border:1px solid var(--danger-border);color:var(--danger)" onmouseover="this.style.background='var(--danger)';this.style.color='#fff'" onmouseout="this.style.background='var(--danger-subtle)';this.style.color='var(--danger)'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>` : '<div style="width:30px;flex-shrink:0"></div>'}
+        </div>
       </td>
     </tr>`).join('');
   _lucide();
@@ -11910,6 +11959,54 @@ async function toggleStaffActive(id, isActive) {
     cacheInvalidate('staff');
     loadStaff();
   } catch(e) { showToast(parseSupabaseError(e), 'error'); }
+}
+
+let _pendingDeleteId = null, _pendingDeleteName = null;
+function confirmDeleteStaff(id, name) {
+  _pendingDeleteId = id;
+  _pendingDeleteName = name;
+  document.getElementById('delete-staff-name').textContent = name;
+  openModal('delete-staff-modal');
+}
+async function executeDeleteStaff() {
+  if (!_pendingDeleteId) return;
+  const btn = document.getElementById('delete-staff-confirm-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader"></i> Deleting…';
+  _lucide();
+  await deleteStaff(_pendingDeleteId, _pendingDeleteName);
+  closeModal('delete-staff-modal');
+  _pendingDeleteId = null; _pendingDeleteName = null;
+  btn.disabled = false;
+  btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete Permanently';
+}
+
+async function deleteStaff(id, name) {
+  try {
+    const bizId = window.currentBusiness?.id || '';
+
+    // 1. Delete the auth account via Edge Function (requires service role)
+    const { data: { session } } = await sb.auth.getSession();
+    const fnRes = await fetch(`${SUPABASE_URL}/functions/v1/delete-staff-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ userId: id, businessId: bizId }),
+    });
+    if (!fnRes.ok) {
+      const msg = await fnRes.text();
+      throw new Error(msg || 'Failed to delete auth account');
+    }
+
+    // 2. Delete from business_members (belt-and-suspenders; edge fn may already cascade)
+    await sb.from('business_members').delete().eq('user_id', id).eq('business_id', bizId);
+
+    showToast(`${name} has been permanently deleted`, 'success');
+    cacheInvalidate('staff');
+    loadStaff();
+  } catch(e) { showToast(e.message || parseSupabaseError(e), 'error'); }
 }
 
 async function initStaffModal() {
@@ -14878,12 +14975,14 @@ async function loadSettings() {
   if (!bizId) return;
 
   try {
-    const { data: bs } = await sb.from('business_settings').select('business_name,slogan,contacts').eq('business_id', bizId).maybeSingle();
+    const { data: bs } = await sb.from('business_settings').select('business_name,business_type,slogan,contacts').eq('business_id', bizId).maybeSingle();
     if (bs) {
       const bizNameEl  = document.getElementById('settings-bizname');
+      const bizTypeEl  = document.getElementById('settings-biztype');
       const sloganEl   = document.getElementById('settings-slogan');
       const contactsEl = document.getElementById('settings-contacts');
       if (bizNameEl)  bizNameEl.value  = bs.business_name || '';
+      if (bizTypeEl && bs.business_type) bizTypeEl.value = bs.business_type;
       if (sloganEl)   sloganEl.value   = bs.slogan || '';
       if (contactsEl) contactsEl.value = bs.contacts || '';
     }
@@ -14893,6 +14992,7 @@ async function loadSettings() {
 async function saveSettings() {
   const bizId    = window.currentBusiness?.id || null;
   const bizName  = document.getElementById('settings-bizname')?.value.trim();
+  const bizType  = document.getElementById('settings-biztype')?.value || null;
   const slogan   = document.getElementById('settings-slogan')?.value.trim() || null;
   const contacts = document.getElementById('settings-contacts')?.value.trim() || null;
   const errEl  = document.getElementById('settings-error');
@@ -14909,11 +15009,13 @@ async function saveSettings() {
   if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Saving…'; _lucide(); }
   try {
     if (bizId) {
-      await sb.from('business_settings').upsert(
-        { business_id: bizId, business_name: bizName, slogan, contacts },
+      const { error: upsertErr } = await sb.from('business_settings').upsert(
+        { business_id: bizId, business_name: bizName, business_type: bizType, slogan, contacts },
         { onConflict: 'business_id' }
       );
-      await sb.from('businesses').update({ name: bizName }).eq('id', bizId);
+      if (upsertErr) throw upsertErr;
+      const { error: updateErr } = await sb.from('businesses').update({ name: bizName }).eq('id', bizId);
+      if (updateErr) throw updateErr;
     }
     window.currentBusiness = { ...window.currentBusiness, name: bizName };
     try {
