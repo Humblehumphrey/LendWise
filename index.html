@@ -5484,6 +5484,10 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
               <div class="modal-error" id="settings-pass-error" style="margin-bottom:0.75rem"><i data-lucide="x-circle"></i><span id="settings-pass-error-text"></span></div>
               <div class="modal-success" id="settings-pass-success" style="margin-bottom:0.75rem"><i data-lucide="check-circle"></i><span>Password changed successfully!</span></div>
               <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" class="form-input" id="settings-current-pass" placeholder="Enter your current password" autocomplete="current-password">
+              </div>
+              <div class="form-group">
                 <label class="form-label">New Password</label>
                 <input type="password" class="form-input" id="settings-new-pass" placeholder="New password (min 8 characters)" autocomplete="new-password">
               </div>
@@ -6187,7 +6191,10 @@ const sb = isConfigured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY,
     detectSessionInUrl: true,
   }
 }) : null;
-const log = (...a) => DEBUG && console.log('[LendWise]', ...a);
+const log      = (...a) => DEBUG && console.log(  '[LendWise]', ...a);
+const logWarn  = (...a) => DEBUG && console.warn( '[LendWise]', ...a);
+const logError = (...a) => DEBUG && console.error('[LendWise]', ...a);
+const logInfo  = (...a) => DEBUG && console.info( '[LendWise]', ...a);
 
 // === STATE ===
 let currentUser = null;
@@ -6739,18 +6746,18 @@ function initRealtimeSync() {
         })
         .subscribe((status) => {
           if (status === 'CHANNEL_ERROR') {
-            console.warn('[LendWise RT] Channel error for', table, '— will retry in 30s');
+            logWarn('RT channel error for', table, '— will retry in 30s');
             setTimeout(() => initRealtimeSync(), 30000);
           }
         });
 
       _rtChannels.push(ch);
     } catch(e) {
-      console.warn('[LendWise RT] Could not subscribe to', table, e);
+      logWarn('RT could not subscribe to', table, e);
     }
   });
 
-  console.info('[LendWise RT] Real-time sync active for business', bizId);
+  logInfo('RT real-time sync active for business', bizId);
 }
 
 function destroyRealtimeSync() {
@@ -6835,7 +6842,7 @@ async function ensureLenderSigColumn() {
     }
     // Column missing — try adding it via RPC or direct SQL if available
     // Most Supabase projects won't allow DDL via REST; show a one-time banner instead
-    console.info('[LendWise] qr_capture_sessions.lender_sig_data column not found. ' +
+    logInfo('qr_capture_sessions.lender_sig_data column not found. ' +
       'Run this in your Supabase SQL Editor:\n' +
       'ALTER TABLE public.qr_capture_sessions ADD COLUMN IF NOT EXISTS lender_sig_data TEXT;');
     // Show a subtle in-app banner for admins
@@ -7192,26 +7199,33 @@ function updateUserUI() {
 
 function applyRBAC() {
   const role = currentUser?.role || '';
-  const isAdmin = ['SUPER_ADMIN', 'BRANCH_MANAGER'].includes(role);
-  const isAuditor = role === 'AUDITOR';
-  const isCashier = role === 'CASHIER';
+  const isSuperAdmin   = role === 'SUPER_ADMIN';
+  const isAdmin        = ['SUPER_ADMIN', 'BRANCH_MANAGER'].includes(role);
+  const canCreateLoans = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'LOAN_OFFICER'].includes(role);
+  const canPayments    = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'CASHIER', 'COLLECTOR'].includes(role);
+  const canAddClients  = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'LOAN_OFFICER'].includes(role);
 
+  // Sidebar: hide Admin section (Staff, Products, Branches, Settings) for non-admins
   document.querySelectorAll('.nav-admin-group').forEach(el => {
     el.style.display = isAdmin ? '' : 'none';
   });
 
-  const btnNewLoan = document.getElementById('btn-new-loan');
-  if (btnNewLoan && isAuditor) btnNewLoan.style.display = 'none';
+  // New Loan buttons
+  ['btn-new-loan', 'dash-btn-new-loan'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = canCreateLoans ? '' : 'none';
+  });
 
-  const btnRecordPayment = document.getElementById('btn-record-payment');
-  if (btnRecordPayment && isAuditor) btnRecordPayment.style.display = 'none';
+  // Record Payment buttons
+  ['btn-record-payment', 'dash-btn-record-payment'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = canPayments ? '' : 'none';
+  });
 
-  // Dashboard quick-action buttons
-  const dashBtnNewLoan = document.getElementById('dash-btn-new-loan');
-  if (dashBtnNewLoan && isAuditor) dashBtnNewLoan.style.display = 'none';
-
-  const dashBtnPayment = document.getElementById('dash-btn-record-payment');
-  if (dashBtnPayment && isAuditor) dashBtnPayment.style.display = 'none';
+  // Add Client buttons
+  document.querySelectorAll('[onclick*="openClientWizard"]').forEach(el => {
+    el.style.display = canAddClients ? '' : 'none';
+  });
 }
 
 
@@ -7279,6 +7293,28 @@ async function submitForgotPassword() {
   }
 }
 
+// ── SECURITY: brute-force lockout ──────────────────────────────────────────────
+const _MAX_LOGIN_ATTEMPTS = 5;
+const _LOCKOUT_MS         = 15 * 60 * 1000; // 15 minutes
+
+function _getLoginMeta() {
+  try { return JSON.parse(sessionStorage.getItem('lw-login-meta') || '{}'); } catch(_) { return {}; }
+}
+function _saveLoginMeta(obj) {
+  try { sessionStorage.setItem('lw-login-meta', JSON.stringify(obj)); } catch(_) {}
+}
+function _recordFailedAttempt() {
+  const m = _getLoginMeta();
+  m.attempts = (m.attempts || 0) + 1;
+  if (m.attempts >= _MAX_LOGIN_ATTEMPTS) m.lockedUntil = Date.now() + _LOCKOUT_MS;
+  _saveLoginMeta(m);
+  return m.attempts;
+}
+function _clearLoginMeta() {
+  try { sessionStorage.removeItem('lw-login-meta'); } catch(_) {}
+}
+// ───────────────────────────────────────────────────────────────────────────────
+
 async function doLogin() {
   const email   = document.getElementById('login-email').value.trim();
   const pass    = document.getElementById('login-pass').value;
@@ -7292,6 +7328,14 @@ async function doLogin() {
 
   errEl.classList.remove('show');
   if (successEl) successEl.classList.remove('show');
+
+  // Lockout check
+  const _lm = _getLoginMeta();
+  if (_lm.lockedUntil && Date.now() < _lm.lockedUntil) {
+    const minsLeft = Math.ceil((_lm.lockedUntil - Date.now()) / 60000);
+    errText.textContent = `Too many failed attempts. Please wait ${minsLeft} minute${minsLeft !== 1 ? 's' : ''} before trying again.`;
+    errEl.classList.add('show'); _lucide(); return;
+  }
 
   if (!email || !pass) {
     errText.textContent = 'Please enter your email and password.';
@@ -7310,6 +7354,7 @@ async function doLogin() {
     if (error) throw error;
 
     _loginUser = data.user;
+    _clearLoginMeta(); // reset on successful login
     await loadUserProfile(_loginUser);
 
     // Persist email if "Remember me" checked
@@ -7416,7 +7461,16 @@ async function doLogin() {
     }
 
   } catch(e) {
-    errText.textContent = e.message || 'Login failed. Check your credentials.';
+    const attempts = _recordFailedAttempt();
+    const remaining = _MAX_LOGIN_ATTEMPTS - attempts;
+    const _lmNow = _getLoginMeta();
+    if (_lmNow.lockedUntil && Date.now() < _lmNow.lockedUntil) {
+      errText.textContent = 'Too many failed attempts. Account locked for 15 minutes.';
+    } else if (remaining > 0) {
+      errText.textContent = `${e.message || 'Invalid email or password.'} ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining before lockout.`;
+    } else {
+      errText.textContent = e.message || 'Login failed. Check your credentials.';
+    }
     errEl.classList.add('show');
     _lucide();
   } finally {
@@ -7444,7 +7498,7 @@ function showWorkspaceSelector(user, businesses) {
     const roleLabel = b.role === 'owner' ? 'Owner'
       : b.role.replace(/_/g,' ');
     const logoHtml = b.logo_url
-      ? `<img src="${b.logo_url}" alt="${b.name}">`
+      ? `<img src="${b.logo_url}" alt="${esc(b.name)}">`
       : getInitials(b.name);
     return `
       <div class="workspace-card" data-biz-id="${b.id}" onclick="selectWorkspace(this,'${b.id}')">
@@ -7453,7 +7507,7 @@ function showWorkspaceSelector(user, businesses) {
         </div>
         <div class="wc-logo">${logoHtml}</div>
         <div>
-          <div class="wc-name">${b.name}</div>
+          <div class="wc-name">${esc(b.name)}</div>
           <div class="wc-slug">${b.role ? b.role.replace(/_/g,' ') : ''}</div><!-- FIX: b.slug never exists; show role instead -->
         </div>
         <div class="wc-meta">
@@ -7481,6 +7535,34 @@ async function enterWorkspace() {
 }
 
 async function finaliseLogin(user, biz) {
+  // ── SECURITY: block deactivated staff before letting them in ──────────────────
+  if (biz?.id) {
+    try {
+      const { data: membership } = await sb
+        .from('business_members')
+        .select('is_active')
+        .eq('user_id', user.id)
+        .eq('business_id', biz.id)
+        .maybeSingle();
+      // If a membership row exists and is explicitly deactivated, block login
+      if (membership && membership.is_active === false) {
+        await sb.auth.signOut();
+        currentUser = null; _loginUser = null; _loginBusinesses = [];
+        sessionStorage.removeItem('lw_session');
+        showLogin();
+        // Show error on login page
+        const errEl = document.getElementById('login-error');
+        const errTx = document.getElementById('login-error-text');
+        if (errEl && errTx) {
+          errTx.textContent = 'Your account has been deactivated. Please contact your administrator.';
+          errEl.classList.add('show');
+        }
+        return;
+      }
+    } catch(_) { /* non-fatal — if check fails, allow login */ }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
   // Merge role from biz into currentUser (role comes from business_members)
   if (currentUser && biz?.role) {
     currentUser.role = biz.role;
@@ -7817,6 +7899,22 @@ function showModalError(errorElId, textElId, msg) {
 }
 
 // === FORMAT HELPERS ===
+
+/**
+ * Escape user-controlled strings before inserting into innerHTML.
+ * Prevents XSS via malicious names, notes, references, etc.
+ * Usage: `${esc(user.full_name)}` inside any template literal fed to innerHTML.
+ */
+function esc(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 // Uganda's lowest denomination is UGX 100. All monetary values are
 // rounded to the nearest 100 shillings before display or storage.
 function ugxRound(n) {
@@ -8501,10 +8599,10 @@ function renderRecentLoans(loans) {
   }
   tbody.innerHTML = loans.map(l => `
     <tr style="cursor:pointer" onclick="openLoanDrawer('${l.id}')">
-      <td class="td-mono">${l.loan_reference || '—'}</td>
-      <td><strong>${l.borrower_name || '—'}</strong></td>
+      <td class="td-mono">${esc(l.loan_reference) || '—'}</td>
+      <td><strong>${esc(l.borrower_name) || '—'}</strong></td>
       <td style="font-weight:600">${fmtAmt(l.principal_amount)}</td>
-      <td><span class="td-muted">${l.product_name || '—'}</span></td>
+      <td><span class="td-muted">${esc(l.product_name) || '—'}</span></td>
       <td>${loanStatusPill(l.status)}</td>
       <td class="td-muted">${formatDate(l.created_at)}</td>
     </tr>`).join('');
@@ -8621,7 +8719,7 @@ function renderLoansTable(loans, total) {
          </div>`;
     return `
     <tr style="cursor:pointer" onclick="openLoanDrawer('${l.id}')" title="Click to view details">
-      <td><strong>${l.borrower_name || '—'}</strong></td>
+      <td><strong>${esc(l.borrower_name) || '—'}</strong></td>
       <td>${fmtAmt(l.principal_amount)}</td>
       <td><strong>${fmtAmt(totalRepayable)}</strong></td>
       <td>${remainingDisplay}</td>
@@ -8691,7 +8789,7 @@ async function initLoanModal() {
     }
     const select = document.getElementById('loan-product');
     select.innerHTML = '<option value="">Select product…</option>' +
-      allProducts.map(p => `<option value="${p.id}" data-min="${p.min_amount}" data-max="${p.max_amount}" data-minterm="${p.min_term_days}" data-maxterm="${p.max_term_days}">${p.product_name}</option>`).join('');
+      allProducts.map(p => `<option value="${p.id}" data-min="${p.min_amount}" data-max="${p.max_amount}" data-minterm="${p.min_term_days}" data-maxterm="${p.max_term_days}">${esc(p.product_name)}</option>`).join('');
   } catch(e) { log('Products load error', e); }
   // Reset to step 1
   loanResetToStep1();
@@ -9112,13 +9210,13 @@ function searchBorrowers(query) {
           ? `<span style="color:var(--info);font-weight:600">${formatUGX(info.outstanding)} outstanding</span>`
           : '<span style="color:var(--text-subtle)">No active loans</span>';
 
-        return `<div class="dropdown-item" onclick="selectBorrower('${b.id}','${b.full_name.replace(/'/g, "\\'")}')">
+        return `<div class="dropdown-item" onclick="selectBorrower('${b.id}', this.dataset.name)" data-name="${esc(b.full_name)}">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem">
-            <div class="dropdown-item-name">${b.full_name}${loanBadge}</div>
+            <div class="dropdown-item-name">${esc(b.full_name)}${loanBadge}</div>
             <div style="font-size:0.7rem;color:var(--text-subtle);white-space:nowrap">${statusDot}${b.status === 'active' ? 'Active' : b.status === 'blacklisted' ? 'Blacklisted' : 'Inactive'}</div>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:3px">
-            <div class="dropdown-item-sub">${b.phone || '—'} · <span style="font-family:var(--mono);font-size:0.72rem">${b.national_id || 'No NID'}</span></div>
+            <div class="dropdown-item-sub">${esc(b.phone) || '—'} · <span style="font-family:var(--mono);font-size:0.72rem">${esc(b.national_id) || 'No NID'}</span></div>
             <div style="font-size:0.72rem">${outstandingLine}</div>
           </div>
         </div>`;
@@ -9136,6 +9234,9 @@ function selectBorrower(id, name) {
 let _loanSubmitInProgress = false; // guard against double-submit
 
 async function submitNewLoan() {
+  if (!['SUPER_ADMIN','BRANCH_MANAGER','LOAN_OFFICER'].includes(currentUser?.role)) {
+    showToast('You do not have permission to create loans', 'error'); return;
+  }
   // Hard guard: prevent any re-entrancy (double-click, polling trigger, etc.)
   if (_loanSubmitInProgress) return;
   _loanSubmitInProgress = true;
@@ -9366,6 +9467,9 @@ async function openLoanDrawer(loanId) {
   tabs.forEach((t, i) => t.classList.toggle('active', i === 0));
   panels.forEach((p, i) => p.classList.toggle('active', i === 0));
 
+  const _drawerIsAdmin   = ['SUPER_ADMIN','BRANCH_MANAGER'].includes(currentUser?.role);
+  const _drawerCanPay    = ['SUPER_ADMIN','BRANCH_MANAGER','CASHIER','COLLECTOR'].includes(currentUser?.role);
+
   try {
     const { data: loan, error } = await tbl('loans').select('*').eq('id', loanId).single();
     if (error) throw error;
@@ -9439,7 +9543,7 @@ async function openLoanDrawer(loanId) {
           <span style="width:8px;height:8px;border-radius:50%;background:${statusColor};display:inline-block;flex-shrink:0"></span>
           <span style="font-size:0.72rem;font-weight:700;letter-spacing:.06em;color:${statusColor}">${displayStatus}</span>
         </div>
-        <span style="font-family:var(--mono);font-size:0.75rem;font-weight:700;color:var(--text)">${loan.loan_reference||'—'}</span>
+        <span style="font-family:var(--mono);font-size:0.75rem;font-weight:700;color:var(--text)">${esc(loan.loan_reference)||'—'}</span>
       </div>
 
       <!-- Key figures -->
@@ -9481,13 +9585,13 @@ async function openLoanDrawer(loanId) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
           ${[
             ['Interest Rate', `${loan.interest_rate}% / month (${(loan.interest_type||'').toUpperCase()})`],
-            ['Product', product?.product_name||'—'],
+            ['Product', esc(product?.product_name)||'—'],
             ['Term', `${loan.loan_term_months} month${loan.loan_term_months!==1?'s':''}`],
             ['Frequency', (loan.repayment_frequency||'—').toLowerCase()],
             ['Disbursed', formatDate(loan.disbursement_date)],
             ['Maturity', `<span style="color:${isOverdue?'var(--danger)':'inherit'}">${formatDate(loan.maturity_date)}${isOverdue?' ⚠':''}</span>`],
             ...(loan.processing_fee ? [['Processing Fee', formatUGX(loan.processing_fee)]] : []),
-            ...(loan.loan_purpose ? [['Purpose', loan.loan_purpose]] : []),
+            ...(loan.loan_purpose ? [['Purpose', esc(loan.loan_purpose)]] : []),
           ].map(([label, value], i) => `
             <div style="padding:9px 14px;border-bottom:1px solid var(--border);${i%2===1?'border-left:1px solid var(--border)':''}">
               <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:2px">${label}</div>
@@ -9505,23 +9609,23 @@ async function openLoanDrawer(loanId) {
         <div style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div>
             <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:2px">Full Name</div>
-            <div style="font-size:0.85rem;font-weight:700;color:var(--text)">${client?.full_name||'—'}</div>
+            <div style="font-size:0.85rem;font-weight:700;color:var(--text)">${esc(client?.full_name)||'—'}</div>
           </div>
           <div>
             <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:2px">Phone</div>
-            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${client?.phone||'—'}</div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${esc(client?.phone)||'—'}</div>
           </div>
           <div style="grid-column:1/-1">
             <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:2px">National ID</div>
-            <div style="font-family:var(--mono);font-size:0.8rem;font-weight:600;color:var(--accent)">${client?.national_id||'—'}</div>
+            <div style="font-family:var(--mono);font-size:0.8rem;font-weight:600;color:var(--accent)">${esc(client?.national_id)||'—'}</div>
           </div>
         </div>
       </div>
 
-      <!-- Action buttons -->
+      <!-- Action buttons — role-gated -->
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-        ${['active'].includes(loan.status) ? `<button class="btn btn-primary" onclick="closeDrawer('loan');openModal('new-payment-modal');prefillLoanForPayment('${loan.id}','${loan.loan_reference}')"><i data-lucide="credit-card"></i> Record Payment</button>` : ''}
-        ${['active'].includes(loan.status) && isOverdue ? `<button class="btn btn-danger btn-sm" onclick="updateLoanStatus('${loan.id}','defaulted')"><i data-lucide="alert-triangle"></i> Mark Defaulted</button>` : ''}
+        ${['active'].includes(loan.status) && _drawerCanPay ? `<button class="btn btn-primary" onclick="closeDrawer('loan');openModal('new-payment-modal');prefillLoanForPayment('${loan.id}','${esc(loan.loan_reference)}')"><i data-lucide="credit-card"></i> Record Payment</button>` : ''}
+        ${['active'].includes(loan.status) && isOverdue && _drawerIsAdmin ? `<button class="btn btn-danger btn-sm" onclick="updateLoanStatus('${loan.id}','defaulted')"><i data-lucide="alert-triangle"></i> Mark Defaulted</button>` : ''}
       </div>`;
 
     // Schedule — use repaymentRows already fetched in parallel above
@@ -9670,12 +9774,12 @@ async function openLoanDrawer(loanId) {
                 <div style="font-size:0.82rem;font-weight:700;color:var(--text)">${formatUGX(p.amount_paid)}</div>
                 <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
                   <span style="font-size:0.65rem;color:${methodColor};font-weight:600">${methodLabel}</span>
-                  ${p.receipt_number ? `<span style="font-size:0.62rem;color:var(--text-subtle)">·</span><span style="font-family:var(--mono);font-size:0.65rem;color:var(--text-muted)">${p.receipt_number}</span>` : ''}
+                  ${p.receipt_number ? `<span style="font-size:0.62rem;color:var(--text-subtle)">·</span><span style="font-family:var(--mono);font-size:0.65rem;color:var(--text-muted)">${esc(p.receipt_number)}</span>` : ''}
                 </div>
               </div>
               <div style="text-align:right">
                 <div style="font-size:0.72rem;font-weight:600;color:var(--text-muted)">${formatDate(p.payment_date)}</div>
-                ${p.notes ? `<div style="font-size:0.65rem;color:var(--text-subtle);margin-top:2px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.notes}</div>` : ''}
+                ${p.notes ? `<div style="font-size:0.65rem;color:var(--text-subtle);margin-top:2px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.notes)}</div>` : ''}
               </div>
             </div>`;
           }).join('')}
@@ -9722,8 +9826,8 @@ async function openLoanDrawer(loanId) {
                   <span style="font-size:0.72rem;font-weight:700;padding:1px 7px;border-radius:20px;background:${dotBg};color:${dotColor};border:1px solid ${dotBorder};letter-spacing:.03em">${a.action}</span>
                   <span style="font-size:0.65rem;color:var(--text-subtle);white-space:nowrap">${formatRelative(a.created_at)}</span>
                 </div>
-                <div style="font-size:0.8rem;font-weight:600;color:var(--text);margin-bottom:1px">${actor}</div>
-                ${a.notes || a.description ? `<div style="font-size:0.72rem;color:var(--text-muted);line-height:1.4">${a.notes || a.description}</div>` : ''}
+                <div style="font-size:0.8rem;font-weight:600;color:var(--text);margin-bottom:1px">${esc(actor)}</div>
+                ${a.notes || a.description ? `<div style="font-size:0.72rem;color:var(--text-muted);line-height:1.4">${esc(a.notes || a.description)}</div>` : ''}
               </div>
             </div>`;
           }).join('')}
@@ -9845,6 +9949,9 @@ function generateLoanSchedule(loan) {
 }
 
 async function updateLoanStatus(loanId, newStatus) {
+  if (!['SUPER_ADMIN','BRANCH_MANAGER'].includes(currentUser?.role)) {
+    showToast('Only Admins can change loan status', 'error'); return;
+  }
   try {
     const updateQuery = tbl('loans').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', loanId);
     const { error } = await updateQuery;
@@ -9964,7 +10071,7 @@ async function buildAgreementTab(loan, client, product) {
       </div>
 
       <div style="display:flex;justify-content:space-between;margin-bottom:0.75rem;font-size:11px">
-        <div><strong>Agreement Ref:</strong> ${loan.loan_reference || '—'}</div>
+        <div><strong>Agreement Ref:</strong> ${esc(loan.loan_reference) || '—'}</div>
         <div><strong>Date Issued:</strong> ${formatDate(loan.disbursement_date || loan.created_at)}</div>
         <div><strong>Status:</strong> ${displayStatus}</div>
       </div>
@@ -9981,8 +10088,8 @@ async function buildAgreementTab(loan, client, product) {
           </div>
           <div style="padding:10px 14px">
             <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:4px">BORROWER</div>
-            <div style="font-weight:600">${client?.full_name || '—'}</div>
-            <div style="font-size:12px;color:#444;margin-top:3px">NID: ${client?.national_id || '—'} &nbsp;|&nbsp; Tel: ${client?.phone || '—'}</div>
+            <div style="font-weight:600">${esc(client?.full_name) || '—'}</div>
+            <div style="font-size:12px;color:#444;margin-top:3px">NID: ${esc(client?.national_id) || '—'} &nbsp;|&nbsp; Tel: ${esc(client?.phone) || '—'}</div>
           </div>
         </div>
       </div>
@@ -10000,7 +10107,7 @@ async function buildAgreementTab(loan, client, product) {
             ['Repayment Frequency', (loan.repayment_frequency||'Monthly').toUpperCase()],
             ['Disbursement Date',   formatDate(loan.disbursement_date)],
             ['Maturity Date',       formatDate(loan.maturity_date)],
-            ['Product',             product?.product_name || '—'],
+            ['Product',             esc(product?.product_name) || '—'],
           ].map(([label, val], i) => `
             <tr style="background:${i%2===0?'#fafafa':'#fff'}">
               <td style="padding:4px 10px;border-bottom:1px solid #eee;color:#555;font-weight:600;width:45%">${label}</td>
@@ -10018,7 +10125,7 @@ async function buildAgreementTab(loan, client, product) {
           <table style="width:100%;border-collapse:collapse;font-size:12px">
             ${collateralArr.map((c,i) => `<tr style="background:${i%2===0?'#fafafa':'#fff'}">
               <td style="padding:4px 10px;border-bottom:1px solid #eee;color:#555;font-weight:600;width:40px">${i+1}.</td>
-              <td style="padding:4px 10px;border-bottom:1px solid #eee">${c}</td>
+              <td style="padding:4px 10px;border-bottom:1px solid #eee">${esc(c)}</td>
             </tr>`).join('')}
           </table>
         </div>`;
@@ -10032,24 +10139,24 @@ async function buildAgreementTab(loan, client, product) {
           let collateralArr = [];
           try { collateralArr = loan.collateral ? JSON.parse(loan.collateral) : []; } catch(_) {}
           const collateralText = collateralArr.length
-            ? collateralArr.map((c,i) => `(${i+1}) ${c}`).join('; ')
+            ? collateralArr.map((c,i) => `(${i+1}) ${esc(c)}`).join('; ')
             : 'as separately documented';
-          return `<p style="margin-bottom:0.4rem"><strong>5. SECURITY / COLLATERAL.</strong> The Borrower provides the following as security: <strong>${collateralText}</strong>. In the event of default, the Lender reserves the right to enforce against stated collateral.</p>`;
+          return `<p style="margin-bottom:0.4rem"><strong>5. SECURITY / COLLATERAL.</strong> The Borrower provides the following as security: <strong>${esc(collateralText)}</strong>. In the event of default, the Lender reserves the right to enforce against stated collateral.</p>`;
         })()}
         <p style="margin-bottom:0.4rem"><strong>6. REPRESENTATIONS.</strong> The Borrower represents that all information provided is accurate, and that they have full capacity to enter into this Agreement.</p>
         <p style="margin-bottom:0.4rem"><strong>7. GOVERNING LAW.</strong> This Agreement is governed by and construed in accordance with the laws of the Republic of Uganda.</p>
-        ${loan.loan_purpose ? `<p style="margin-bottom:0.75rem"><strong>8. LOAN PURPOSE.</strong> The Borrower states the purpose of this loan as: <em>${loan.loan_purpose}</em>.</p>` : ''}
+        ${loan.loan_purpose ? `<p style="margin-bottom:0.75rem"><strong>8. LOAN PURPOSE.</strong> The Borrower states the purpose of this loan as: <em>${esc(loan.loan_purpose)}</em>.</p>` : ''}
       </div>
 
       <p style="margin-bottom:0.75rem;font-size:11px;color:#555;font-style:italic">By signing below, both parties confirm they have read, understood, and agree to be bound by all terms and conditions of this Agreement.</p>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.25rem;padding-top:1rem;border-top:2px solid #ccc">
         <div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#555;margin-bottom:0.5rem">Lender — ${bizName}</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#555;margin-bottom:0.5rem">Lender — ${esc(bizName)}</div>
           ${lenderSigLine}
         </div>
         <div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#555;margin-bottom:0.5rem">Borrower — ${client?.full_name || '—'}</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#555;margin-bottom:0.5rem">Borrower — ${esc(client?.full_name) || '—'}</div>
           ${signatureLine}
         </div>
       </div>
@@ -10077,9 +10184,9 @@ async function buildAgreementTab(loan, client, product) {
             </tr></thead>
             <tbody>${guarantorsArr.map(g => `
               <tr>
-                <td style="padding:6px 8px;border:1px solid #ddd;font-weight:600">${g.name || ''}</td>
-                <td style="padding:6px 8px;border:1px solid #ddd;font-family:monospace">${g.nid || ''}</td>
-                <td style="padding:6px 8px;border:1px solid #ddd">${g.phone || ''}</td>
+                <td style="padding:6px 8px;border:1px solid #ddd;font-weight:600">${esc(g.name) || ''}</td>
+                <td style="padding:6px 8px;border:1px solid #ddd;font-family:monospace">${esc(g.nid) || ''}</td>
+                <td style="padding:6px 8px;border:1px solid #ddd">${esc(g.phone) || ''}</td>
                 <td style="padding:6px 8px;border:1px solid #ddd;min-width:120px">&nbsp;</td>
               </tr>`).join('')}
             </tbody>
@@ -10088,7 +10195,7 @@ async function buildAgreementTab(loan, client, product) {
       })()}
 
       <div style="margin-top:0.75rem;padding:6px 10px;background:#f5f5f5;border:1px solid #ddd;border-radius:4px;font-size:10px;color:#888;text-align:center">
-        Generated by LendWise LMS &nbsp;|&nbsp; ${bizName} &nbsp;|&nbsp; Ref: ${loan.loan_reference || '—'} &nbsp;|&nbsp; ${new Date().toLocaleString('en-GB')}
+        Generated by LendWise LMS &nbsp;|&nbsp; ${bizName} &nbsp;|&nbsp; Ref: ${esc(loan.loan_reference) || '—'} &nbsp;|&nbsp; ${new Date().toLocaleString('en-GB')}
       </div>
     </div>`;
 
@@ -10098,7 +10205,7 @@ async function buildAgreementTab(loan, client, product) {
 
   document.getElementById('lt-agreement').innerHTML = `
     <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
-      ${!bothSigned ? `<button class="btn btn-ghost btn-sm" onclick="openSigningModal({loanRef:'${loan.loan_reference}',loanId:'${loan.id}',clientId:'${client?.id||''}',borrowerName:'${(client?.full_name||'').replace(/'/g,"\\'")}' })">
+      ${!bothSigned ? `<button class="btn btn-ghost btn-sm" onclick="openSigningModal({loanRef:this.dataset.ref,loanId:'${loan.id}',clientId:'${client?.id||''}',borrowerName:this.dataset.bname})" data-ref="${esc(loan.loan_reference)}" data-bname="${esc(client?.full_name||'')}">
         <i data-lucide="pen-line"></i> ${_sigBtnLabel}
       </button>` : ''}
       <button class="btn btn-primary btn-sm" onclick="printLoanAgreement()">
@@ -10609,8 +10716,8 @@ async function sigCapWriteToServer(key, fields) {
         body: JSON.stringify({ session_key: key, submitted_at: new Date().toISOString(), ...fields }),
       });
       if (resp.ok || resp.status === 201 || resp.status === 204) ok = true;
-      else console.warn('[LW sig] write failed:', resp.status, await resp.text());
-    } catch(e) { console.warn('[LW sig] exception:', e); }
+      else logWarn('sig write failed:', resp.status);
+    } catch(e) { logWarn('sig write exception:', e); }
   }
   // Always write to localStorage as same-device fallback
   try {
@@ -10620,7 +10727,7 @@ async function sigCapWriteToServer(key, fields) {
     ), ts: Date.now() }));
     ok = true;
   } catch(_) {}
-  if (!ok) console.warn('[LW sig] all write strategies failed');
+  if (!ok) logWarn('sig: all write strategies failed');
 }
 
 // Legacy compat shims — kept so any other code calling these still works
@@ -10766,10 +10873,10 @@ function renderBorrowersTable(borrowers, total) {
           ${b.photo_url
             ? `<img src="${b.photo_url}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid var(--border)">`
             : `<div style="width:30px;height:30px;border-radius:50%;background:var(--accent-subtle);display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:700;color:var(--accent);flex-shrink:0">${getInitials(b.full_name)}</div>`}
-          <strong>${b.full_name}</strong>
+          <strong>${esc(b.full_name)}</strong>
         </div>
       </td>
-      <td class="td-muted">${b.phone || '—'}</td>
+      <td class="td-muted">${esc(b.phone) || '—'}</td>
       <td>
         ${b._active_loans > 0
           ? `<span class="pill pill-green">${b._active_loans} active</span>`
@@ -10803,6 +10910,9 @@ function filterBorrowers(query) {
 }
 
 async function submitNewBorrower() {
+  if (!['SUPER_ADMIN','BRANCH_MANAGER','LOAN_OFFICER'].includes(currentUser?.role)) {
+    showToast('You do not have permission to add clients', 'error'); return;
+  }
   const name    = document.getElementById('b-name').value.trim();
   const nid     = document.getElementById('b-nid').value.trim();
   const phone   = document.getElementById('b-phone').value.trim();
@@ -10925,13 +11035,13 @@ async function openBorrowerDrawer(clientId) {
           </div>
           <!-- Core info -->
           <div style="flex:1;min-width:0">
-            <div style="font-size:1.05rem;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:2px">${b.full_name}${genderIcon ? ` <span style="font-size:0.75rem;color:var(--text-muted)">${genderIcon}</span>` : ''}</div>
-            <div style="font-family:var(--mono);font-size:0.72rem;color:var(--accent);font-weight:600;margin-bottom:8px;letter-spacing:.03em">${b.national_id||'No NID'}</div>
+            <div style="font-size:1.05rem;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:2px">${esc(b.full_name)}${genderIcon ? ` <span style="font-size:0.75rem;color:var(--text-muted)">${genderIcon}</span>` : ''}</div>
+            <div style="font-family:var(--mono);font-size:0.72rem;color:var(--accent);font-weight:600;margin-bottom:8px;letter-spacing:.03em">${esc(b.national_id)||'No NID'}</div>
             <div style="display:grid;gap:4px">
-              ${b.phone ? `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.72 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.63 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.29 6.29l.98-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span style="color:var(--text)">${b.phone}</span></div>` : ''}
-              ${b.email ? `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><span style="color:var(--text);word-break:break-all">${b.email}</span></div>` : ''}
+              ${b.phone ? `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.72 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.63 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.29 6.29l.98-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span style="color:var(--text)">${esc(b.phone)}</span></div>` : ''}
+              ${b.email ? `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><span style="color:var(--text);word-break:break-all">${esc(b.email)}</span></div>` : ''}
               ${b.date_of_birth ? `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg><span style="color:var(--text)">${formatDate(b.date_of_birth)}</span></div>` : ''}
-              ${b.address ? `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span style="color:var(--text)">${b.address}</span></div>` : ''}
+              ${b.address ? `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span style="color:var(--text)">${esc(b.address)}</span></div>` : ''}
             </div>
           </div>
         </div>
@@ -10951,15 +11061,15 @@ async function openBorrowerDrawer(clientId) {
         <div style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px">
           <div>
             <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em">Name</div>
-            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${b.next_of_kin_name||'—'}</div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${esc(b.next_of_kin_name)||'—'}</div>
           </div>
           <div>
             <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em">Phone</div>
-            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${b.next_of_kin_phone||'—'}</div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${esc(b.next_of_kin_phone)||'—'}</div>
           </div>
           <div>
             <div style="font-size:0.62rem;color:var(--text-muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em">Relationship</div>
-            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${b.next_of_kin_rel||'—'}</div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text)">${esc(b.next_of_kin_rel)||'—'}</div>
           </div>
         </div>
       </div>
@@ -10968,7 +11078,7 @@ async function openBorrowerDrawer(clientId) {
       ${b.notes ? `
       <div style="background:var(--warning-subtle);border:1px solid var(--warning-border);border-radius:10px;padding:10px 14px">
         <div style="font-size:0.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--warning);margin-bottom:4px">Notes</div>
-        <div style="font-size:0.8rem;color:var(--text);line-height:1.5">${b.notes}</div>
+        <div style="font-size:0.8rem;color:var(--text);line-height:1.5">${esc(b.notes)}</div>
       </div>` : ''}
     `;
 
@@ -10996,7 +11106,7 @@ async function openBorrowerDrawer(clientId) {
             <div style="padding:9px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:${idx === 0 ? 'rgba(88,166,255,0.04)' : 'transparent'}">
               <div style="display:flex;align-items:center;gap:8px">
                 ${idx === 0 ? '<span style="font-size:0.6rem;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--info-subtle);color:var(--info);border:1px solid var(--info-border);letter-spacing:.04em">LATEST</span>' : ''}
-                <span style="font-family:var(--mono);font-size:0.78rem;font-weight:700;color:var(--text)">${l.loan_reference||'—'}</span>
+                <span style="font-family:var(--mono);font-size:0.78rem;font-weight:700;color:var(--text)">${esc(l.loan_reference)||'—'}</span>
               </div>
               <span style="font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:20px;background:${statusBg};color:${statusColor};border:1px solid ${statusBorder};letter-spacing:.04em">${(l.status||'unknown').toUpperCase()}</span>
             </div>
@@ -11167,11 +11277,11 @@ function renderPaymentsTable(payments, total) {
     : formatDate;
   tbody.innerHTML = payments.map(p => `
     <tr style="cursor:pointer" onclick="openPaymentDetail('${p.id}')" title="Click to view details">
-      <td><strong>${p._borrower_name || '—'}</strong></td>
+      <td><strong>${esc(p._borrower_name) || '—'}</strong></td>
       <td><strong>${fmtPayAmt(p.amount_paid)}</strong></td>
       <td>${methodPill((p.payment_method||'').toUpperCase())}</td>
       <td class="td-muted">${fmtPayDate(p.payment_date)}</td>
-      <td class="td-muted">${p._collected_by_name || (p.collected_by ? p.collected_by.toString().substring(0, 8) + '…' : '—')}</td>
+      <td class="td-muted">${esc(p._collected_by_name) || (p.collected_by ? p.collected_by.toString().substring(0, 8) + '…' : '—')}</td>
     </tr>`).join('');
   renderPagination('payments-pagination', paymentPage, total, 'goPaymentPage');
   _lucide();
@@ -11242,18 +11352,18 @@ async function openPaymentDetail(paymentId) {
         <!-- Receipt number bar -->
         <div class="pmt-receipt-id">
           <span class="pmt-receipt-id-label"><i data-lucide="hash" style="width:11px;height:11px;vertical-align:middle;margin-right:3px"></i>Receipt No.</span>
-          <span class="pmt-receipt-id-value">${p.receipt_number || '—'}</span>
+          <span class="pmt-receipt-id-value">${esc(p.receipt_number) || '—'}</span>
         </div>
 
         <!-- Detail grid -->
         <div class="pmt-detail-grid">
           <div class="pmt-detail-cell">
             <div class="pmt-detail-cell-label">Borrower</div>
-            <div class="pmt-detail-cell-value">${p._borrower_name || '—'}</div>
+            <div class="pmt-detail-cell-value">${esc(p._borrower_name) || '—'}</div>
           </div>
           <div class="pmt-detail-cell">
             <div class="pmt-detail-cell-label">Loan Reference</div>
-            <div class="pmt-detail-cell-value mono">${p._loan_reference || '—'}</div>
+            <div class="pmt-detail-cell-value mono">${esc(p._loan_reference) || '—'}</div>
           </div>
           <div class="pmt-detail-cell">
             <div class="pmt-detail-cell-label">Payment Date</div>
@@ -11269,14 +11379,14 @@ async function openPaymentDetail(paymentId) {
           </div>
           <div class="pmt-detail-cell full-width">
             <div class="pmt-detail-cell-label">Collected By</div>
-            <div class="pmt-detail-cell-value"><i data-lucide="user-check" style="width:13px;height:13px;color:var(--text-muted)"></i>${p._collected_by_name || (p.collected_by ? p.collected_by.toString().substring(0,8)+'…' : '—')}</div>
+            <div class="pmt-detail-cell-value"><i data-lucide="user-check" style="width:13px;height:13px;color:var(--text-muted)"></i>${esc(p._collected_by_name) || (p.collected_by ? esc(p.collected_by.toString()).substring(0,8)+'…' : '—')}</div>
           </div>
         </div>
 
         ${p.notes ? `
         <div>
           <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.4rem">Notes</div>
-          <div class="pmt-notes-box">${p.notes}</div>
+          <div class="pmt-notes-box">${esc(p.notes)}</div>
         </div>` : ''}
 
       </div>
@@ -11383,19 +11493,19 @@ function searchLoansForPayment(query) {
         return `<div class="dropdown-item" onclick="selectLoanById('${l.id}');prefillOutstanding(${l.installment_amount || l.outstanding_principal})">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem">
             <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-family:var(--mono);font-size:0.8rem;font-weight:700;color:var(--accent)">${l.loan_reference}</span>
+              <span style="font-family:var(--mono);font-size:0.8rem;font-weight:700;color:var(--accent)">${esc(l.loan_reference)}</span>
               <span style="background:${statusColor}1a;color:${statusColor};border:1px solid ${statusColor}33;border-radius:100px;font-size:0.62rem;font-weight:700;padding:1px 6px;text-transform:uppercase;letter-spacing:0.04em">${statusLabel}</span>
             </div>
             <span style="font-size:0.78rem;font-weight:600;color:var(--info)">${formatUGX(l.outstanding_principal)}</span>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
-            <div style="font-size:0.75rem;color:var(--text-muted)">${l.borrower_name}${l.borrower_phone ? ' · ' + l.borrower_phone : ''}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">${esc(l.borrower_name)}${l.borrower_phone ? ' · ' + esc(l.borrower_phone) : ''}</div>
             <div style="font-size:0.72rem;color:var(--text-muted)">${dueLabel}</div>
           </div>
           <div style="margin-top:5px;height:3px;background:var(--border-2);border-radius:2px;overflow:hidden">
             <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:2px;transition:width 0.3s"></div>
           </div>
-          <div style="font-size:0.68rem;color:var(--text-subtle);margin-top:2px">${pct}% repaid · ${l.product_name}</div>
+          <div style="font-size:0.68rem;color:var(--text-subtle);margin-top:2px">${pct}% repaid · ${esc(l.product_name)}</div>
         </div>`;
       }).join('');
     } catch(e) { dd.innerHTML = '<div class="dropdown-empty">Search failed</div>'; }
@@ -11480,6 +11590,9 @@ function updatePaymentLoanSummary(loan) {
 }
 
 async function submitNewPayment() {
+  if (!['SUPER_ADMIN','BRANCH_MANAGER','CASHIER','COLLECTOR'].includes(currentUser?.role)) {
+    showToast('You do not have permission to record payments', 'error'); return;
+  }
   const loanId = document.getElementById('pay-loan-id').value;
   const amount = parseFloat(document.getElementById('pay-amount').value);
   const method = document.getElementById('pay-method').value;
@@ -11765,8 +11878,8 @@ function _renderPAR(tbody, data) {
     tbody.innerHTML = data.map(l => {
       const daysOverdue = l.maturity_date ? Math.max(0, Math.floor((today - new Date(l.maturity_date)) / 86400000)) : 0;
       return `<tr>
-        <td class="td-mono">${l.loan_reference || '—'}</td>
-        <td><strong>${l.borrower_name || '—'}</strong></td>
+        <td class="td-mono">${esc(l.loan_reference) || '—'}</td>
+        <td><strong>${esc(l.borrower_name) || '—'}</strong></td>
         <td>${formatUGX(l.outstanding_principal)}</td>
         <td><span style="color:var(--danger);font-weight:600">${daysOverdue} days</span></td>
         <td>${formatUGX(l.outstanding_penalties || 0)}</td>
@@ -11847,10 +11960,10 @@ function _renderAudit(tbody, data, count) {
   } else {
     tbody.innerHTML = data.map(a => `<tr>
       <td class="td-muted no-wrap">${formatRelative(a.created_at)}</td>
-      <td><span class="pill pill-${a.action==='INSERT'?'green':a.action==='UPDATE'?'blue':a.action==='LOGIN'?'purple':'red'}">${a.action}</span></td>
-      <td class="td-mono">${a.table_name || '—'}</td>
-      <td class="td-mono" style="font-size:0.72rem">${a.record_id ? a.record_id.toString().substring(0,12)+'…' : '—'}</td>
-      <td class="td-muted">${a.changed_by_name || '—'}</td>
+      <td><span class="pill pill-${a.action==='INSERT'?'green':a.action==='UPDATE'?'blue':a.action==='LOGIN'?'purple':'red'}">${esc(a.action)}</span></td>
+      <td class="td-mono">${esc(a.table_name) || '—'}</td>
+      <td class="td-mono" style="font-size:0.72rem">${a.record_id ? esc(a.record_id.toString()).substring(0,12)+'…' : '—'}</td>
+      <td class="td-muted">${esc(a.changed_by_name) || '—'}</td>
     </tr>`).join('');
     renderPagination('audit-pagination', auditPage, count, 'goAuditPage');
   }
@@ -11911,11 +12024,11 @@ function renderStaffTable(staff) {
       <td>
         <div style="display:flex;align-items:center;gap:0.6rem">
           <div style="width:30px;height:30px;border-radius:6px;background:var(--accent-subtle);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:var(--accent)">${getInitials(s.full_name)}</div>
-          <strong>${s.full_name}</strong>
+          <strong>${esc(s.full_name)}</strong>
         </div>
       </td>
       <td>${roleBadge(s.role)}</td>
-      <td class="td-muted">${s.phone || '—'}</td>
+      <td class="td-muted">${esc(s.phone) || '—'}</td>
       <td>${s.is_active ? '<span class="pill pill-green">Active</span>' : '<span class="pill pill-gray">Inactive</span>'}</td>
       <td class="td-muted">${formatDate(s.created_at)}</td>
       <td class="td-staff-actions">
@@ -11937,7 +12050,7 @@ function renderStaffTable(staff) {
             : '<div style="width:30px;flex-shrink:0"></div>'
           }
           ${isSuperAdmin && s.id !== currentUser?.id
-            ? `<button onclick="confirmDeleteStaff('${s.id}','${s.full_name.replace(/'/g,"\'")}')" title="Delete staff member" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;background:var(--danger-subtle);border:1px solid var(--danger-border);color:var(--danger)" onmouseover="this.style.background='var(--danger)';this.style.color='#fff'" onmouseout="this.style.background='var(--danger-subtle)';this.style.color='var(--danger)'">
+            ? `<button onclick="confirmDeleteStaff('${s.id}', this.dataset.name)" data-name="${esc(s.full_name)}" title="Delete staff member" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;background:var(--danger-subtle);border:1px solid var(--danger-border);color:var(--danger)" onmouseover="this.style.background='var(--danger)';this.style.color='#fff'" onmouseout="this.style.background='var(--danger-subtle)';this.style.color='var(--danger)'">
                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                </button>`
             : '<div style="width:30px;flex-shrink:0"></div>'
@@ -11957,8 +12070,21 @@ function filterStaff(query) {
 async function changeStaffRole(id, role) {
   if (currentUser?.role !== 'SUPER_ADMIN') { showToast('Only Super Admins can change staff roles', 'error'); loadStaff(); return; }
   try {
+    const prevMember = allStaff.find(s => s.id === id);
     const { error } = await sb.from('business_members').update({ role }).eq('user_id', id).eq('business_id', window.currentBusiness?.id || '');
     if (error) throw error;
+    try {
+      await tbl('audit_trail').insert({
+        action:          'CHANGE_STAFF_ROLE',
+        table_name:      'business_members',
+        record_id:       id,
+        user_id:         currentUser?.id || null,
+        business_id:     window.currentBusiness?.id || null,
+        changed_by_name: currentUser?.full_name || 'Unknown',
+        old_data:        { role: prevMember?.role || null },
+        new_data:        { role, staff_name: prevMember?.full_name || id },
+      });
+    } catch(_) {}
     showToast('Role updated', 'success');
     cacheInvalidate('staff');
     loadStaff();
@@ -11968,8 +12094,21 @@ async function changeStaffRole(id, role) {
 async function toggleStaffActive(id, isActive) {
   if (currentUser?.role !== 'SUPER_ADMIN') { showToast('Only Super Admins can activate or deactivate staff', 'error'); return; }
   try {
+    const prevMember = allStaff.find(s => s.id === id);
     const { error } = await sb.from('business_members').update({ is_active: isActive }).eq('user_id', id).eq('business_id', window.currentBusiness?.id || '');
     if (error) throw error;
+    try {
+      await tbl('audit_trail').insert({
+        action:          isActive ? 'ACTIVATE_STAFF' : 'DEACTIVATE_STAFF',
+        table_name:      'business_members',
+        record_id:       id,
+        user_id:         currentUser?.id || null,
+        business_id:     window.currentBusiness?.id || null,
+        changed_by_name: currentUser?.full_name || 'Unknown',
+        old_data:        { is_active: !isActive },
+        new_data:        { is_active: isActive, staff_name: prevMember?.full_name || id },
+      });
+    } catch(_) {}
     showToast(`Staff ${isActive ? 'activated' : 'deactivated'}`, 'success');
     cacheInvalidate('staff');
     loadStaff();
@@ -11985,6 +12124,11 @@ function confirmDeleteStaff(id, name) {
   openModal('delete-staff-modal');
 }
 async function executeDeleteStaff() {
+  if (currentUser?.role !== 'SUPER_ADMIN') {
+    closeModal('delete-staff-modal');
+    showToast('Only Super Admins can delete staff members', 'error');
+    return;
+  }
   if (!_pendingDeleteId) return;
   const btn = document.getElementById('delete-staff-confirm-btn');
   btn.disabled = true;
@@ -12019,6 +12163,20 @@ async function deleteStaff(id, name) {
     // 2. Delete from business_members (belt-and-suspenders; edge fn may already cascade)
     await sb.from('business_members').delete().eq('user_id', id).eq('business_id', bizId);
 
+    // Audit log
+    try {
+      await tbl('audit_trail').insert({
+        action:          'DELETE_STAFF',
+        table_name:      'business_members',
+        record_id:       id,
+        user_id:         currentUser?.id || null,
+        business_id:     bizId || null,
+        changed_by_name: currentUser?.full_name || 'Unknown',
+        old_data:        { staff_name: name, user_id: id },
+        new_data:        null,
+      });
+    } catch(_) {}
+
     showToast(`${name} has been permanently deleted`, 'success');
     cacheInvalidate('staff');
     loadStaff();
@@ -12036,11 +12194,14 @@ async function initStaffModal() {
     const { data } = await tbl('branches').select('*').eq('is_active', true);
     const select = document.getElementById('st-branch');
     select.innerHTML = '<option value="">Select branch…</option>' +
-      (data || []).map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+      (data || []).map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('');
   } catch(e) { log('Branch load error', e); }
 }
 
 async function submitNewStaff() {
+  if (currentUser?.role !== 'SUPER_ADMIN') {
+    showToast('Only Super Admins can add staff members', 'error'); return;
+  }
   const name     = document.getElementById('st-name').value.trim();
   const email    = document.getElementById('st-email').value.trim();
   const pass     = document.getElementById('st-pass').value;
@@ -12116,6 +12277,19 @@ async function submitNewStaff() {
     }, { onConflict: 'business_id,user_id' });
     if (memberErr) throw memberErr;
 
+    // Audit log
+    try {
+      await tbl('audit_trail').insert({
+        action:          'CREATE_STAFF',
+        table_name:      'business_members',
+        record_id:       newUserId,
+        user_id:         currentUser?.id || null,
+        business_id:     resolvedBizId || null,
+        changed_by_name: currentUser?.full_name || 'Unknown',
+        new_data:        { full_name: name, email, role, branch_id: branchId || null },
+      });
+    } catch(_) {}
+
     showToast(`${name} added — they can log in with their email & password`, 'success');
     closeModal('new-staff-modal');
     cacheInvalidate('staff');
@@ -12171,20 +12345,23 @@ function renderProductsTable(products) {
     _lucide();
     return;
   }
+  const _canEditProducts = ['SUPER_ADMIN','BRANCH_MANAGER'].includes(currentUser?.role);
   tbody.innerHTML = products.map(p => `
     <tr>
-      <td><strong>${p.product_name}</strong><br><span class="td-muted" style="font-size:0.75rem">${p.description || ''}</span></td>
-      <td class="td-mono">${p.product_code}</td>
+      <td><strong>${esc(p.product_name)}</strong><br><span class="td-muted" style="font-size:0.75rem">${esc(p.description) || ''}</span></td>
+      <td class="td-mono">${esc(p.product_code)}</td>
       <td class="td-muted">${formatUGX(p.min_amount)} / ${formatUGX(p.max_amount)}</td>
       <td><span class="pill pill-blue">${(p.interest_method||'').replace(/_/g,' ')}</span></td>
-      <td class="text-accent">${(p.daily_rate_pct * 30).toFixed(2)}% / mo</td><!-- FIX: was p.daily_rate_pct which shows raw 0.333333 daily; multiply by 30 to show familiar monthly % -->
-      <td class="td-muted">${p.repayment_frequency}</td>
+      <td class="text-accent">${(p.daily_rate_pct * 30).toFixed(2)}% / mo</td>
+      <td class="td-muted">${esc(p.repayment_frequency)}</td>
       <td class="td-muted">${p.min_term_days}–${p.max_term_days}</td>
       <td>${p.is_active ? '<span class="pill pill-green">Active</span>' : '<span class="pill pill-gray">Inactive</span>'}</td>
       <td class="td-actions">
         <div class="td-actions-wrap">
+          ${_canEditProducts ? `
           <button class="btn btn-ghost btn-sm" onclick="openProductModal('${p.id}')"><i data-lucide="pencil"></i></button>
           <button class="btn btn-danger btn-sm" onclick="deactivateProduct('${p.id}')"><i data-lucide="trash-2"></i></button>
+          ` : '<span style="font-size:0.72rem;color:var(--text-muted)">View only</span>'}
         </div>
       </td>
     </tr>`).join('');
@@ -12307,6 +12484,9 @@ function prHideHighlights() { /* preview panel removed */ }
 function prUpdatePreview() { /* preview panel removed */ }
 
 function openProductModal(productId) {
+  if (!['SUPER_ADMIN','BRANCH_MANAGER'].includes(currentUser?.role)) {
+    showToast('Only Admins can manage loan products', 'error'); return;
+  }
   document.getElementById('product-edit-id').value = productId || '';
   document.getElementById('product-modal-title').textContent = productId ? 'Edit Loan Product' : 'Add Loan Product';
   // Reset
@@ -12362,6 +12542,9 @@ function openProductModal(productId) {
 }
 
 async function submitProduct() {
+  if (!['SUPER_ADMIN','BRANCH_MANAGER'].includes(currentUser?.role)) {
+    showToast('Only Admins can manage loan products', 'error'); return;
+  }
   const editId  = document.getElementById('product-edit-id').value;
   const typeKey = document.getElementById('pr-product-type').value;
   const cfg     = PR_TYPES[typeKey];
@@ -12397,10 +12580,32 @@ async function submitProduct() {
     if (editId) {
       const { error } = await tbl('loan_products').update(payload).eq('id', editId);
       if (error) throw error;
+      try {
+        await tbl('audit_trail').insert({
+          action:          'UPDATE_LOAN_PRODUCT',
+          table_name:      'loan_products',
+          record_id:       editId,
+          user_id:         currentUser?.id || null,
+          business_id:     window.currentBusiness?.id || null,
+          changed_by_name: currentUser?.full_name || 'Unknown',
+          new_data:        { product_name: payload.product_name, product_code: payload.product_code, interest_method: payload.interest_method, repayment_frequency: payload.repayment_frequency },
+        });
+      } catch(_) {}
       showToast('Product updated', 'success');
     } else {
       const { error } = await tbl('loan_products').insert({ ...payload, created_by: currentUser?.id, business_id: window.currentBusiness?.id || null });
       if (error) throw error;
+      try {
+        await tbl('audit_trail').insert({
+          action:          'CREATE_LOAN_PRODUCT',
+          table_name:      'loan_products',
+          record_id:       null,
+          user_id:         currentUser?.id || null,
+          business_id:     window.currentBusiness?.id || null,
+          changed_by_name: currentUser?.full_name || 'Unknown',
+          new_data:        { product_name: payload.product_name, product_code: payload.product_code, interest_method: payload.interest_method, repayment_frequency: payload.repayment_frequency },
+        });
+      } catch(_) {}
       showToast('Product created', 'success');
     }
     allProducts = [];
@@ -12415,8 +12620,21 @@ async function submitProduct() {
 async function deactivateProduct(id) {
   if (!confirm('Deactivate this product? Existing loans will not be affected.')) return;
   try {
+    const prevProduct = allProducts.find(p => p.id === id);
     const { error } = await tbl('loan_products').update({ is_active: false }).eq('id', id);
     if (error) throw error;
+    try {
+      await tbl('audit_trail').insert({
+        action:          'DELETE_LOAN_PRODUCT',
+        table_name:      'loan_products',
+        record_id:       id,
+        user_id:         currentUser?.id || null,
+        business_id:     window.currentBusiness?.id || null,
+        changed_by_name: currentUser?.full_name || 'Unknown',
+        old_data:        { is_active: true, product_name: prevProduct?.product_name || id },
+        new_data:        { is_active: false },
+      });
+    } catch(_) {}
     showToast('Product deactivated', 'success');
     cacheInvalidate('products');
     loadProducts();
@@ -12451,12 +12669,12 @@ function _renderBranches(tbody, data) {
     tbody.innerHTML = emptyState('building-2', 'No branches', 'No branches configured yet.');
   } else {
     tbody.innerHTML = data.map(b => `<tr>
-      <td><strong>${b.name}</strong></td>
-      <td class="td-muted">${b.location || '—'}</td>
+      <td><strong>${esc(b.name)}</strong></td>
+      <td class="td-muted">${esc(b.location) || '—'}</td>
       <td>${b.is_active ? '<span class="pill pill-green">Active</span>' : '<span class="pill pill-gray">Inactive</span>'}</td>
       <td class="td-muted">${formatDate(b.created_at)}</td>
       <td style="text-align:right">
-        <button class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:var(--danger-border);padding:0 0.5rem" onclick="deleteBranch('${b.id}','${b.name.replace(/'/g,"\\'")}')">
+        <button class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:var(--danger-border);padding:0 0.5rem" onclick="deleteBranch('${b.id}', this.dataset.name)" data-name="${esc(b.name)}">
           <i data-lucide="trash-2" style="width:13px;height:13px"></i>
         </button>
       </td>
@@ -12477,6 +12695,9 @@ function openBranchModal() {
 }
 
 async function submitBranch() {
+  if (currentUser?.role !== 'SUPER_ADMIN') {
+    showToast('Only Super Admins can manage branches', 'error'); return;
+  }
   const name = document.getElementById('branch-name').value.trim();
   const location = document.getElementById('branch-location').value.trim();
   const isActive = document.getElementById('branch-status').value === 'true';
@@ -12503,6 +12724,17 @@ async function submitBranch() {
     closeModal('branch-modal');
     cacheInvalidate('branches');
     await loadBranches();
+    try {
+      await tbl('audit_trail').insert({
+        action:          'CREATE_BRANCH',
+        table_name:      'branches',
+        record_id:       null,
+        user_id:         currentUser?.id || null,
+        business_id:     window.currentBusiness?.id || null,
+        changed_by_name: currentUser?.full_name || 'Unknown',
+        new_data:        { name, location: location || null, is_active: isActive },
+      });
+    } catch(_) {}
     showToast('Branch added successfully', 'success');
   } catch(e) {
     errTxt.textContent = parseSupabaseError(e);
@@ -12514,10 +12746,25 @@ async function submitBranch() {
 }
 
 async function deleteBranch(id, name) {
+  if (currentUser?.role !== 'SUPER_ADMIN') {
+    showToast('Only Super Admins can delete branches', 'error'); return;
+  }
   if (!confirm(`Delete branch "${name}"?\n\nThis cannot be undone.`)) return;
   try {
     const { error } = await tbl('branches').delete().eq('id', id);
     if (error) throw error;
+    try {
+      await tbl('audit_trail').insert({
+        action:          'DELETE_BRANCH',
+        table_name:      'branches',
+        record_id:       id,
+        user_id:         currentUser?.id || null,
+        business_id:     window.currentBusiness?.id || null,
+        changed_by_name: currentUser?.full_name || 'Unknown',
+        old_data:        { branch_name: name, branch_id: id },
+        new_data:        null,
+      });
+    } catch(_) {}
     cacheInvalidate('branches');
     await loadBranches();
     showToast('Branch deleted', 'success');
@@ -13052,8 +13299,8 @@ function downloadFile(content, filename, mimeType) {
 function printLoansTable(data) {
   if (window.location.protocol === 'file:') { showToast('Print is unavailable when opened from a local file. Serve via a web server to enable printing.', 'warning', 6000); return; }
   const rows = data.map(l => `<tr>
-    <td>${l.loan_reference||''}</td><td>${l.borrower_name||''}</td>
-    <td>${l.product_name||''}</td>
+    <td>${esc(l.loan_reference)||''}</td><td>${esc(l.borrower_name)||''}</td>
+    <td>${esc(l.product_name)||''}</td>
     <td>UGX ${Number(l.principal_amount||0).toLocaleString()}</td>
     <td>UGX ${Number(l.outstanding_principal||0).toLocaleString()}</td>
     <td>${l.status||''}</td>
@@ -14245,7 +14492,7 @@ async function cwPollSupabaseOnce() {
 
   // Cross-device: use anon-only client so RLS anon policies apply correctly
   const client = cwGetAnonClient();
-  if (!client) { console.warn('[LW poll] no anon client'); return; }
+  if (!client) { logWarn('poll: no anon client'); return; }
   try {
     const { data, error } = await client
       .from('qr_capture_sessions')
@@ -14255,7 +14502,7 @@ async function cwPollSupabaseOnce() {
     if (!error && data && data.photo_data) {
       cwApplyCaptureData(data.photo_data || null);
     }
-  } catch(e) { console.error('[LW poll] exception:', e); }
+  } catch(e) { logError('poll exception:', e); }
 }
 
 function cwApplyCaptureData(photoData) {
@@ -14389,8 +14636,8 @@ async function cwdcSubmitPhoto(sessionKey) {
         }),
       });
       if (resp.ok || resp.status === 201 || resp.status === 204) ok = true;
-      else console.warn('[LW cwdc] write failed:', resp.status, await resp.text());
-    } catch(e) { console.warn('[LW cwdc] fetch error:', e); }
+      else logWarn('cwdc write failed:', resp.status);
+    } catch(e) { logWarn('cwdc fetch error:', e); }
   }
 
   // Same-device fallback — polling checks localStorage too
@@ -14621,12 +14868,11 @@ async function cpSubmitAll(key, skipSig) {
       if (resp.ok || resp.status === 201 || resp.status === 204) {
         supabaseOk = true;
       } else {
-        const body = await resp.text();
-        console.warn('[LW capture] write failed:', resp.status, body);
+        logWarn('capture write failed:', resp.status);
       }
-    } catch(e) { console.warn('[LW capture] fetch exception:', e); }
+    } catch(e) { logWarn('capture fetch exception:', e); }
   } else {
-    console.warn('[LW capture] missing credentials — sbUrl:', sbUrl, 'sbKey:', !!sbKey);
+    logWarn('capture missing credentials — sbUrl present:', !!sbUrl, 'sbKey present:', !!sbKey);
   }
 
   // Same-device fallback via localStorage
@@ -14955,29 +15201,49 @@ async function saveSettingsProfile() {
 }
 
 async function saveSettingsPassword() {
-  const np  = document.getElementById('settings-new-pass')?.value;
-  const cp  = document.getElementById('settings-confirm-pass')?.value;
+  const curP = document.getElementById('settings-current-pass')?.value;
+  const np   = document.getElementById('settings-new-pass')?.value;
+  const cp   = document.getElementById('settings-confirm-pass')?.value;
   const errEl = document.getElementById('settings-pass-error');
   const errTx = document.getElementById('settings-pass-error-text');
   const okEl  = document.getElementById('settings-pass-success');
   errEl?.classList.remove('show'); okEl?.classList.remove('show');
+
+  if (!curP) {
+    if (errTx) errTx.textContent = 'Please enter your current password to confirm this change.';
+    errEl?.classList.add('show'); _lucide(); return;
+  }
   if (!np || np.length < 8) {
-    if (errTx) errTx.textContent = 'Password must be at least 8 characters.';
+    if (errTx) errTx.textContent = 'New password must be at least 8 characters.';
     errEl?.classList.add('show'); _lucide(); return;
   }
   if (np !== cp) {
-    if (errTx) errTx.textContent = 'Passwords do not match.';
+    if (errTx) errTx.textContent = 'New passwords do not match.';
     errEl?.classList.add('show'); _lucide(); return;
   }
+  if (curP === np) {
+    if (errTx) errTx.textContent = 'New password must be different from your current password.';
+    errEl?.classList.add('show'); _lucide(); return;
+  }
+
   const btn = document.getElementById('settings-pass-btn');
   if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader"></i> Updating…'; _lucide(); }
   try {
+    // Re-authenticate with current password first
+    const userEmail = currentUser?.email || (await sb.auth.getUser()).data?.user?.email;
+    const { error: reAuthErr } = await sb.auth.signInWithPassword({ email: userEmail, password: curP });
+    if (reAuthErr) {
+      if (errTx) errTx.textContent = 'Current password is incorrect.';
+      errEl?.classList.add('show'); _lucide(); return;
+    }
+    // Now update to the new password
     const { error } = await sb.auth.updateUser({ password: np });
     if (error) throw error;
+    document.getElementById('settings-current-pass').value = '';
     document.getElementById('settings-new-pass').value = '';
     document.getElementById('settings-confirm-pass').value = '';
     okEl?.classList.add('show'); _lucide();
-    showToast('Password updated', 'success');
+    showToast('Password updated successfully', 'success');
   } catch(e) {
     if (errTx) errTx.textContent = e.message || 'Failed to update password.';
     errEl?.classList.add('show'); _lucide();
@@ -15006,6 +15272,9 @@ async function loadSettings() {
 }
 
 async function saveSettings() {
+  if (currentUser?.role !== 'SUPER_ADMIN') {
+    showToast('Only Super Admins can edit business settings', 'error'); return;
+  }
   const bizId    = window.currentBusiness?.id || null;
   const bizName  = document.getElementById('settings-bizname')?.value.trim();
   const bizType  = document.getElementById('settings-biztype')?.value || null;
@@ -15039,6 +15308,18 @@ async function saveSettings() {
       lws.businessName = bizName;
       sessionStorage.setItem('lw_session', JSON.stringify(lws));
     } catch(_) {}
+    // Audit log
+    try {
+      await tbl('audit_trail').insert({
+        action:          'UPDATE_BUSINESS_SETTINGS',
+        table_name:      'business_settings',
+        record_id:       bizId,
+        user_id:         currentUser?.id || null,
+        business_id:     bizId || null,
+        changed_by_name: currentUser?.full_name || 'Unknown',
+        new_data:        { business_name: bizName, business_type: bizType, slogan, contacts },
+      });
+    } catch(_) {}
     const logoText = document.querySelector('.sidebar-logo-text');
     if (logoText) logoText.innerHTML = bizName + '<span></span>';
     if (okEl) { okEl.classList.add('show'); _lucide(); }
@@ -15070,7 +15351,7 @@ function printLoanSchedule() {
     const stStyle = { PAID:'background:#dcfce7;color:#15803d;', MISSED:'background:#fee2e2;color:#dc2626;', PARTIAL:'background:#fef9c3;color:#a16207;', PENDING:'background:#dbeafe;color:#1d4ed8;' }[s.status] || 'background:#f3f4f6;color:#374151;';
     return `<tr style="background:${rowBg}"><td style="text-align:center;color:#6b7280;font-size:11px">${s.installment_no}</td><td>${formatDate(s.due_date)}</td><td style="text-align:right;font-weight:600">${formatUGX(s.total_due)}</td><td style="text-align:right;color:${Number(s.paid_amount)>0?'#16a34a':'#9ca3af'}">${Number(s.paid_amount)>0?formatUGX(s.paid_amount):'—'}</td><td style="text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.04em;${stStyle}">${s.status}</span></td></tr>`;
   }).join('');
-  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Loan Statement — ${loan.loan_reference}</title>
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Loan Statement — ${esc(loan.loan_reference)}</title>
 <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',Arial,sans-serif;color:#1f2937;background:#fff;font-size:13px;line-height:1.5}
 .page{max-width:800px;margin:0 auto;padding:48px 48px 64px}
@@ -15108,11 +15389,11 @@ tfoot td:nth-child(2){text-align:right}tfoot td:nth-child(3){text-align:right;co
 @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{padding:24px 32px 40px}.no-print{display:none!important}}
 </style></head><body><div class="page">
 <div class="no-print"><button onclick="window.print()" style="padding:8px 20px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">🖨 Print / Save as PDF</button><button onclick="window.close()" style="margin-left:8px;padding:8px 16px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">✕ Close</button></div>
-<div class="header"><div><div class="brand"><div class="brand-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="0" y1="16" x2="20" y2="16"/><line x1="2" y1="16" x2="2" y2="8"/><line x1="18" y1="16" x2="18" y2="8"/><line x1="6" y1="16" x2="6" y2="10"/><line x1="10" y1="16" x2="10" y2="10"/><line x1="14" y1="16" x2="14" y2="10"/><path d="M0 8 L10 2 L20 8"/></svg></div><div class="brand-name">Lend<span>Wise</span></div></div><div class="doc-subtitle">${bizName} &nbsp;·&nbsp; Loan Repayment Statement</div></div>
-<div class="header-right"><div class="loan-ref">${loan.loan_reference||'—'}</div><div class="loan-date">Printed: ${printDate}</div><div class="status-badge">${loanStatus}</div></div></div>
+<div class="header"><div><div class="brand"><div class="brand-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="0" y1="16" x2="20" y2="16"/><line x1="2" y1="16" x2="2" y2="8"/><line x1="18" y1="16" x2="18" y2="8"/><line x1="6" y1="16" x2="6" y2="10"/><line x1="10" y1="16" x2="10" y2="10"/><line x1="14" y1="16" x2="14" y2="10"/><path d="M0 8 L10 2 L20 8"/></svg></div><div class="brand-name">Lend<span>Wise</span></div></div><div class="doc-subtitle">${esc(bizName)} &nbsp;·&nbsp; Loan Repayment Statement</div></div>
+<div class="header-right"><div class="loan-ref">${esc(loan.loan_reference)||'—'}</div><div class="loan-date">Printed: ${printDate}</div><div class="status-badge">${esc(loanStatus)}</div></div></div>
 <div class="info-grid">
-<div class="info-card"><div class="info-card-title">Client Information</div><div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${client?.full_name||'—'}</span></div><div class="info-row"><span class="info-label">National ID</span><span class="info-value" style="font-family:monospace">${client?.national_id||'—'}</span></div><div class="info-row"><span class="info-label">Phone</span><span class="info-value">${client?.phone||'—'}</span></div></div>
-<div class="info-card"><div class="info-card-title">Loan Details</div><div class="info-row"><span class="info-label">Product</span><span class="info-value">${product?.product_name||'—'}</span></div><div class="info-row"><span class="info-label">Principal</span><span class="info-value">${formatUGX(loan.principal_amount)}</span></div><div class="info-row"><span class="info-label">Total Interest</span><span class="info-value">${formatUGX(loan.total_interest)}</span></div><div class="info-row"><span class="info-label">Total Repayable</span><span class="info-value">${formatUGX(loan.total_repayable)}</span></div><div class="info-row"><span class="info-label">Rate</span><span class="info-value">${loan.interest_rate}% / month (${(loan.interest_type||'').toUpperCase()})</span></div><div class="info-row"><span class="info-label">Term</span><span class="info-value">${loan.loan_term_months} months · ${(loan.repayment_frequency||'').toUpperCase()}</span></div><div class="info-row"><span class="info-label">Disbursed</span><span class="info-value">${formatDate(loan.disbursement_date)}</span></div><div class="info-row"><span class="info-label">Maturity</span><span class="info-value">${formatDate(loan.maturity_date)}</span></div></div>
+<div class="info-card"><div class="info-card-title">Client Information</div><div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${esc(client?.full_name)||'—'}</span></div><div class="info-row"><span class="info-label">National ID</span><span class="info-value" style="font-family:monospace">${esc(client?.national_id)||'—'}</span></div><div class="info-row"><span class="info-label">Phone</span><span class="info-value">${esc(client?.phone)||'—'}</span></div></div>
+<div class="info-card"><div class="info-card-title">Loan Details</div><div class="info-row"><span class="info-label">Product</span><span class="info-value">${esc(product?.product_name)||'—'}</span></div><div class="info-row"><span class="info-label">Principal</span><span class="info-value">${formatUGX(loan.principal_amount)}</span></div><div class="info-row"><span class="info-label">Total Interest</span><span class="info-value">${formatUGX(loan.total_interest)}</span></div><div class="info-row"><span class="info-label">Total Repayable</span><span class="info-value">${formatUGX(loan.total_repayable)}</span></div><div class="info-row"><span class="info-label">Rate</span><span class="info-value">${loan.interest_rate}% / month (${(loan.interest_type||'').toUpperCase()})</span></div><div class="info-row"><span class="info-label">Term</span><span class="info-value">${loan.loan_term_months} months · ${(loan.repayment_frequency||'').toUpperCase()}</span></div><div class="info-row"><span class="info-label">Disbursed</span><span class="info-value">${formatDate(loan.disbursement_date)}</span></div><div class="info-row"><span class="info-label">Maturity</span><span class="info-value">${formatDate(loan.maturity_date)}</span></div></div>
 </div>
 <div class="progress-section"><div class="progress-header"><div class="progress-title">Repayment Progress</div><div class="progress-pct">${progress}% Complete</div></div><div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
 <div class="progress-stats"><div class="stat-box"><div class="stat-val" style="color:#16a34a">${paidCount}</div><div class="stat-lbl">Paid</div></div><div class="stat-box"><div class="stat-val" style="color:#dc2626">${missedCount}</div><div class="stat-lbl">Missed</div></div><div class="stat-box"><div class="stat-val" style="color:#1d4ed8">${pendingCount}</div><div class="stat-lbl">Remaining</div></div><div class="stat-box"><div class="stat-val" style="color:#111827">${formatUGX(totalPaid)}</div><div class="stat-lbl">Total Paid</div></div><div class="stat-box"><div class="stat-val" style="color:#b45309">${formatUGX(outstanding)}</div><div class="stat-lbl">Outstanding</div></div></div></div>
@@ -15436,9 +15717,9 @@ kbd {
     /* Block action shortcuts if a modal is open */
     if (isBlockingModalOpen()) return;
 
-    if (key === 'n' || key === 'N') { e.preventDefault(); if (typeof openModal === 'function') openModal('new-loan-modal'); return; }
-    if (key === 'p' || key === 'P') { e.preventDefault(); if (typeof openModal === 'function') openModal('new-payment-modal'); return; }
-    if (key === 'c' || key === 'C') { e.preventDefault(); if (typeof openClientWizard === 'function') openClientWizard(); return; }
+    if (key === 'n' || key === 'N') { e.preventDefault(); if (['SUPER_ADMIN','BRANCH_MANAGER','LOAN_OFFICER'].includes(window.currentUser?.role) && typeof openModal === 'function') openModal('new-loan-modal'); return; }
+    if (key === 'p' || key === 'P') { e.preventDefault(); if (['SUPER_ADMIN','BRANCH_MANAGER','CASHIER','COLLECTOR'].includes(window.currentUser?.role) && typeof openModal === 'function') openModal('new-payment-modal'); return; }
+    if (key === 'c' || key === 'C') { e.preventDefault(); if (['SUPER_ADMIN','BRANCH_MANAGER','LOAN_OFFICER'].includes(window.currentUser?.role) && typeof openClientWizard === 'function') openClientWizard(); return; }
     if (key === '[') { e.preventDefault(); if (typeof toggleSidebarCollapse === 'function') toggleSidebarCollapse(); return; }
 
     /* G chord for navigation */
