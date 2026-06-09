@@ -15,21 +15,43 @@
 <meta name="msapplication-TileColor" content="#3fb950">
 <script>
 (function() {
-  var svgIcon = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%233fb950'/><g transform='translate(96,96)'><line x1='0' y1='256' x2='320' y2='256' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='32' y1='256' x2='32' y2='112' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='288' y1='256' x2='288' y2='112' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='96' y1='256' x2='96' y2='144' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='160' y1='256' x2='160' y2='144' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='224' y1='256' x2='224' y2='144' stroke='white' stroke-width='32' stroke-linecap='round'/><path d='M0 112 L160 32 L320 112' stroke='white' stroke-width='32' stroke-linecap='round' stroke-linejoin='round' fill='none'/></g></svg>";
-  var manifest = {
-    name: "LendWise", short_name: "LendWise", description: "Loan Management System",
-    start_url: window.location.href, display: "standalone", background_color: "#0f1117", theme_color: "#3fb950",
-    orientation: "portrait-primary",
-    icons: [
-      { src: svgIcon, sizes: "any", type: "image/svg+xml", purpose: "any maskable" },
-      { src: svgIcon, sizes: "192x192", type: "image/svg+xml" },
-      { src: svgIcon, sizes: "512x512", type: "image/svg+xml" }
-    ]
-  };
-  var blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-  var link = document.createElement("link");
-  link.rel = "manifest"; link.href = URL.createObjectURL(blob);
-  document.head.appendChild(link);
+  var svgStr = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%233fb950'/><g transform='translate(96,96)'><line x1='0' y1='256' x2='320' y2='256' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='32' y1='256' x2='32' y2='112' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='288' y1='256' x2='288' y2='112' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='96' y1='256' x2='96' y2='144' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='160' y1='256' x2='160' y2='144' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='224' y1='256' x2='224' y2='144' stroke='white' stroke-width='32' stroke-linecap='round'/><path d='M0 112 L160 32 L320 112' stroke='white' stroke-width='32' stroke-linecap='round' stroke-linejoin='round' fill='none'/></g></svg>";
+  var svgDataUrl = "data:image/svg+xml," + svgStr;
+
+  function buildManifest(icon192, icon512) {
+    var manifest = {
+      name: "LendWise", short_name: "LendWise", description: "Loan Management System",
+      start_url: window.location.href, display: "standalone", background_color: "#0f1117", theme_color: "#3fb950",
+      orientation: "portrait-primary",
+      icons: [
+        { src: icon192, sizes: "192x192", type: "image/png", purpose: "any" },
+        { src: icon512, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+      ]
+    };
+    var blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+    var link = document.querySelector('link[rel="manifest"]') || document.createElement("link");
+    link.rel = "manifest"; link.href = URL.createObjectURL(blob);
+    if (!link.parentNode) document.head.appendChild(link);
+  }
+
+  function svgToPng(size, callback) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement("canvas");
+      canvas.width = canvas.height = size;
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, size, size);
+      callback(canvas.toDataURL("image/png"));
+    };
+    img.src = svgDataUrl;
+  }
+
+  // Generate both sizes then build manifest with real PNGs
+  svgToPng(192, function(png192) {
+    svgToPng(512, function(png512) {
+      buildManifest(png192, png512);
+    });
+  });
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -6629,6 +6651,8 @@ async function boot() {
                   sess.logoUrl = logoUrl;
                   sessionStorage.setItem('lw_session', JSON.stringify(sess));
                   try { const lc = JSON.parse(localStorage.getItem('lw_biz_cache') || 'null'); if (lc) { lc.logo_url = logoUrl; localStorage.setItem('lw_biz_cache', JSON.stringify(lc)); } } catch(_) {}
+                  // Apply to sidebar now — goToApp() may have already run before this async fetch completed
+                  try { const _li = document.querySelector('.sidebar-logo-icon'); if (_li) _li.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'landmark\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`; } catch(_) {}
                 }
               } catch(_) {}
             }
@@ -6664,6 +6688,9 @@ async function boot() {
             let logoUrl = null;
             try { const { data: bs } = await sb.from('business_settings').select('logo_url').eq('business_id', bizId).maybeSingle(); logoUrl = bs?.logo_url || null; } catch(_) {}
             window.currentBusiness = { id: bizId, name: bizName, logo_url: logoUrl, plan: 'free', role: bizRole };
+            if (logoUrl) {
+              try { const _li = document.querySelector('.sidebar-logo-icon'); if (_li) _li.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'landmark\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`; } catch(_) {}
+            }
             try {
               const raw2 = sessionStorage.getItem('lw_session');
               const sess2 = raw2 ? JSON.parse(raw2) : {};
