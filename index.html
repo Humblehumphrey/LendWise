@@ -15,43 +15,22 @@
 <meta name="msapplication-TileColor" content="#3fb950">
 <script>
 (function() {
-  var svgStr = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%233fb950'/><g transform='translate(96,96)'><line x1='0' y1='256' x2='320' y2='256' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='32' y1='256' x2='32' y2='112' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='288' y1='256' x2='288' y2='112' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='96' y1='256' x2='96' y2='144' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='160' y1='256' x2='160' y2='144' stroke='white' stroke-width='32' stroke-linecap='round'/><line x1='224' y1='256' x2='224' y2='144' stroke='white' stroke-width='32' stroke-linecap='round'/><path d='M0 112 L160 32 L320 112' stroke='white' stroke-width='32' stroke-linecap='round' stroke-linejoin='round' fill='none'/></g></svg>";
-  var svgDataUrl = "data:image/svg+xml," + svgStr;
-
-  function buildManifest(icon192, icon512) {
-    var manifest = {
-      name: "LendWise", short_name: "LendWise", description: "Loan Management System",
-      start_url: window.location.href, display: "standalone", background_color: "#0f1117", theme_color: "#3fb950",
-      orientation: "portrait-primary",
-      icons: [
-        { src: icon192, sizes: "192x192", type: "image/png", purpose: "any" },
-        { src: icon512, sizes: "512x512", type: "image/png", purpose: "any maskable" }
-      ]
-    };
-    var blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-    var link = document.querySelector('link[rel="manifest"]') || document.createElement("link");
-    link.rel = "manifest"; link.href = URL.createObjectURL(blob);
-    if (!link.parentNode) document.head.appendChild(link);
-  }
-
-  function svgToPng(size, callback) {
-    var img = new Image();
-    img.onload = function() {
-      var canvas = document.createElement("canvas");
-      canvas.width = canvas.height = size;
-      var ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, size, size);
-      callback(canvas.toDataURL("image/png"));
-    };
-    img.src = svgDataUrl;
-  }
-
-  // Generate both sizes then build manifest with real PNGs
-  svgToPng(192, function(png192) {
-    svgToPng(512, function(png512) {
-      buildManifest(png192, png512);
-    });
-  });
+  // Pre-rendered PNG icons (192px and 512px) — synchronously available for PWA install
+  var icon192 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAACQUlEQVR42u3cwY0CQQxFQWdGCqRLdEMKaNSAv12td7bU7RKHXXbr8XpKtytPIIAEkAASQBJAAkgACSAJIAEkgASQBJAAEkACSAJIAAkgASSAJIAEkAASQBJAAkgACSAJIAEkgASQBJAAEkACSABJAAkgARTe9fHxVgDdpIMRQAfoYATQAToYFToYAdSCzk5GhQ5GALWjs4dRoYMRQK3pzGZU6GAEUAydeYwKHYxWA7pGHIDQWcqo0MFoEaB/rROjeEAdVohRJKBua8MoBlDnVWHUGlDKejAqdHxRZAig9DXsZFTouEswoKnPvYdRoeOOYYC2fcjPvm95SncPAOTnJVPfoTwZRk0BodPqfQCa+Y0+gPwRccZbATSTzs9eDKDJdH7wbgDNp/PV19sOyP8xAogegAACCCCAAAIIIIAA6nP55XNmAjqIzJy2n9AAAQSQOQBZPEAAAQQQQACZA5DFAwQQQAABBJA5AAEEkMUDBBBAAAEEkDkAWTxAAAEEEEAAmQOQxQMEEEAAAQSQOQBZPEAAAQQQQACZAxBAAFk8QAABBBBAAJkDkMUDBBBAAAEEkDkAWTxAAAEEEEAAmTMO0OV0OgA5ADkAAQQQQAAB5ADkAAQQQAABBJADkAMQQAABBFDSb+OVHkACSAAJIAEkASSABJAAkgASQAJIAEkACSABJIAkgASQABJAAkgCSAAJIAEkASSABJAAkgASQAJIAEkACSABJIAEkASQABJAAkgCSAAJIAEkASSABJAAkgDSyd6fKtex5AbAWgAAAABJRU5ErkJggg==";
+  var icon512 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAIAAAB7GkOtAAAKrUlEQVR42u3VwQ2EMAwAwXRGC7Sb6uDPH0K0Y00B1l3MjmOeAAQNPwGAAAAgAAAIAAACAIAAACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAAACAIAAACAAAAgAAAIAgAAAIAAACACAAAAgAAAIAAACAIAAACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAAACAIAAACAAAAgAAAIAgAAAIAAACACAAPgVAAQAAAEAQAAAEAAABAAAAQBAAAAQAAAEAAABAEAAABAAAAQAAAEAQAAAEAAABAAAAQBAAAAQAAAEAAABAEAAAAQAAAEAQAAAEAAABAAAAQBAAAAQAAAEAAABAEAAABAAAAQAAAEAQAAAEAAABAAAAQBAAAAQAAAEAAABAEAAAATArwAgAAAIAAACAIAAACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAAACAIAAACAA8HB9Mn5nBAByn34ZQAAg/emXAQQA0p9+GUAAIP3plwEEANKffhlAACD96ZcBBADSn34ZQAAg/emXAQQA0p9+GUAAIP3plwEEANKffhlAACD96ZcBBADSn34ZQADw6TcygADg029kAAHAp18GQADw6ZcBEAB8+mUABACffhkAAcCnXwZAAPDplwEQAHz6ZQAEAJ9+GQABwKdfBkAA8OmXARAAfPplAAEAn34ZQADAp18GEAB8+o0MIAD49BsZQADw6TcygADg029kAAHAp9/IAAKAT7+RAQQAn34jAwgAPv1GBhAAfPqNDCAA+PQbGUAA8Ok3MoAA4NNvZAABwKf/3U+b30EGBACf/vTnzG8iAwKAT3/6E+b3kQEBwKc//dnyW8mAAODTn/5U+d1kQADw6U9/nvyGMiAA+PSnP0l+TxkQAHz6058hv60MCAA+/elPj99ZBgQAn/7058ZvLgMCgE9M+hPj95cBAcBnJf1Z8V/IgADgU5L+lPhfZEAA8PlIfz78RzIgAPhkpD8Z/i8ZEAB8JtKfCf+dDAgAPg3pT4P/UQYEAJ+D9OfAfyoDAuDTb9KfAP+vNyAAPv0mffb+a+9BAJy6SZ+6/93bEADn7by9E+OdCICTdtLejPFmBMAZO2Pvx3g/AuB0na63ZLwlAXCuztW7Mt6VADhRJ+qNGW9MAJyls/TejPcmAE7RKXp73h4C4Pycn3foHSIATs7JeZPeJALgzJyZ9+l9IgBOy2l5q96qAOCcnJN3690KgBMyTsgb9oYFwNkYZ+M9e88C4FSciq+qt+1tC4DzcB545965ADgJJ4E3780LgDNwBnj/Hr8AOACvH1fgBATA0/fucQsOQQA8ei8eF+EcBMBz99ZxF45CADx0rxzX4TQEwBP3vnEjDkQAPG4vG5fiTATAs/amcS+ORQA8aK8ZV+NkBMBT9o5xOw5HADxin35ckPMRAM/Xpx935IgEoPdwfZJwTU5JAHJP1mcIN+WgBCD3WH16cFnOSgByz9TnBvfluATAAwX35b4EwAMF9+W+BMADBfflvgTAAwX35b4EwAMF9+W+BMADBfflvgTAAwX3JQAeqAcK7ksAPFAPFNyXAHigHii4LwHwQD1QcF8C4IF6oOC+BMAD9UDBfQmAB+qBIgDuSwA8UA8UAXBfAuCB7vRA7W9/9yUAOGD72z+3f40AOAD729/+AoADsL/9BUAAcMD2t78ACAAO2P72FwABwAHb3/4CIAA4YPvbXwAEAAdsf/sLgADggO1vfwEQAAFwwPa3vwAIgAA4YPvbXwAEQAAcsP3tLwACIAAO2P72FwABEAAHbH/7C4AACIADtr/9BUAABMAB29/+AiAAAuCA7W9/ARAAAXDA9rc/AiAA9re//REAAbC//e2PAAiA/e1vfwRAAOxvf/sjAAJgf/vbHwEQAPvb3/4IgAOwv/3tLwA4APvb3/4CgAO2v/0FQABwwPa3vwAIAA7Y/vYXAAHAAdvf/gIgADhg+9tfAAQAB2x/+wuAAAiAA7a//QVAAATAAdvf/gIgAALggO1vfwEQAAFwwPa3vwAIgAA4YPvbXwAEQAAcsP3tLwACIAAO2P72FwABEAAHbH/7C4AACIADtr/9BUAABMD+9rc/AiAA9re//REAAbC//e2PAAiA/e1vfwRAAOxvf/sjAAJgf/vbHwFwAPa3v/0FwE/gAOxvf/sLAA7A/vYXAAHAAdvf/gIgADhg+9tfAAQAB2x/+wuAAOCA7W9/ARAAHLD97S8AAoADtr/9BUAABMAB29/+AiAAAuCA7W9/ARAAAXDA9re/AAiAADhg+9tfAARAAByw/e0vAAIgAA7Y/vYXAAEQAAdsf/sLgAAIgAO2v/0FQAAEwAHb3/4IgADY3/72RwAEwP72tz8CIAD2t7/9EQABsL/97Y8ACID97W9/BEAA7G9/+yMADsD+9re/AOAA7G9/+wsADtj+9hcAAcAB29/+AiAAOGD7218ABAAHbH/7C4AA4IDtb38BEAAcsP3tLwACIAAO2P72FwABEAAHbH/7C4AACIADtr/9BUAABMAB29/+AiAAAuCA7W9/ARAAAXDA9re/AAiAADhg+9tfAARAAByw/e0vAAIgAA7Y/vb3kREAAbC//e2PAAiA/e1vfwRAAOxvf/sjAAJgf/vbHwEQAPvb3/4IgADY3/72RwAcgP3tb38B8Cs4APvb3/4CgAOwv/0FQABwwPa3vwAIAA7Y/vYXAAHAAdvf/gIgADhg+9tfAAQAB2x/+wuAAOCA7W9/ARAAAXDA9re/AAiAADhg+9tfAARAAByw/e0vAAIgAA7Y/vYXAAEQAAdsf/sLgAAIgAO2v/0FQAAEwAHb3/4CIAAC4IDtb38BEID/P1BjzL4jAAJgjBEAARAAY4wACIAAGGMEQAAEwBgjAAIgAMYYARAAATDGCIAACIAxRgAEQACMMQIgAAJgjBEAARAAY4wACIAAGGMEQAAEwBgjAAIgAMYYARAAATDGCIAACIAxRgAEQACMMQIgAAJgjBEAARAAY4wACIAAGGMEQAAEwBgjAALgfRtjBEAAjDFGAATAGGMEQACMMQIgAAJgjBEAARAAY4wACIAAGGMEQAAEwBgjAAIgAMYYARAAATDGCIAACIAxRgAEQACMMQIgAAAIAAACAIAAACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAIAAACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAAACAIAAACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAIAAACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAAACAIAAACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAIAA+AkABAAAAQBAAAAQAAAEAAABAEAAABAAAAQAAAEAQAAAEAAABAAAAQBAAAAQAAAEAAABAEAAABAAAAQAAAEAQAAABAAAAQBAAAAQAAAEAAABAEAAABAAAAQAAAEAQAAAEAAABAAAAQBAAAAQAAAEAAABAEAAABAAAAQAAAEAQAAABMCvACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAAACAIAAACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAAACACAAAAgAAAIAgAAAIAAACAAAAgCAAAAgAAAIAAACAIAAALDGDWaKUdY3e6GoAAAAAElFTkSuQmCC";
+  var manifest = {
+    name: "LendWise", short_name: "LendWise", description: "Loan Management System",
+    start_url: window.location.href, display: "standalone", background_color: "#0f1117", theme_color: "#3fb950",
+    orientation: "portrait-primary",
+    icons: [
+      { src: icon192, sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: icon512, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+    ]
+  };
+  var blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+  var link = document.createElement("link");
+  link.rel = "manifest"; link.href = URL.createObjectURL(blob);
+  document.head.appendChild(link);
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
