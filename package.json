@@ -69,6 +69,7 @@
     "dmg": {
       "title": "LendWise LMS",
       "icon": "build/icon.icns",
+      "background": null,
       "contents": [
         {
           "x": 130,
