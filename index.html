@@ -5077,6 +5077,12 @@ body.electron-mode .sidebar-overlay { top: 38px; }
       <span id="login-btn-spinner" style="display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:loginSpin 0.7s linear infinite;flex-shrink:0"></span>
     </button>
 
+    <!-- REGISTER NEW BUSINESS LINK -->
+    <div style="text-align:center;margin-top:1rem;font-size:0.8rem;color:rgba(125,133,144,0.8)">
+      Don't have a business account?
+      <button type="button" class="login-forgot" onclick="showRegister(false)" id="register-biz-link" style="display:inline;font-size:inherit">Register your business</button>
+    </div>
+
     <!-- Trust indicators -->
     <div class="login-trust-badges">
       <span class="login-trust-badge">
@@ -6572,7 +6578,7 @@ const logError = (...a) => DEBUG && console.error('[LendWise]', ...a);
 const logInfo  = (...a) => DEBUG && console.info( '[LendWise]', ...a);
 
 // === STATE ===
-let currentUser = null;
+let currentUser = null; window.currentUser = null;
 let allLoans = [], allBorrowers = [], allPayments = [], allStaff = [], allProducts = [];
 let loanPage = 1, borrowerPage = 1, paymentPage = 1, auditPage = 1;
 let charts = {};
@@ -6786,6 +6792,12 @@ async function boot() {
     const { data: { session } } = await sb.auth.getSession();
     loadBar.style.width = '70%';
 
+    // SECURITY: purge any legacy cross-user business cache. Older versions of
+    // this app stored the last-used business_id in localStorage under
+    // 'lw_biz_cache' and reused it for whoever next opened the app on this
+    // device, causing tenant data leakage. Remove it unconditionally.
+    try { localStorage.removeItem('lw_biz_cache'); } catch(_) {}
+
     // hasRegistered is used as a fast-path fallback only; Supabase Auth is the source of truth.
     const hasRegistered = !!localStorage.getItem('lms-has-registered');
 
@@ -6812,7 +6824,6 @@ async function boot() {
                 if (logoUrl) {
                   sess.logoUrl = logoUrl;
                   sessionStorage.setItem('lw_session', JSON.stringify(sess));
-                  try { const lc = JSON.parse(localStorage.getItem('lw_biz_cache') || 'null'); if (lc) { lc.logo_url = logoUrl; localStorage.setItem('lw_biz_cache', JSON.stringify(lc)); } } catch(_) {}
                   // Apply to sidebar now — goToApp() may have already run before this async fetch completed
                   try { const _li = document.querySelector('.sidebar-logo-icon'); if (_li) _li.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'building-2\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`; } catch(_) {}
                 }
@@ -6823,15 +6834,11 @@ async function boot() {
         }
       } catch(_) {}
       // Auto-find business if not in session (authenticated, so RLS allows this)
-      if (!window.currentBusiness) {
-        // Fast path: use localStorage cache (valid for 24h) to skip a DB round-trip
-        try {
-          const bizCache = JSON.parse(localStorage.getItem('lw_biz_cache') || 'null');
-          if (bizCache && bizCache.id && (Date.now() - bizCache.ts < 86400000)) {
-            window.currentBusiness = { id: bizCache.id, name: bizCache.name, logo_url: bizCache.logo_url || null, plan: 'free', role: bizCache.role || 'SUPER_ADMIN' };
-          }
-        } catch(_) {}
-      }
+      // NOTE: deliberately NOT using a localStorage cache here. A cached
+      // business_id can belong to a different user who previously logged in
+      // on this same browser/device, causing cross-tenant data leakage.
+      // Always resolve the business_id from the database for the current
+      // authenticated user.
       if (!window.currentBusiness) {
         try {
           // Try as owner (businesses table has no is_active column)
@@ -6858,7 +6865,6 @@ async function boot() {
               const sess2 = raw2 ? JSON.parse(raw2) : {};
               sess2.businessId = bizId; sess2.businessName = bizName; sess2.logoUrl = logoUrl; sess2.plan = 'free'; sess2.role = bizRole;
               sessionStorage.setItem('lw_session', JSON.stringify(sess2));
-              localStorage.setItem('lw_biz_cache', JSON.stringify({ id: bizId, name: bizName, logo_url: logoUrl, role: bizRole, ts: Date.now() }));
             } catch(_) {}
           }
         } catch(_) {}
@@ -6978,6 +6984,7 @@ async function loadUserProfile(user) {
       branch:      member?.branch       || null,
       business_id: member?.business_id  || null,
     };
+    window.currentUser = currentUser;
     log('User loaded:', currentUser.full_name, '/', currentUser.role);
   } catch(e) {
     log('loadUserProfile error (non-fatal):', e.message);
@@ -6986,6 +6993,7 @@ async function loadUserProfile(user) {
       full_name: user.user_metadata?.full_name || user.email.split('@')[0],
       role:      'SUPER_ADMIN',
     };
+    window.currentUser = currentUser;
   }
 }
 
@@ -7065,8 +7073,6 @@ function showApp() {
               try {
                 const r2 = sessionStorage.getItem('lw_session');
                 if (r2) { const s2 = JSON.parse(r2); s2.logoUrl = logoUrl; sessionStorage.setItem('lw_session', JSON.stringify(s2)); }
-                const lc = JSON.parse(localStorage.getItem('lw_biz_cache') || 'null');
-                if (lc) { lc.logo_url = logoUrl; localStorage.setItem('lw_biz_cache', JSON.stringify(lc)); }
               } catch(_) {}
             }
           } catch(_) {}
@@ -7408,6 +7414,7 @@ async function doRegister() {
     const { data: signInData, error: signInErr } = await sb.auth.signInWithPassword({ email, password: pass });
     if (!signInErr && signInData?.user) {
       currentUser = { ...signInData.user, full_name: email.split('@')[0], role: 'SUPER_ADMIN', is_active: true };
+      window.currentUser = currentUser;
     }
 
     showBusiness();
@@ -8142,7 +8149,7 @@ async function finaliseLogin(user, biz) {
       // If a membership row exists and is explicitly deactivated, block login
       if (membership && membership.is_active === false) {
         await sb.auth.signOut();
-        currentUser = null; _loginUser = null; _loginBusinesses = [];
+        currentUser = null; window.currentUser = null; _loginUser = null; _loginBusinesses = [];
         sessionStorage.removeItem('lw_session');
         showLogin();
         // Show error on login page
@@ -8219,9 +8226,10 @@ async function doLogout() {
   cacheInvalidate();
   _currentView = null;
   try { await sb.auth.signOut(); } catch(_) {}
-  currentUser = null; _loginUser = null; _loginBusinesses = []; _selectedWorkspaceId = null;
+  currentUser = null; window.currentUser = null; _loginUser = null; _loginBusinesses = []; _selectedWorkspaceId = null;
   window.currentBusiness = null; window.currentSchema = null;
   sessionStorage.removeItem('lw_session');
+  localStorage.removeItem('lw_biz_cache'); // purge legacy cross-user cache, if any
   allLoans = []; allBorrowers = []; allPayments = []; allStaff = []; allProducts = [];
   Object.values(charts).forEach(c => { try { c.destroy(); } catch(_) {} });
   charts = {};
@@ -14214,6 +14222,7 @@ async function regStep1Submit() {
 
     // Update currentUser so showApp() works
     currentUser = { id: userId, email, full_name: fullName, phone, role: 'SUPER_ADMIN', is_active: true };
+    window.currentUser = currentUser;
 
     // Skip OTP (step 2) — go straight to Business Profile (step 3)
     regGoTo(3);
@@ -16506,9 +16515,9 @@ if (typeof window !== 'undefined' && window.electronAPI) {
     <div class="kb-body">
       <div class="kb-section">
         <div class="kb-section-label">Actions</div>
-        <div class="kb-row"><span class="kb-desc">New Loan</span><span class="kb-keys"><kbd>N</kbd></span></div>
-        <div class="kb-row"><span class="kb-desc">Record Payment</span><span class="kb-keys"><kbd>P</kbd></span></div>
-        <div class="kb-row"><span class="kb-desc">Add Client</span><span class="kb-keys"><kbd>C</kbd></span></div>
+        <div class="kb-row" data-kb-roles="SUPER_ADMIN,BRANCH_MANAGER,LOAN_OFFICER"><span class="kb-desc">New Loan</span><span class="kb-keys"><kbd>N</kbd></span></div>
+        <div class="kb-row" data-kb-roles="SUPER_ADMIN,BRANCH_MANAGER,CASHIER,COLLECTOR"><span class="kb-desc">Record Payment</span><span class="kb-keys"><kbd>P</kbd></span></div>
+        <div class="kb-row" data-kb-roles="SUPER_ADMIN,BRANCH_MANAGER,LOAN_OFFICER"><span class="kb-desc">Add Client</span><span class="kb-keys"><kbd>C</kbd></span></div>
       </div>
       <div class="kb-section">
         <div class="kb-section-label">Navigation</div>
@@ -16630,6 +16639,19 @@ kbd {
   window.openKbOverlay = function () {
     const el = document.getElementById('kb-overlay');
     if (!el) return;
+    /* Show/hide action rows based on the current user's role */
+    const role = window.currentUser?.role || '';
+    el.querySelectorAll('[data-kb-roles]').forEach(row => {
+      const allowed = row.dataset.kbRoles.split(',');
+      row.style.display = allowed.includes(role) ? '' : 'none';
+    });
+    /* Hide the entire Actions section header if no rows are visible */
+    const actionsSection = el.querySelector('.kb-section');
+    if (actionsSection) {
+      const anyVisible = [...actionsSection.querySelectorAll('.kb-row')]
+        .some(r => r.style.display !== 'none');
+      actionsSection.style.display = anyVisible ? '' : 'none';
+    }
     el.classList.add('open');
     if (window.lucide) lucide.createIcons();
   };
