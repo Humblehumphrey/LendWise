@@ -1862,6 +1862,59 @@ code { font-family: var(--mono); font-size: 0.8rem; background: var(--surface-3)
   outline: none;
 }
 
+/* ── Email autocomplete dropdown ── */
+.login-email-wrap { position: relative; }
+.login-email-suggestions {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0; right: 0;
+  background: #141c1a;
+  border: 1px solid rgba(63,185,80,0.25);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(63,185,80,0.08);
+  z-index: 999;
+  overflow: hidden;
+  max-height: 192px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.login-email-suggestions::-webkit-scrollbar { display: none; }
+.login-email-suggestions.open { display: block; }
+.login-email-suggestion-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: rgba(230,237,243,0.88);
+  cursor: pointer;
+  transition: background 0.12s;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.login-email-suggestion-item:last-child { border-bottom: none; }
+.login-email-suggestion-item:hover,
+.login-email-suggestion-item.active {
+  background: rgba(63,185,80,0.12);
+  color: #e6edf3;
+}
+.login-email-suggestion-item svg {
+  flex-shrink: 0; color: rgba(63,185,80,0.6);
+  width: 14px; height: 14px;
+}
+.login-email-suggestion-remove {
+  margin-left: auto; flex-shrink: 0;
+  background: none; border: none; padding: 2px 4px;
+  color: rgba(125,133,144,0.45);
+  cursor: pointer; border-radius: 4px;
+  display: flex; align-items: center;
+  transition: color 0.12s, background 0.12s;
+  line-height: 1;
+  font-size: 0.8rem;
+}
+.login-email-suggestion-remove:hover {
+  color: rgba(248,81,73,0.85);
+  background: rgba(248,81,73,0.1);
+}
+
 /* Password field with toggle */
 .login-pw-wrap { position: relative; }
 .login-pw-wrap .form-input { padding-right: 2.8rem; }
@@ -2274,6 +2327,7 @@ textarea.form-input { height: auto; min-height: 80px; padding: 0.65rem 0.85rem; 
   opacity: 1;
   min-width: 0;
 }
+.sidebar-logo-text .logo-name {
   font-size: 0.92rem; font-weight: 800; letter-spacing: -0.3px;
   color: var(--text); line-height: 1.2;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -4502,15 +4556,78 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 .cw-client-summary-row:last-child { border-bottom: none; }
 .cw-client-summary-row strong { color: var(--text); }
 
+
+/* ── Electron custom titlebar ─────────────────────────────────────── */
+#electron-titlebar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 38px;
+  z-index: 99999;
+  -webkit-app-region: drag;
+  background: rgba(6, 13, 8, 0.82);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid rgba(63,185,80,0.12);
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px 0 16px;
+  box-sizing: border-box;
+  user-select: none;
+}
+#electron-titlebar .etb-logo {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.78rem; font-weight: 700;
+  color: rgba(230,237,230,0.75);
+  letter-spacing: 0.02em;
+}
+#electron-titlebar .etb-controls {
+  display: flex; align-items: center; gap: 2px;
+  -webkit-app-region: no-drag;
+}
+.etb-btn {
+  width: 32px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: transparent;
+  color: rgba(200,210,200,0.55);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.etb-btn:hover { background: rgba(255,255,255,0.08); color: rgba(230,237,230,0.9); }
+.etb-btn.close:hover { background: rgba(248,81,73,0.75); color: #fff; }
+body.electron-mode { padding-top: 38px; }
+body.electron-mode #electron-titlebar { display: flex; }
+/* Shift fixed sidebar down so the electron titlebar does not overlap it */
+body.electron-mode .sidebar { top: 38px; }
+body.electron-mode .sidebar-overlay { top: 38px; }
+
 </style>
 </head>
 <body>
+<div id="electron-titlebar">
+  <div class="etb-logo">
+    <img src="./icon.png" width="18" height="18" style="border-radius:4px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">
+    LendWise LMS
+  </div>
+  <div class="etb-controls">
+    <button class="etb-btn" id="etb-min" title="Minimise">
+      <svg width="10" height="2" viewBox="0 0 10 2"><rect width="10" height="1.5" rx="0.75" fill="currentColor"/></svg>
+    </button>
+    <button class="etb-btn" id="etb-max" title="Maximise">
+      <svg width="10" height="10" viewBox="0 0 10 10"><rect x="0.75" y="0.75" width="8.5" height="8.5" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+    </button>
+    <button class="etb-btn close" id="etb-close" title="Close">
+      <svg width="10" height="10" viewBox="0 0 10 10"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</div>
 
 <!-- SETUP REQUIRED PAGE -->
 <div id="setup-page">
   <div class="setup-box">
     <div class="setup-logo">
-      <div class="setup-logo-icon"><i data-lucide="landmark" style="width:20px;height:20px"></i></div>
+      <div class="setup-logo-icon"><img src="./icon.png" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.style.display='none'"></div>
       <div class="setup-logo-text">Lend<span style="color:var(--accent)">Wise</span> LMS</div>
     </div>
     <h1 class="setup-title">Setup Required</h1>
@@ -4542,7 +4659,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
 <!-- LOADING SCREEN -->
 <div id="loading-screen">
   <div class="loading-logo">
-    <div class="loading-logo-icon"><i data-lucide="landmark" style="width:20px;height:20px;color:#fff"></i></div>
+    <div class="loading-logo-icon"><img src="./icon.png" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.style.display='none'"></div>
     <div class="loading-logo-text">Lend<span style="color:var(--accent)">Wise</span></div>
   </div>
   <div class="loading-bar"><div class="loading-bar-fill" id="load-bar"></div></div>
@@ -4557,9 +4674,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     <!-- Logo -->
     <div class="reg-logo">
       <div class="reg-logo-icon">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M3 15h14M5 15V8m10 7V8M8 15V9m4 6V9M3 8l7-5 7 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <img src="./icon.png" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;position:relative;z-index:1" onerror="this.style.display='none'">
       </div>
       <div class="reg-logo-text">Lend<span>Wise</span></div>
     </div>
@@ -4901,9 +5016,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     <!-- Logo -->
     <div class="login-logo">
       <div class="login-logo-icon">
-        <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
-          <path d="M3 15h14M5 15V8m10 7V8M8 15V9m4 6V9M3 8l7-5 7 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <img src="./icon.png" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.style.display='none'">
       </div>
       <div class="login-logo-text">Lend<span style="color:#3fb950">Wise</span> <span style="color:rgba(125,133,144,0.7);font-weight:500;font-size:0.82rem">LMS</span></div>
     </div>
@@ -4925,7 +5038,15 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
     <!-- EMAIL -->
     <div class="form-group">
       <label class="form-label" for="login-email">Email address</label>
-      <input type="email" class="form-input" id="login-email" placeholder="you@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()">
+      <div class="login-email-wrap">
+        <input type="email" class="form-input" id="login-email" placeholder="you@example.com"
+          autocomplete="off"
+          onkeydown="loginEmailKeydown(event)"
+          oninput="loginEmailInput(this.value)"
+          onfocus="loginEmailFocus()"
+          onblur="loginEmailBlur()">
+        <div class="login-email-suggestions" id="login-email-suggestions"></div>
+      </div>
     </div>
 
     <!-- PASSWORD -->
@@ -4955,6 +5076,12 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
       <span id="login-btn-text">Sign In</span>
       <span id="login-btn-spinner" style="display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:loginSpin 0.7s linear infinite;flex-shrink:0"></span>
     </button>
+
+    <!-- REGISTER NEW BUSINESS LINK -->
+    <div style="text-align:center;margin-top:1rem;font-size:0.8rem;color:rgba(125,133,144,0.8)">
+      Don't have a business account?
+      <button type="button" class="login-forgot" onclick="showRegister(false)" id="register-biz-link" style="display:inline;font-size:inherit">Register your business</button>
+    </div>
 
     <!-- Trust indicators -->
     <div class="login-trust-badges">
@@ -5026,7 +5153,7 @@ textarea.cw-input { min-height: 64px; padding: 0.55rem 0.85rem; resize: vertical
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <div class="sidebar-logo-icon"><i data-lucide="landmark" style="width:18px;height:18px"></i></div>
+      <div class="sidebar-logo-icon"><img src="./icon.png" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=&quot;building-2&quot; style=&quot;width:20px;height:20px&quot;></i>';_lucide()"></div>
       <div class="sidebar-logo-text">
         <div class="logo-name">Lend<span>Wise</span></div>
         <div class="logo-tagline">Loan Management</div>
@@ -6451,7 +6578,7 @@ const logError = (...a) => DEBUG && console.error('[LendWise]', ...a);
 const logInfo  = (...a) => DEBUG && console.info( '[LendWise]', ...a);
 
 // === STATE ===
-let currentUser = null;
+let currentUser = null; window.currentUser = null;
 let allLoans = [], allBorrowers = [], allPayments = [], allStaff = [], allProducts = [];
 let loanPage = 1, borrowerPage = 1, paymentPage = 1, auditPage = 1;
 let charts = {};
@@ -6665,6 +6792,12 @@ async function boot() {
     const { data: { session } } = await sb.auth.getSession();
     loadBar.style.width = '70%';
 
+    // SECURITY: purge any legacy cross-user business cache. Older versions of
+    // this app stored the last-used business_id in localStorage under
+    // 'lw_biz_cache' and reused it for whoever next opened the app on this
+    // device, causing tenant data leakage. Remove it unconditionally.
+    try { localStorage.removeItem('lw_biz_cache'); } catch(_) {}
+
     // hasRegistered is used as a fast-path fallback only; Supabase Auth is the source of truth.
     const hasRegistered = !!localStorage.getItem('lms-has-registered');
 
@@ -6691,9 +6824,8 @@ async function boot() {
                 if (logoUrl) {
                   sess.logoUrl = logoUrl;
                   sessionStorage.setItem('lw_session', JSON.stringify(sess));
-                  try { const lc = JSON.parse(localStorage.getItem('lw_biz_cache') || 'null'); if (lc) { lc.logo_url = logoUrl; localStorage.setItem('lw_biz_cache', JSON.stringify(lc)); } } catch(_) {}
                   // Apply to sidebar now — goToApp() may have already run before this async fetch completed
-                  try { const _li = document.querySelector('.sidebar-logo-icon'); if (_li) _li.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'landmark\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`; } catch(_) {}
+                  try { const _li = document.querySelector('.sidebar-logo-icon'); if (_li) _li.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'building-2\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`; } catch(_) {}
                 }
               } catch(_) {}
             }
@@ -6702,15 +6834,11 @@ async function boot() {
         }
       } catch(_) {}
       // Auto-find business if not in session (authenticated, so RLS allows this)
-      if (!window.currentBusiness) {
-        // Fast path: use localStorage cache (valid for 24h) to skip a DB round-trip
-        try {
-          const bizCache = JSON.parse(localStorage.getItem('lw_biz_cache') || 'null');
-          if (bizCache && bizCache.id && (Date.now() - bizCache.ts < 86400000)) {
-            window.currentBusiness = { id: bizCache.id, name: bizCache.name, logo_url: bizCache.logo_url || null, plan: 'free', role: bizCache.role || 'SUPER_ADMIN' };
-          }
-        } catch(_) {}
-      }
+      // NOTE: deliberately NOT using a localStorage cache here. A cached
+      // business_id can belong to a different user who previously logged in
+      // on this same browser/device, causing cross-tenant data leakage.
+      // Always resolve the business_id from the database for the current
+      // authenticated user.
       if (!window.currentBusiness) {
         try {
           // Try as owner (businesses table has no is_active column)
@@ -6730,14 +6858,13 @@ async function boot() {
             try { const { data: bs } = await sb.from('business_settings').select('logo_url').eq('business_id', bizId).maybeSingle(); logoUrl = bs?.logo_url || null; } catch(_) {}
             window.currentBusiness = { id: bizId, name: bizName, logo_url: logoUrl, plan: 'free', role: bizRole };
             if (logoUrl) {
-              try { const _li = document.querySelector('.sidebar-logo-icon'); if (_li) _li.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'landmark\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`; } catch(_) {}
+              try { const _li = document.querySelector('.sidebar-logo-icon'); if (_li) _li.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'building-2\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`; } catch(_) {}
             }
             try {
               const raw2 = sessionStorage.getItem('lw_session');
               const sess2 = raw2 ? JSON.parse(raw2) : {};
               sess2.businessId = bizId; sess2.businessName = bizName; sess2.logoUrl = logoUrl; sess2.plan = 'free'; sess2.role = bizRole;
               sessionStorage.setItem('lw_session', JSON.stringify(sess2));
-              localStorage.setItem('lw_biz_cache', JSON.stringify({ id: bizId, name: bizName, logo_url: logoUrl, role: bizRole, ts: Date.now() }));
             } catch(_) {}
           }
         } catch(_) {}
@@ -6857,6 +6984,7 @@ async function loadUserProfile(user) {
       branch:      member?.branch       || null,
       business_id: member?.business_id  || null,
     };
+    window.currentUser = currentUser;
     log('User loaded:', currentUser.full_name, '/', currentUser.role);
   } catch(e) {
     log('loadUserProfile error (non-fatal):', e.message);
@@ -6865,6 +6993,7 @@ async function loadUserProfile(user) {
       full_name: user.user_metadata?.full_name || user.email.split('@')[0],
       role:      'SUPER_ADMIN',
     };
+    window.currentUser = currentUser;
   }
 }
 
@@ -6929,7 +7058,7 @@ function showApp() {
       }
       if (sess.logoUrl) {
         const logoIcon = document.querySelector('.sidebar-logo-icon');
-        if (logoIcon) logoIcon.innerHTML = `<img src="${sess.logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'landmark\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`;
+        if (logoIcon) logoIcon.innerHTML = `<img src="${sess.logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'building-2\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`;
       } else {
         // No logo cached — fetch in background and apply when ready
         setTimeout(async () => {
@@ -6940,12 +7069,10 @@ function showApp() {
             const logoUrl = bs?.logo_url || null;
             if (logoUrl) {
               const logoIcon = document.querySelector('.sidebar-logo-icon');
-              if (logoIcon) logoIcon.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'landmark\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`;
+              if (logoIcon) logoIcon.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'building-2\\' style=\\'width:17px;height:17px\\'></i>';_lucide()">`;
               try {
                 const r2 = sessionStorage.getItem('lw_session');
                 if (r2) { const s2 = JSON.parse(r2); s2.logoUrl = logoUrl; sessionStorage.setItem('lw_session', JSON.stringify(s2)); }
-                const lc = JSON.parse(localStorage.getItem('lw_biz_cache') || 'null');
-                if (lc) { lc.logo_url = logoUrl; localStorage.setItem('lw_biz_cache', JSON.stringify(lc)); }
               } catch(_) {}
             }
           } catch(_) {}
@@ -6968,6 +7095,8 @@ function showApp() {
   setTimeout(initRealtimeSync, 2500);
   // Silent one-time migration: add lender_sig_data column if not yet present
   setTimeout(ensureLenderSigColumn, 3000);
+  // Ensure sidebar icon and any other deferred icons are rendered
+  _lucide();
 }
 
 
@@ -7195,6 +7324,14 @@ function showLogin() {
   document.getElementById('business-page').classList.remove('active');
   document.getElementById('login-page').classList.add('active');
   hideWorkspacePage();
+  // Migrate legacy single remembered email into history list
+  try {
+    const legacy = localStorage.getItem('lms-remembered-email');
+    if (legacy) {
+      const hist = JSON.parse(localStorage.getItem('lms-email-history') || '[]');
+      if (!hist.includes(legacy)) { hist.unshift(legacy); localStorage.setItem('lms-email-history', JSON.stringify(hist)); }
+    }
+  } catch(_) {}
   // Prefill remembered email
   try {
     const remembered = localStorage.getItem('lms-remembered-email');
@@ -7277,6 +7414,7 @@ async function doRegister() {
     const { data: signInData, error: signInErr } = await sb.auth.signInWithPassword({ email, password: pass });
     if (!signInErr && signInData?.user) {
       currentUser = { ...signInData.user, full_name: email.split('@')[0], role: 'SUPER_ADMIN', is_active: true };
+      window.currentUser = currentUser;
     }
 
     showBusiness();
@@ -7587,6 +7725,116 @@ let _loginBusinesses = [];
 let _selectedWorkspaceId = null;
 let _loginUser = null;
 
+// ── Email autocomplete ────────────────────────────────────────────
+let _loginEmailActiveIdx = -1;
+
+function _loginGetHistory() {
+  try { return JSON.parse(localStorage.getItem('lms-email-history') || '[]'); } catch(_) { return []; }
+}
+
+function _loginBuildSuggestions(filter) {
+  const box = document.getElementById('login-email-suggestions');
+  if (!box) return;
+  const hist = _loginGetHistory();
+  const matches = filter
+    ? hist.filter(e => e.toLowerCase().includes(filter.toLowerCase()))
+    : hist;
+  if (!matches.length) { box.classList.remove('open'); box.innerHTML = ''; return; }
+  _loginEmailActiveIdx = -1;
+  box.innerHTML = matches.map((email, i) => `
+    <div class="login-email-suggestion-item" data-idx="${i}" data-email="${email}"
+         onmousedown="loginEmailPick('${email.replace(/'/g,"\\'")}',event)"
+         onmouseover="loginEmailHover(${i})">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${email}</span>
+      <button class="login-email-suggestion-remove" title="Remove"
+        onmousedown="loginEmailRemove('${email.replace(/'/g,"\\'")}',event)">✕</button>
+    </div>`).join('');
+  box.classList.add('open');
+}
+
+function loginEmailFocus() {
+  const val = document.getElementById('login-email').value.trim();
+  _loginBuildSuggestions(val);
+}
+
+function loginEmailInput(val) {
+  _loginBuildSuggestions(val.trim());
+}
+
+function loginEmailBlur() {
+  // Small delay so clicks on items fire first
+  setTimeout(() => {
+    const box = document.getElementById('login-email-suggestions');
+    if (box) { box.classList.remove('open'); box.innerHTML = ''; }
+    _loginEmailActiveIdx = -1;
+  }, 180);
+}
+
+function loginEmailHover(idx) {
+  _loginEmailActiveIdx = idx;
+  document.querySelectorAll('.login-email-suggestion-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+}
+
+function loginEmailPick(email, e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById('login-email');
+  if (input) { input.value = email; input.focus(); }
+  const box = document.getElementById('login-email-suggestions');
+  if (box) { box.classList.remove('open'); box.innerHTML = ''; }
+  _loginEmailActiveIdx = -1;
+}
+
+function loginEmailRemove(email, e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  try {
+    let hist = _loginGetHistory();
+    hist = hist.filter(h => h !== email);
+    localStorage.setItem('lms-email-history', JSON.stringify(hist));
+    // Also clear remembered email if it matches
+    if (localStorage.getItem('lms-remembered-email') === email)
+      localStorage.removeItem('lms-remembered-email');
+  } catch(_) {}
+  const currentVal = document.getElementById('login-email')?.value.trim() || '';
+  _loginBuildSuggestions(currentVal);
+}
+
+function loginEmailKeydown(e) {
+  const box = document.getElementById('login-email-suggestions');
+  const items = box ? box.querySelectorAll('.login-email-suggestion-item') : [];
+  if (box && box.classList.contains('open') && items.length) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      _loginEmailActiveIdx = Math.min(_loginEmailActiveIdx + 1, items.length - 1);
+      items.forEach((el, i) => el.classList.toggle('active', i === _loginEmailActiveIdx));
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      _loginEmailActiveIdx = Math.max(_loginEmailActiveIdx - 1, 0);
+      items.forEach((el, i) => el.classList.toggle('active', i === _loginEmailActiveIdx));
+      return;
+    }
+    if (e.key === 'Enter' && _loginEmailActiveIdx >= 0) {
+      e.preventDefault();
+      const picked = items[_loginEmailActiveIdx]?.dataset?.email;
+      if (picked) loginEmailPick(picked, null);
+      document.getElementById('login-pass')?.focus();
+      return;
+    }
+    if (e.key === 'Escape') {
+      box.classList.remove('open'); box.innerHTML = '';
+      _loginEmailActiveIdx = -1;
+      return;
+    }
+  }
+  if (e.key === 'Enter') document.getElementById('login-pass')?.focus();
+}
+
 function loginTogglePw() {
   const input = document.getElementById('login-pass');
   const icon  = document.getElementById('login-eye-icon');
@@ -7714,6 +7962,13 @@ async function doLogin() {
     } else {
       try { localStorage.removeItem('lms-remembered-email'); } catch(_) {}
     }
+    // Always save to email history for autocomplete suggestions
+    try {
+      const hist = JSON.parse(localStorage.getItem('lms-email-history') || '[]');
+      if (!hist.includes(email)) { hist.unshift(email); if (hist.length > 10) hist.pop(); }
+      else { hist.splice(hist.indexOf(email), 1); hist.unshift(email); } // bubble to top
+      localStorage.setItem('lms-email-history', JSON.stringify(hist));
+    } catch(_) {}
 
     // --- Look up workspaces for this user (4 fallback strategies) ---
     let businesses = [];
@@ -7894,7 +8149,7 @@ async function finaliseLogin(user, biz) {
       // If a membership row exists and is explicitly deactivated, block login
       if (membership && membership.is_active === false) {
         await sb.auth.signOut();
-        currentUser = null; _loginUser = null; _loginBusinesses = [];
+        currentUser = null; window.currentUser = null; _loginUser = null; _loginBusinesses = [];
         sessionStorage.removeItem('lw_session');
         showLogin();
         // Show error on login page
@@ -7971,9 +8226,10 @@ async function doLogout() {
   cacheInvalidate();
   _currentView = null;
   try { await sb.auth.signOut(); } catch(_) {}
-  currentUser = null; _loginUser = null; _loginBusinesses = []; _selectedWorkspaceId = null;
+  currentUser = null; window.currentUser = null; _loginUser = null; _loginBusinesses = []; _selectedWorkspaceId = null;
   window.currentBusiness = null; window.currentSchema = null;
   sessionStorage.removeItem('lw_session');
+  localStorage.removeItem('lw_biz_cache'); // purge legacy cross-user cache, if any
   allLoans = []; allBorrowers = []; allPayments = []; allStaff = []; allProducts = [];
   Object.values(charts).forEach(c => { try { c.destroy(); } catch(_) {} });
   charts = {};
@@ -11128,8 +11384,7 @@ function printLoanAgreement() {
 <body>${content.innerHTML}
 
 
-</body>
-</html>`);
+`);
   win.document.close();
   win.onload = () => { win.focus(); win.print(); };
 }
@@ -13967,6 +14222,7 @@ async function regStep1Submit() {
 
     // Update currentUser so showApp() works
     currentUser = { id: userId, email, full_name: fullName, phone, role: 'SUPER_ADMIN', is_active: true };
+    window.currentUser = currentUser;
 
     // Skip OTP (step 2) — go straight to Business Profile (step 3)
     regGoTo(3);
@@ -15885,9 +16141,9 @@ async function saveSettings() {
     const logoIcon = document.querySelector('.sidebar-logo-icon');
     if (logoIcon) {
       if (logoUrl) {
-        logoIcon.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'landmark\\' style=\\'width:18px;height:18px\\'></i>';_lucide()">`;
+        logoIcon.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'building-2\\' style=\\'width:18px;height:18px\\'></i>';_lucide()">`;
       } else {
-        logoIcon.innerHTML = `<i data-lucide="landmark" style="width:18px;height:18px"></i>`;
+        logoIcon.innerHTML = `<img src="./icon.png" style="width:100%;height:100%;object-fit:cover;border-radius:inherit" onerror="this.parentElement.innerHTML='<i data-lucide=\\'building-2\\' style=\\'width:20px;height:20px\\'></i>';_lucide()">`;
         _lucide();
       }
     }
@@ -16219,6 +16475,26 @@ tfoot td:nth-child(2){text-align:right}tfoot td:nth-child(3){text-align:right;co
 })();
 </script>
 
+<script>
+if (typeof window !== 'undefined' && window.electronAPI) {
+  document.body.classList.add('electron-mode');
+  document.getElementById('etb-min')  ?.addEventListener('click', function() { window.electronAPI.minimize(); });
+  document.getElementById('etb-max')  ?.addEventListener('click', function() { window.electronAPI.maximize(); });
+  document.getElementById('etb-close')?.addEventListener('click', function() { window.electronAPI.close(); });
+  window.electronAPI.onMaximized(function(isMax) {
+    var btn = document.getElementById('etb-max');
+    if (!btn) return;
+    var restoreIcon = '<svg width="10" height="10" viewBox="0 0 10 10">'
+      + '<rect x="2" y="0" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>'
+      + '<rect x="0" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="none" style="fill:rgba(6,13,8,0.82)"/>'
+      + '</svg>';
+    var maxIcon = '<svg width="10" height="10" viewBox="0 0 10 10">'
+      + '<rect x="0.75" y="0.75" width="8.5" height="8.5" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>'
+      + '</svg>';
+    btn.innerHTML = isMax ? restoreIcon : maxIcon;
+  });
+}
+</script>
 </body>
 </html>
 <!-- ============================================================
@@ -16239,9 +16515,9 @@ tfoot td:nth-child(2){text-align:right}tfoot td:nth-child(3){text-align:right;co
     <div class="kb-body">
       <div class="kb-section">
         <div class="kb-section-label">Actions</div>
-        <div class="kb-row"><span class="kb-desc">New Loan</span><span class="kb-keys"><kbd>N</kbd></span></div>
-        <div class="kb-row"><span class="kb-desc">Record Payment</span><span class="kb-keys"><kbd>P</kbd></span></div>
-        <div class="kb-row"><span class="kb-desc">Add Client</span><span class="kb-keys"><kbd>C</kbd></span></div>
+        <div class="kb-row" data-kb-roles="SUPER_ADMIN,BRANCH_MANAGER,LOAN_OFFICER"><span class="kb-desc">New Loan</span><span class="kb-keys"><kbd>N</kbd></span></div>
+        <div class="kb-row" data-kb-roles="SUPER_ADMIN,BRANCH_MANAGER,CASHIER,COLLECTOR"><span class="kb-desc">Record Payment</span><span class="kb-keys"><kbd>P</kbd></span></div>
+        <div class="kb-row" data-kb-roles="SUPER_ADMIN,BRANCH_MANAGER,LOAN_OFFICER"><span class="kb-desc">Add Client</span><span class="kb-keys"><kbd>C</kbd></span></div>
       </div>
       <div class="kb-section">
         <div class="kb-section-label">Navigation</div>
@@ -16363,6 +16639,19 @@ kbd {
   window.openKbOverlay = function () {
     const el = document.getElementById('kb-overlay');
     if (!el) return;
+    /* Show/hide action rows based on the current user's role */
+    const role = window.currentUser?.role || '';
+    el.querySelectorAll('[data-kb-roles]').forEach(row => {
+      const allowed = row.dataset.kbRoles.split(',');
+      row.style.display = allowed.includes(role) ? '' : 'none';
+    });
+    /* Hide the entire Actions section header if no rows are visible */
+    const actionsSection = el.querySelector('.kb-section');
+    if (actionsSection) {
+      const anyVisible = [...actionsSection.querySelectorAll('.kb-row')]
+        .some(r => r.style.display !== 'none');
+      actionsSection.style.display = anyVisible ? '' : 'none';
+    }
     el.classList.add('open');
     if (window.lucide) lucide.createIcons();
   };
